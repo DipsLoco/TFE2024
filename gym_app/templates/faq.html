@@ -1,0 +1,204 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>FAQ</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #ffffff;
+            overflow: hidden;
+        }
+
+        .faq-container {
+            display: flex;
+            justify-content: space-around;
+            padding: 20px;
+            background-color: rgb(202, 206, 203);
+            height: 80vh;
+            color: #000000;
+        }
+
+        .faq-column {
+            width: 45%;
+            overflow-y: auto;
+        }
+
+        .faq-item {
+            margin-bottom: 20px;
+            border: 1px solid #55555500;
+            padding: 10px;
+            border-radius: 8px;
+        }
+
+        .faq-title {
+            font-size: 24px;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 20px;
+            text-decoration: underline;
+        }
+
+        .faq-subtitle {
+            font-size: 20px;
+            font-weight: bold;
+            margin-top: 20px;
+            margin-bottom: 10px;
+            color: #181615;
+            font-style: italic;
+        }
+
+        .faq-question {
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        .faq-answer {
+            display: none;
+            margin-top: 10px;
+            font-style: italic;
+            font-family: 'Nouvelle police', sans-serif;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="faq-container">
+        <div class="faq-column">
+            <div class="faq-title">FAQ</div>
+            <div class="faq-subtitle">Questions Fréquentes</div>
+
+            <!-- Questions 1 à 10 -->
+            <div class="faq-item">
+                <div class="faq-question">1. Comment puis-je m'inscrire au club de gym ?</div>
+                <div class="faq-answer">Réponse : Pour vous inscrire au club de gym, veuillez visiter notre bureau
+                    d'inscription pendant les heures d'ouverture.</div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">2. Quels sont les tarifs d'adhésion ?</div>
+                <div class="faq-answer">Réponse : Nos tarifs d'adhésion varient en fonction de la durée de l'adhésion.
+                    Vous pouvez trouver tous les détails sur notre site web ou en nous contactant.</div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">3. Quels sont les horaires d'ouverture du club ?</div>
+                <div class="faq-answer">Réponse : Le club est ouvert du lundi au samedi de 6h00 à 22h00, et le dimanche
+                    de 8h00 à 20h00.</div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">4. Puis-je annuler mon adhésion à tout moment ?</div>
+                <div class="faq-answer">Réponse : Oui, vous pouvez annuler votre adhésion en nous contactant. Veuillez
+                    consulter nos conditions d'annulation pour plus de détails.</div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">5. Y a-t-il des cours de groupe ?</div>
+                <div class="faq-answer">Réponse : Oui, nous proposons une variété de cours de groupe, y compris le yoga,
+                    le spinning et la musculation. Consultez notre calendrier pour les horaires.</div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">6. Puis-je apporter un ami au club avec moi ?</div>
+                <div class="faq-answer">Réponse : Oui, vous pouvez apporter un ami avec vous en tant qu'invité. Veuillez
+                    vérifier notre politique sur les invités pour plus d'informations.</div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">7. Comment puis-je m'inscrire pour un cours collectif ?</div>
+                <div class="faq-answer">Réponse : Pour vous inscrire à un cours collectif, connectez-vous à votre compte
+                    en ligne et choisissez le cours et l'heure qui vous conviennent.</div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">8. Puis-je réserver un cours collectif en tant qu'invité ?</div>
+                <div class="faq-answer">Réponse : Les cours collectifs sont réservés aux membres. Cependant, vous pouvez
+                    apporter un ami en tant qu'invité s'il remplit les conditions d'admissibilité.</div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">9. Comment puis-je réserver un cours personnalisé avec un entraîneur ?</div>
+                <div class="faq-answer">Réponse : Pour réserver un cours personnalisé, veuillez contacter notre équipe
+                    d'entraîneurs et convenir d'un horaire qui vous convient.</div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">10. Puis-je réserver un cours personnalisé en dehors des heures d'ouverture ?
+                </div>
+                <div class="faq-answer">Réponse : Nous faisons de notre mieux pour répondre à vos besoins. Contactez
+                    notre équipe pour discuter des horaires disponibles.</div>
+            </div>
+        </div>
+
+        <div class="faq-column">
+            <!-- Questions 11 à 20 -->
+            <div class="faq-item">
+                <div class="faq-question">11. Quels sont les avantages de chaque plan d'abonnement ?</div>
+                <div class="faq-answer">Réponse : Chacun de nos plans d'abonnement offre des avantages différents, y
+                    compris l'accès illimité aux cours collectifs, des séances d'entraînement personnalisées et bien
+                    plus encore. Consultez notre site web pour une comparaison détaillée.</div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">12. Comment puis-je changer mon plan d'abonnement ?</div>
+                <div class="faq-answer">Réponse : Vous pouvez changer votre plan d'abonnement en nous contactant et en
+                    discutant des options disponibles.</div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">13. Quelle est la politique de remboursement en cas de résiliation anticipée ?
+                </div>
+                <div class="faq-answer">Réponse : Notre politique de remboursement varie en fonction du plan
+                    d'abonnement que vous avez choisi. Veuillez consulter nos conditions générales pour plus
+                    d'informations.</div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">14. Puis-je geler mon abonnement en cas d'absence prolongée ?</div>
+                <div class="faq-answer">Réponse : Oui, nous offrons la possibilité de geler votre abonnement en cas
+                    d'absence prolongée. Veuillez nous en informer à l'avance.</div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">15. Comment puis-je obtenir des informations sur les cours du mois ?</div>
+                <div class="faq-answer">Réponse : Vous pouvez consulter notre site web pour obtenir le calendrier
+                    mensuel de nos cours.</div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">16. Existe-t-il des offres spéciales pour les membres fidèles ?</div>
+                <div class="faq-answer">Réponse : Oui, nous proposons des réductions et des offres spéciales pour nos
+                    membres fidèles. Consultez notre page des offres.</div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">17. Puis-je changer mon plan d'abonnement en cours de mois ?</div>
+                <div class="faq-answer">Réponse : Vous pouvez changer votre plan d'abonnement à la fin de la période en
+                    cours. Contactez notre équipe pour discuter des options.</div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">18. Quelle est la politique d'annulation pour les cours de groupe ?</div>
+                <div class="faq-answer">Réponse : Vous pouvez annuler votre réservation jusqu'à 24 heures avant le
+                    cours. Passé ce délai, des frais d'annulation peuvent s'appliquer.</div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">19. Puis-je participer à un cours collectif sans réservation ?</div>
+                <div class="faq-answer">Réponse : Les cours collectifs sont soumis à disponibilité. Il est recommandé de
+                    réserver à l'avance pour garantir votre place.</div>
+            </div>
+            <div class="faq-item">
+                <div class="faq-question">20. Comment puis-je suivre mes progrès au club de gym ?</div>
+                <div class="faq-answer">Réponse : Nous proposons un suivi de vos progrès en ligne, y compris les
+                    statistiques d'entraînement et les conseils de nos instructeurs.</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // JavaScript pour faire défiler les questions et les réponses
+        const questions = document.querySelectorAll('.faq-question');
+        questions.forEach(question => {
+            question.addEventListener('click', () => {
+                const answer = question.nextElementSibling;
+                answer.style.display = answer.style.display === 'block' ? 'none' : 'block';
+            });
+        });
+    </script>
+</body>
+
+</html>
+
+{% endblock %}

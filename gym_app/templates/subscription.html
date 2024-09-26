@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container">
+    <h1>Souscription au plan {{ plan.name }}</h1>
+    <p>Description: {{ plan.description }}</p>
+    <p>Prix: {{ plan.price }}€</p>
+    <p>Durée: {{ plan.duration }} jours</p>
+
+    <!-- Afficher l'image du plan -->
+    {% if plan.image %}
+    <img src="{{ plan.image.url }}" alt="{{ plan.name }}" class="img-fluid mb-3">
+    {% else %}
+    <img src="path/to/default/image.jpg" alt="Image par défaut" class="img-fluid mb-3">
+    {% endif %}
+
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-success">Confirmer et Payer</button>
+    </form>
+</div>
+{% endblock %}

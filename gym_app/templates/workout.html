@@ -1,0 +1,54 @@
+<!-- workout.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<br/><br/><br/>
+<div class="container">
+    <div class="card mb-3">
+        <div class="row g-0">
+            <div class="col-md-4">
+                {% if workout.get_main_image %}
+                    {% for image in images %}
+                        <img src="{{ image.image.url }}" class="img-fluid mb-2" alt="{{ image.description }}"
+                             style="width: 100%; height: auto; object-fit: cover;">
+                    {% endfor %}
+                {% else %}
+                    <img src="path/to/default/image.jpg" class="img-fluid rounded-start" alt="Image par défaut">
+                {% endif %}
+            </div>
+            <div class="col-md-8">
+                <div class="card-body">
+                    <h5 class="card-title">{{ workout.title }}</h5>
+                    <p class="card-text">{{ workout.description }}</p>
+                    <p class="card-text"><strong>Durée:</strong> {{ workout.duration }} minutes</p>
+                    <p class="card-text"><strong>Coach(s):</strong>
+                        {% for coach in workout.coachs.all %}
+                            {{ coach.username }}{% if not forloop.last %}, {% endif %}
+                        {% endfor %}
+                    </p>
+                    <p class="card-text"><strong>Localisation:</strong> {{ workout.location }}</p>
+
+                    <!-- Ajouter le bouton de réservation si l'utilisateur est premium -->
+                    {% if user.is_premium %}
+                        <a href="{% url 'affiche_workout' workout.id %}" class="btn btn-primary">Réserver cette séance</a>
+                    {% else %}
+                        <a href="{% url 'subscription_list' %}" class="btn btn-warning">Devenez Premium pour Réserver</a>
+                    {% endif %}
+
+                    <!-- Ajout des séances disponibles pour ce workout -->
+                    <h5 class="mt-3">Séances disponibles :</h5>
+                    {% for schedule in workout.schedules.all %}
+                        <p>
+                            Date et Heure : {{ schedule.start_time|date:"d M Y H:i" }}<br/>
+                            <a href="{% url 'affiche_workout' workout.id %}" class="btn btn-primary">Réserver cette séance</a>
+                        </p>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<br/><br/><br/><br/>
+{% endblock %}
+

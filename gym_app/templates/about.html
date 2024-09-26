@@ -1,0 +1,118 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<header class="bg-dark py-1">
+    <div class="container px-5">
+        <div class="row gx-5 justify-content-center">
+            <div class="col-lg-6">
+                <div class="text-center my-5">
+                    <h1 class="display-5 fw-bolder text-white mb-2">A propos de nous</h1>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+<br /><br />
+<style>
+    /* Conteneur principal pour le contenu avec images et texte */
+    .about-content {
+        display: flex;
+        justify-content: space-between;
+        height: 100vh;
+        /* Assure une hauteur de la taille de la fenêtre */
+    }
+
+    /* Conteneur pour les images à gauche et à droite */
+    .about-images {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+        /* Espace entre les images */
+        justify-content: space-between;
+    }
+
+    /* Conteneur pour le texte au milieu */
+    .about-text {
+        flex: 2;
+        padding: 0 20px;
+        text-align: justify;
+        overflow-y: auto;
+        /* Permet de faire défiler si le texte déborde */
+    }
+
+    /* Style pour les images */
+    .about-images img {
+        width: 100%;
+        height: calc(50% - 10px);
+        /* La moitié de la hauteur de la colonne moins la moitié de l'écart */
+        object-fit: cover;
+        /* Assure que les images couvrent entièrement leur conteneur */
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+</style>
+
+<div class="container">
+    <div class="about-content">
+        <!-- Images à gauche -->
+        <div class="about-images">
+            <img src="{% static 'image/left1.jpg' %}" alt="Image 1">
+            <img src="{% static 'image/left2.jpg' %}" alt="Image 2">
+        </div>
+
+        <!-- Contenu texte -->
+        <div class="about-text">
+            <p>
+                Fondé en 2020, BE Fit Workout Gym a vu le jour grâce à la passion inébranlable de son Fondateur pour la
+                calisthénie. Découvrant cette discipline il y a déjà cinq ans, il en est rapidement devenu un fervent
+                adepte. La calisthénie, qui met l'accent sur l'utilisation du poids du corps comme principale
+                résistance, a rapidement démontré son efficacité remarquable. Les résultats positifs et plus que
+                probants qu'il a pu observer ont suscité en lui une détermination sans faille à partager cette méthode
+                unique avec le monde.
+
+                La calisthénie, bien plus qu'un simple entraînement physique, a été pour lui une véritable révélation.
+                En s'engageant dans cette voie, il a développé des compétences qui ont transcendé le simple aspect
+                sportif. Une plus grande mobilité, une concentration accrue, une force pure étonnante et une motivation
+                décuplée ont été les fruits de son engagement passionné. C'est cette transformation personnelle qui a
+                inspiré la création de BE Fit Workout Gym, un lieu où la calisthénie est érigée en art de vivre. Au sein
+                de notre Gym, nous croyons en la puissance du corps humain et en sa capacité à atteindre des sommets
+                insoupçonnés. Notre fondateur en est la preuve vivante. Chaque jour, nous nous efforçons de transmettre
+                cette passion et de guider nos membres vers leurs propres succès. Rejoignez-nous dans cette aventure
+                exceptionnelle, où la calisthénie devient bien plus qu'un simple exercice, mais un chemin vers une
+                meilleure version de soi.
+
+                Pour répondre aux besoins variés de notre communauté et offrir une expérience d'entraînement complète,
+                BE Fit Workout Gym propose également une gamme diversifiée de cours, incluant le CrossFit, le Pilates et
+                le Yoga. Ces disciplines complémentaires permettent à nos membres d'explorer différentes approches de
+                fitness, chacune avec ses propres avantages uniques.
+
+                Nos cours de CrossFit, dirigés par des coachs expérimentés, mettent l'accent sur la force fonctionnelle
+                et l'endurance, utilisant des exercices variés et intenses pour des résultats rapides et efficaces. Le
+                Pilates, avec son focus sur la stabilité du tronc et l'amélioration de la posture, offre une méthode
+                douce mais profondément efficace pour renforcer et allonger les muscles. Le Yoga, quant à lui, combine
+                flexibilité, relaxation et renforcement musculaire, créant un équilibre parfait entre le corps et
+                l'esprit.
+
+                Nos coachs dévoués, chacun expert dans sa discipline, sont là pour vous guider, vous motiver et vous
+                aider à atteindre vos objectifs personnels. Que vous soyez débutant ou athlète confirmé, notre équipe
+                est engagée à vous offrir le meilleur soutien possible pour votre parcours de fitness.
+
+                Explorez la diversité de nos cours et découvrez comment BE Fit Workout Gym peut vous aider à devenir la
+                meilleure version de vous-même, quel que soit votre niveau ou votre objectif. Nous vous invitons à
+                rencontrer nos coachs passionnés et à vous joindre à nous dans notre quête d'excellence physique et
+                mentale.
+            </p>
+        </div>
+
+        <!-- Images à droite -->
+        <div class="about-images">
+            <img src="{% static 'image/right1.jpg' %}" alt="Image 3">
+            <img src="{% static 'image/right2.jpg' %}" alt="Image 4">
+        </div>
+    </div>
+</div>
+<br/><br/>
+
+{% endblock %}

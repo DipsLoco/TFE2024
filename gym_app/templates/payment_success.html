@@ -1,0 +1,10 @@
+<!-- payment_success.html -->
+
+{% extends 'base.html' %}
+{% block content %}
+<div class="container">
+    <h1>Paiement Réussi!</h1>
+    <p>Merci pour votre souscription au plan {{ subscription.plan.name }}.</p>
+    <p>Votre abonnement est maintenant actif.</p>
+</div>
+{% endblock %}

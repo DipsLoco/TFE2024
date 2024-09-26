@@ -1,0 +1,14 @@
+
+<!-- payment.html -->
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Paiement pour {{ subscription.plan.name }}</h1>
+<p>Prix : {{ subscription.plan.price }}€</p>
+<p>Statut du paiement : {{ subscription.get_payment_status_display }}</p>
+
+<form method="post">
+    {% csrf_token %}
+    <button type="submit">Payer</button>
+</form>
+{% endblock %}

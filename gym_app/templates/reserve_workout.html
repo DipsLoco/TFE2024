@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+<div class="container mt-5">
+    <div class="row">
+        <!-- Détails de la séance sélectionnée -->
+        <div class="col-md-7">
+            <div class="card mb-4 shadow-lg">
+                <div class="card-body">
+                    <!-- Titre du workout -->
+                    <h2 class="card-title text-center text-primary mb-4" style="font-weight: bold; text-transform: uppercase;">
+                        {{ workout.title }}
+                    </h2>
+                    
+                    <!-- Image principale du workout -->
+                    <div class="text-center mb-4">
+                        <img src="{{ workout.get_main_image.url }}" class="img-fluid rounded shadow" style="max-width: 250px; border: 3px solid #6a1b9a;">
+                    </div>
+
+                    <!-- Afficher les images associées -->
+                    <div class="text-center mb-5">
+                        <div class="row">
+                            {% for image in workout.images.all %}
+                                <div class="col-md-4 mb-4">
+                                    <div class="card shadow-sm">
+                                        <img src="{{ image.image.url }}" class="img-fluid rounded" alt="{{ image.description }}" style="border-radius: 10px;">
+                                        <div class="card-body">
+                                            <p class="card-text text-center" style="color: #6a1b9a; font-weight: bold;">
+                                                {{ image.description }}
+                                            </p>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                        <!-- Description du workout -->
+                        <p class="card-text text-muted">{{ workout.description|truncatewords:70 }}</p>
+                    </div>
+
+                    <!-- Bouton pour réserver un autre cours -->
+                    <div class="text-center mt-4">
+                        <a href="{% url 'workout_list' %}" class="btn btn-primary" style="padding: 10px 20px; font-size: 16px; border-radius: 8px;">
+                            Réserver un autre cours
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Séances disponibles cette semaine -->
+        <div class="col-md-5">
+            <div class="text-center mb-4">
+                <span style="background-color: #6a1b9a; color: #fff; font-weight: bold; padding: 10px 20px; border-radius: 8px; text-shadow: 0 0 10px rgba(0, 0, 0, 0.3); font-size: 18px;">
+                    Séances disponibles cette semaine
+                </span>
+            </div>
+
+            <div class="list-group">
+                {% for schedule in weekly_schedules %}
+                <div class="list-group-item list-group-item-action mb-4 p-3 shadow-lg" style="border-radius: 10px; background-color: #f9f9f9;">
+                    <div class="d-flex align-items-center">
+                        <!-- Informations du workout -->
+                        <div class="flex-grow-1">
+                            <h5 class="mb-2 text-primary" style="font-weight: bold;">{{ schedule.workout.title }}</h5>
+
+                            <!-- Intitulés et informations du workout -->
+                            <p class="mb-1">
+                                <strong style="color: #6a1b9a;">Durée :</strong> {{ schedule.workout.duration }}
+                            </p>
+                            <p class="mb-1">
+                                <strong style="color: #6a1b9a;">Coach :</strong> {{ schedule.coach.get_full_name }}
+                            </p>
+                            <p class="mb-1">
+                                <strong style="color: #6a1b9a;">Localisation :</strong> {{ schedule.location }}
+                            </p>
+                            <p class="mb-1">
+                                <strong style="color: #6a1b9a;">Date et Heure :</strong> {{ schedule.start_time|date:"d M Y H:i" }}
+                            </p>
+
+                            <!-- Bouton pour réserver -->
+                            <div class="mt-3">
+                                <button class="btn btn-primary btn-sm" data-bs-toggle="modal" data-bs-target="#reservationModal{{ schedule.id }}" style="padding: 8px 15px;">
+                                    Réserver cette séance
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Modal de confirmation -->
+                <div class="modal fade" id="reservationModal{{ schedule.id }}" tabindex="-1" aria-labelledby="reservationModalLabel{{ schedule.id }}" aria-hidden="true">
+                    <div class="modal-dialog">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title" id="reservationModalLabel{{ schedule.id }}">Confirmer la réservation</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                            </div>
+                            <div class="modal-body">
+                                Êtes-vous sûr de vouloir réserver la séance de <strong>{{ schedule.workout.title }}</strong> le <strong>{{ schedule.start_time|date:"d M Y H:i" }}</strong> ?
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                                <a href="{% url 'confirmation_reservation' schedule.id %}" class="btn btn-primary">Confirmer</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block content %}
+    <!-- Section de paiement -->
+    {% if subscription %}
+        <h1>Paiement pour {{ subscription.plan.name }}</h1>
+        <p>Prix : {{ subscription.plan.price }}€</p>
+        <p>Statut du paiement : {{ subscription.get_payment_status_display }}</p>
+
+        <form method="post">
+            {% csrf_token %}
+            <button type="submit">Payer</button>
+        </form>
+    {% else %}
+        <!-- Liste des plans d'abonnement -->
+        <h1>Plans d'abonnement</h1>
+        <div class="row">
+            {% for plan in plans %}
+            <div class="col-md-4">
+                <div class="card mb-3">
+                    <!-- Afficher l'image du plan -->
+                    {% if plan.image %}
+                    <img src="{{ plan.image.url }}" class="card-img-top" alt="{{ plan.name }}">
+                    {% else %}
+                    <img src="path/to/default/image.jpg" class="card-img-top" alt="Image par défaut">
+                    {% endif %}
+                    <div class="card-body">
+                        <h5 class="card-title">{{ plan.name }}</h5>
+                        <p class="card-text">{{ plan.description }}</p>
+                        <p class="card-text"><strong>Prix:</strong> {{ plan.price }}€</p>
+                        <p class="card-text"><strong>Durée:</strong> {{ plan.duration }} jours</p>
+                        <a href="{% url 'subscribe' plan.pk %}" class="btn btn-primary">Souscrire</a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+{% endblock %}

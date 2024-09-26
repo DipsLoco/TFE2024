@@ -1,0 +1,240 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block content %}
+
+<header class="bg-dark py-5"
+    style="background-image: url('/media/background_images/background.jpg'); background-size: cover; background-repeat: no-repeat; background-position: center;">
+    <div class="container px-5">
+        <div class="row gx-5 justify-content-center">
+            <div class="col-lg-10 text-center my-5"
+                style="background-color: rgba(0, 0, 0, 0.6); padding: 20px; border-radius: 10px;">
+                <h1 class="display-4 fw-bold text-white mb-2">BE-FIT</h1>
+                <p class="lead text-white-50 mb-4">Restez en forme</p>
+                <p class="card-text text-white h4 mb-4">Repoussez vos limites, devenez la meilleure version de vous-même
+                    avec BeFit. Votre transformation commence ici maintenant.</p>
+                <a class="btn btn-outline-warning btn-lg px-4" href="#nos-offres">Nos Formules</a>
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Nos Workouts Section -->
+<section id="workouts" class="py-5 bg-light">
+    <div class="container px-5 my-5">
+        <div class="text-center mb-5">
+            <h2 class="display-5 fw-bold text-dark">Nos Workouts</h2>
+        </div>
+        <div class="row gx-5 gy-5">
+            {% for workout in workouts %}
+            <div class="col-lg-6 col-md-6 mb-4">
+                <div class="card h-100 shadow-sm">
+                    {% if workout.get_main_image %}
+                    <img src="{{ workout.get_main_image.image.url }}" alt="Image de {{ workout.title }}"
+                        class="card-img-top" style="height: 200px; object-fit: cover;">
+                    {% else %}
+                    <img src="path/to/default/image.jpg" alt="Image par défaut" class="card-img-top"
+                        style="height: 200px; object-fit: cover;">
+                    {% endif %}
+                    <div class="card-body">
+                        <h4 class="card-title">{{ workout.title }}</h4>
+                        <p class="card-text">
+                            {% if workout.description|length > 200 %}
+                            {{ workout.description|slice:":200" }}...
+                            {% else %}
+                            {{ workout.description }}
+                            {% endif %}
+                        </p>
+                        <a class="text-decoration-none fw-bold" href="{% url 'workout_detail' workout.id %}">En savoir plus <i class="bi bi-arrow-right"></i></a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+<!-- Nos Coachs Section -->
+<section id="coachs" class="py-5">
+    <div class="container px-5 my-5">
+        <div class="text-center mb-5">
+            <h2 class="display-5 fw-bold text-dark">Nos Coachs</h2>
+        </div>
+        <div class="row gx-5 gy-5">
+            {% for coach in coachs %}
+            <div class="col-lg-6 col-md-6 mb-4">
+                <div class="card h-100 shadow-sm">
+                    {% if coach.image %}
+                    <img src="{{ coach.image.url }}" alt="Image de {{ coach.username }}" class="card-img-top"
+                        style="height: 300px; object-fit: contain;">
+                    {% else %}
+                    <img src="path/to/default/image.jpg" alt="Image par défaut" class="card-img-top"
+                        style="height: 300px; object-fit: contain;">
+                    {% endif %}
+                    <div class="card-body">
+                        <h4 class="card-title">{{ coach.username }}</h4>
+                        <p class="card-text">Spécialités :
+                            {% for specialty in coach.specialties.all %}
+                            {{ specialty.title }}{% if not forloop.last %}, {% endif %}
+                            {% endfor %}
+                        </p>
+                        <p class="card-text"><strong>Disponibile :</strong> {{ coach.available|yesno:"Oui,Non" }}</p> <!-- Affichage de "Oui" ou "Non" -->
+                        <p class="card-text"><strong>Expérience :</strong> {{ coach.exp }} ans</p> <!-- Affichage de l'expérience -->
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+
+
+<!-- Nos Offres Section -->
+<section id="nos-offres" class="py-5 bg-light">
+    <div class="container px-5 my-5">
+        <div class="text-center mb-5">
+            <h2 class="display-5 fw-bold text-dark">Nos Offres</h2>
+            <p class="lead mb-0">Sélectionnez le plan qui vous convient !</p>
+        </div>
+        <div class="row gx-5 justify-content-center">
+            {% for plan in plans %}
+            <div class="col-lg-6 col-xl-4 mb-4">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body p-5">
+                        <div class="small text-uppercase fw-bold mb-3">
+                            <i class="bi bi-star-fill text-warning"></i>
+                            {{ plan.name }}
+                        </div>
+                        <div class="mb-3">
+                            <span class="display-4 fw-bold">{{ plan.price }}€</span>
+                            <span class="text-muted">/ mois</span>
+                        </div>
+                        <p class="card-text mb-4">
+                            {% if plan.description|length > 200 %}
+                            {{ plan.description|slice:":200" }}...
+                            {% else %}
+                            {{ plan.description }}
+                            {% endif %}
+                        </p>
+                        <a class="btn btn-outline-primary d-grid" href="{% url 'plan' plan.id %}">Sélectionner Votre Plan</a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- Section commentaires -->
+<section class="py-5 border-bottom">
+    <div class="container px-5 my-5">
+        <div class="text-center mb-5">
+            <h2 class="display-5 fw-bold text-dark">Témoignages Clients</h2>
+            <p class="lead mb-0">Ce que disent nos membres</p>
+        </div>
+        <div class="row gx-5 justify-content-center">
+            {% for review in reviews %}
+            <div class="col-lg-6 mb-4">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body">
+                        <div class="d-flex">
+                            <div class="flex-shrink-0">
+                                {% if review.user.image %}
+                                <img src="{{ review.user.image.url }}" alt="{{ review.user.username }}"
+                                    class="rounded-circle" style="width: 50px; height: 50px; object-fit: cover;">
+                                {% else %}
+                                <img src="path/to/default/user/image.jpg" alt="{{ review.user.username }}"
+                                    class="rounded-circle" style="width: 50px; height: 50px; object-fit: cover;">
+                                {% endif %}
+                            </div>
+                            <div class="ms-3">
+                                <h5 class="card-title mb-1">{{ review.user.username }}</h5>
+                                <p class="card-text mb-1"><strong>Cours :</strong> {{ review.workout.title }}</p>
+                                <p class="card-text mb-1"><strong>Date :</strong> {{ review.datetime|date:"d M Y H:i" }}
+                                </p>
+                                <p class="card-text mb-1"><strong>Membre depuis :</strong> {{review.user.date_joined|date:"d M Y" }}
+                                </p>
+                            </div>
+                        </div>
+                        <hr>
+                        <p class="card-text">{{ review.content }}</p>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+     <!-- Contact Section -->
+     <section id="contact" class="bg-light py-5">
+        <div class="container px-5 my-5">
+            <div class="text-center mb-5">
+                <div class="feature bg-primary bg-gradient text-white rounded-3 mb-3"><i class="bi bi-envelope"></i>
+                </div>
+                <h2 class="fw-bold">Formulaire de Contact</h2>
+                <p class="lead mb-0">Nous aimerions recevoir de vos nouvelles !</p>
+            </div>
+            <div class="row gx-5 justify-content-center">
+                <div class="col-lg-6">
+                    <form id="contactForm" data-sb-form-api-token="API_TOKEN">
+                        <!-- Name input-->
+                        <div class="form-floating mb-3">
+                            <input class="form-control" id="name" type="text" placeholder="Enter your name..."
+                                data-sb-validations="required" />
+                            <label for="name">Votre nom complet</label>
+                            <div class="invalid-feedback" data-sb-feedback="name:required">Un nom est requis.</div>
+                        </div>
+                        <!-- Email address input-->
+                        <div class="form-floating mb-3">
+                            <input class="form-control" id="email" type="email" placeholder="name@example.com"
+                                data-sb-validations="required,email" />
+                            <label for="email">Adresse email</label>
+                            <div class="invalid-feedback" data-sb-feedback="email:required">Un email est requis.</div>
+                            <div class="invalid-feedback" data-sb-feedback="email:email">L'email n'est pas valide.</div>
+                        </div>
+                        <!-- Phone number input-->
+                        <div class="form-floating mb-3">
+                            <input class="form-control" id="phone" type="tel" placeholder="(123) 456-7890"
+                                data-sb-validations="required" />
+                            <label for="phone">Numéro de téléphone</label>
+                            <div class="invalid-feedback" data-sb-feedback="phone:required">Un numéro de téléphone est
+                                requis.</div>
+                        </div>
+                        <!-- Message input-->
+                        <div class="form-floating mb-3">
+                            <textarea class="form-control" id="message" placeholder="Enter your message here..."
+                                style="height: 10rem" data-sb-validations="required"></textarea>
+                            <label for="message">Message</label>
+                            <div class="invalid-feedback" data-sb-feedback="message:required">Un message est requis.
+                            </div>
+                        </div>
+                        <!-- Submit success message-->
+                        <div class="d-none" id="submitSuccessMessage">
+                            <div class="text-center mb-3">
+                                <div class="fw-bolder">Envoi du formulaire réussi !</div>
+                                Pour activer ce formulaire, inscrivez-vous sur
+                                <br />
+                                <a
+                                    href="https://startbootstrap.com/solution/contact-forms">https://startbootstrap.com/solution/contact-forms</a>
+                            </div>
+                        </div>
+                        <!-- Submit error message-->
+                        <div class="d-none" id="submitErrorMessage">
+                            <div class="text-center text-danger mb-3">Erreur lors de l'envoi du message !</div>
+                        </div>
+                        <!-- Submit Button-->
+                        <div class="d-grid"><button class="btn btn-primary btn-lg disabled" id="submitButton"
+                                type="submit">Soumettre</button></div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </section>
+
+
+
+
+
+{% endblock %}

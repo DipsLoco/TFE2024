@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+<div class="container">
+    <br/><br/><br/>
+    <div class="card mb-3">
+        <div class="row g-0">
+            <div class="col-md-4">
+                {% if plan.image %}
+                <img src="{{ plan.image.url }}" class="img-fluid rounded-start" alt="{{ plan.name }}">
+                {% else %}
+                <img src="path/to/default/image.jpg" class="img-fluid rounded-start" alt="Image par défaut">
+                {% endif %}
+                <a href="{% url 'subscription' plan.id %}" class="btn btn-primary">Souscrire</a>
+            </div>
+            <div class="col-md-8">
+                <div class="card-body">
+                    <h5 class="card-title">{{ plan.name }}</h5>
+                    <p class="card-text">{{ plan.description }}</p>
+                    <p class="card-text"><strong>Prix:</strong> {{ plan.price }} €</p>
+                    <p class="card-text"><strong>Durée:</strong> {{ plan.duration }} jours</p>
+                    <p class="card-text"><strong>Disponibilité:</strong> {{ plan.is_available|yesno:"Oui,Non" }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+{% endblock %}

@@ -1,0 +1,12 @@
+<!-- edit_profile.html -->
+{% extends 'base.html' %}
+{% block content %}
+<div class="container">
+    <h1>Modifier mes informations</h1>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit" class="btn btn-success">Enregistrer les modifications</button>
+    </form>
+</div>
+{% endblock %}
