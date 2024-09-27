@@ -30,13 +30,11 @@ urlpatterns = [
     path('validate_password/', validate_password, name='validate_password'),
     path('reserve/<int:workout_id>/', views.affiche_workout, name='affiche_workout'),
     path('cancel_reservation/<int:workoutschedule_id>/', cancel_reservation, name='cancel_reservation'),
-    
-    path('workout_list/', views.workout_list, name='workout_list'),  # Pour workout_list.html
+    path('workout_list/', views.workout_list, name='workout_list'),  
     path('subscription/', views.subscription, name='subscription'),  # Si nécessaire
-    
     path('confirmation_reservation/<int:scheduleId>/', views.confirmation_reservation, name='confirmation_reservation'),
 
-    
+
     
 ] 
 

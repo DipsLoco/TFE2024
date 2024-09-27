@@ -29,13 +29,20 @@
                 <li class="nav-item">
                     <a class="nav-link" href="{% url 'profile' %}">Mon profil</a>
                 </li>
-                {% if user.is_superuser %}
-                <li class="nav-item">
-                    <a class="nav-link" href="/admin">Admin</a>
-                </li>
-                {% endif %}
+                    {% if user.is_superuser %}
+                    <li class="nav-item">
+                        <a class="nav-link" href="/admin">Admin</a>
+                    </li>
+                    {% endif %}
                 <li class="nav-item">
                     <a class="nav-link" href="{% url 'logout' %}">Se déconnecter</a>
+                </li>
+                <li>
+                    <a href="{% url 'cart_summary' %}" class="btn btn-outline-light" type="submit">
+                        <i class="bi-cart-fill me-1"></i>
+                        Cart
+                        <span class="badge bg-white text-dark ms-1 rounded-pill">0</span>
+                    </a>                    
                 </li>
                 {% else %}
                 <li class="nav-item">
