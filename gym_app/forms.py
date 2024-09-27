@@ -2,41 +2,44 @@ from django.contrib.auth import get_user_model
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
 from django import forms
-from .models import Booking, User, WorkoutSchedule
+from .models import User, WorkoutSchedule
 import re
 
-
-class BookingForm(forms.ModelForm):
+class WorkoutScheduleForm(forms.ModelForm):
     schedule_choice = forms.ChoiceField(
         label="Choisissez un autre créneau",
         required=True,
-        widget=forms.Select(attrs={'class': 'form-select'})  # Ajout de la classe CSS directement dans le widget
+        widget=forms.Select(attrs={'class': 'form-select'})  # Ajout de la classe CSS
     )
 
     class Meta:
-        model = Booking
+        model = WorkoutSchedule
         fields = ['schedule_choice']
 
     def __init__(self, *args, **kwargs):
         schedule = kwargs.pop('schedule', None)
         super().__init__(*args, **kwargs)
         if schedule:
-            # Remplir le champ choix avec les créneaux horaires disponibles
+            # Remplir le champ de choix avec les créneaux horaires disponibles
             self.fields['schedule_choice'].choices = [
                 (s.id, f"{s.start_time.strftime('%d %b %Y %H:%M')}") for s in schedule
             ]
 
     def save(self, commit=True):
-        booking = super().save(commit=False)
+        schedule_instance = super().save(commit=False)
         schedule_id = self.cleaned_data['schedule_choice']
         schedule = WorkoutSchedule.objects.get(id=schedule_id)
-        booking.schedule = schedule
-        booking.coach = schedule.coach
-        booking.location = schedule.location
-        booking.datetime = schedule.start_time
+        
+        # Mise à jour des champs liés au créneau sélectionné
+        schedule_instance.coach = schedule.coach
+        schedule_instance.location = schedule.location
+        schedule_instance.start_time = schedule.start_time
+        schedule_instance.end_time = schedule.end_time
+        
         if commit:
-            booking.save()
-        return booking
+            schedule_instance.save()
+        return schedule_instance
+
 
 
 

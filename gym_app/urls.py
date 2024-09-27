@@ -29,7 +29,7 @@ urlpatterns = [
     path('validate_username/', validate_username, name='validate_username'),
     path('validate_password/', validate_password, name='validate_password'),
     path('reserve/<int:workout_id>/', views.affiche_workout, name='affiche_workout'),
-    path('cancel_reservation/<int:booking_id>/', cancel_reservation, name='cancel_reservation'),
+    path('cancel_reservation/<int:workoutschedule_id>/', cancel_reservation, name='cancel_reservation'),
     
     path('workout_list/', views.workout_list, name='workout_list'),  # Pour workout_list.html
     path('subscription/', views.subscription, name='subscription'),  # Si nécessaire

@@ -2,30 +2,57 @@
 {% load static %}
 {% block content %}
 
-<div class="container">
-    <h2 class="text-center mb-4">Nos Workouts</h2>
+<div class="container my-5">
+    <h2 class="text-center mb-5 text-primary" style="font-weight: bold; text-transform: uppercase;">
+        Nos Workouts
+    </h2>
     <div class="row">
         {% for workout in workouts %}
         <div class="col-md-6 mb-4">
-            <div class="card h-100 shadow-sm">
-                <div class="card-img-top" style="height: 75px; overflow: hidden;">
-                    {% if workout.get_main_image %}
-                        <img src="{{ workout.get_main_image.url }}" class="img-fluid" style="width: 100%; height: 100%; object-fit: cover;">
-                    {% else %}
-                        <img src="path/to/default/image.jpg" alt="Image par défaut" class="img-fluid" style="width: 100%; height: 100%; object-fit: cover;">
-                    {% endif %}
+            <div class="card h-100 shadow-lg rounded" style="border-radius: 15px;">
+                <!-- Image du workout -->
+                <div class="card-img-top" style="height: 300px; overflow: hidden; border-radius: 15px 15px 0 0;">
+                    {% for image in workout.images.all %}
+                        <img src="{{ image.image.url }}" class="img-fluid" alt="{{ image.description }}" 
+                             style="width: 100%; height: 100%; object-fit: cover; border-radius: 10px;">
+                    {% endfor %}
                 </div>
+                
+                <!-- Détails du workout -->
                 <div class="card-body d-flex flex-column">
-                    <h5 class="card-title text-primary">{{ workout.title }}</h5>
-                    <p class="card-text text-muted">{{ workout.description|truncatewords:20 }}</p>
-                    <p class="card-text"><strong>Durée:</strong> {{ workout.duration }} minutes</p>
-                    <p class="card-text"><strong>Localisation:</strong> {{ workout.location }}</p>
-                    <a href="{% url 'workout_detail' workout.pk %}" class="btn btn-outline-primary mt-auto">Voir les détails</a>
+                    <h5 class="card-title text-center text-primary" style="font-weight: bold;">{{ workout.title }}</h5>
+                    <p class="card-text text-muted text-center" style="font-style: italic;">{{ workout.description|truncatewords:70 }}</p>
+                    <a href="{% url 'workout_detail' workout.pk %}" class="btn btn-outline-primary mt-auto" style="border-radius: 25px;">
+                        Voir les détails
+                    </a>
                 </div>
             </div>
         </div>
         {% endfor %}
     </div>
 </div>
+
+<!-- Styles personnalisés pour embellir les éléments -->
+<style>
+    .card {
+        transition: transform 0.3s ease-in-out;
+    }
+    .card:hover {
+        transform: scale(1.05);
+    }
+    .card-title {
+        font-size: 1.3rem;
+    }
+    .card-text {
+        font-size: 1rem;
+    }
+
+    .card-img-top img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+</style>
+
 <br/><br/><br/><br/>
 {% endblock %}

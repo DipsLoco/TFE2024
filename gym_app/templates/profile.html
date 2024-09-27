@@ -1,14 +1,22 @@
-<!-- profile.html -->
-{% extends 'base.html' %}   
+{% extends 'base.html' %}
 {% load static %}
 {% block content %}
 <div class="container my-5">
-    <h1 class="mb-4 text-center">Profil de {{ user.first_name }}</h1>
+    <!-- En-tête du profil avec le statut Premium en haut à droite -->
+    <div class="d-flex justify-content-between align-items-center">
+        <h1 class="mb-5 text-primary" style="font-weight: bold;">Profil de {{ user.first_name }}</h1>
+        {% if user.is_premium %}
+            <span class="badge bg-success" style="font-size: 1.2rem;">Vous êtes un membre premium</span>
+        {% else %}
+            <span class="badge bg-danger" style="font-size: 1.2rem;">Statut non premium</span>
+        {% endif %}
+    </div>
+    
     <div class="row">
         <!-- Informations Personnelles et Photo -->
-        <div class="col-md-6">
-            <div class="card mb-4">
-                <div class="card-header">
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
                     <h2 class="h5 mb-0"><i class="fas fa-user"></i> Informations Personnelles</h2>
                 </div>
                 <div class="card-body">
@@ -16,9 +24,9 @@
                         <!-- Section Photo -->
                         <div class="col-sm-4 text-center">
                             {% if user.image %}
-                                <img src="{{ user.image.url }}" alt="Image du profil" class="img-fluid rounded-circle mb-3" style="max-width: 150px;">
+                                <img src="{{ user.image.url }}" alt="Image du profil" class="img-fluid rounded-circle mb-3 shadow" style="max-width: 150px;">
                             {% else %}
-                                <img src="{% static 'images/default-profile.png' %}" alt="Image du profil" class="img-fluid rounded-circle mb-3" style="max-width: 150px;">
+                                <img src="{% static 'images/default-profile.png' %}" alt="Image du profil" class="img-fluid rounded-circle mb-3 shadow" style="max-width: 150px;">
                             {% endif %}
                             <a href="{% url 'edit_profile' %}" class="btn btn-secondary btn-sm">Modifier</a>
                         </div>
@@ -26,111 +34,151 @@
                         <div class="col-sm-8">
                             <p><strong>Nom :</strong> {{ user.first_name }} {{ user.last_name }}</p>
                             <p><strong>Email :</strong> {{ user.email }}</p>
-                            <p><strong>Téléphone :</strong> {{ user.phone }}</p>
-                            <p><strong>Adresse :</strong> {{ user.address }}</p>
-                            <p><strong>Code Postal :</strong> {{ user.postal_code }}</p>
-                            <p><strong>Membre depuis :</strong> {{ user.date_joined }}</p>
+                            <p><strong>Téléphone :</strong> {{ user.phone|default:'Non renseigné' }}</p>
+                            <p><strong>Adresse :</strong> {{ user.address|default:'Non renseignée' }}</p>
+                            <p><strong>Code Postal :</strong> {{ user.postal_code|default:'Non renseigné' }}</p>
+                            <p><strong>Membre depuis :</strong> {{ user.date_joined|date:"d M Y" }}</p>
                         </div>
                     </div>
                     <a href="{% url 'edit_profile' %}" class="btn btn-primary mt-3">Modifier mes informations</a>
                 </div>
             </div>
         </div>
+
         <!-- Abonnement Actuel -->
-        <div class="col-md-6">
-            <div class="card mb-4">
-                <div class="card-header">
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
                     <h2 class="h5 mb-0"><i class="fas fa-gem"></i> Abonnement Actuel</h2>
                 </div>
                 <div class="card-body">
                     {% if current_subscription %}
                         <p><strong>Plan :</strong> {{ current_subscription.plan.name }}</p>
                         <p><strong>Prix :</strong> {{ current_subscription.plan.price }}€</p>
-                        <p><strong>Date de Début :</strong> {{ current_subscription.start_date }}</p>
-                        <p><strong>Date de Fin :</strong> {{ current_subscription.get_end_date }}</p>
+                        <p><strong>Date de Début :</strong> {{ current_subscription.start_date|date:"d M Y" }}</p>
+                        <p><strong>Date de Fin :</strong> {{ current_subscription.get_end_date|date:"d M Y" }}</p>
                     {% else %}
-                        <p>Aucun abonnement actif</p>
+                        <p class="text-muted">Aucun abonnement actif</p>
                     {% endif %}
                 </div>
             </div>
         </div>
     </div>
+
     <div class="row">
         <!-- Réservations Actuelles -->
-        <div class="col-md-6">
-            <div class="card mb-4">
-                <div class="card-header">
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
                     <h2 class="h5 mb-0"><i class="fas fa-calendar-check"></i> Réservations Actuelles</h2>
                 </div>
                 <div class="card-body">
-                    {% if bookings %}
-                        <ul class="list-group list-group-flush">
-                            {% for booking in bookings %}
-                                <li class="list-group-item">
-                                    <strong>Seance :</strong> {{ booking.workout.title }}<br>
-                                    <strong>Date :</strong> {{ booking.datetime }}<br>
-                                    <strong>Lieu :</strong> {{ booking.location.name }}
-                                </li>
+                    {% if scheduleWorkout %}
+                        <ul class="list-group">
+                            {% for schedule in scheduleWorkout %}
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h5 class="text-primary">{{ schedule.workout.title }}</h5>
+                                    <p><strong>Coach:</strong> {{ schedule.coach.get_full_name }}</p>
+                                    <p><strong>Date et Heure:</strong> {{ schedule.start_time|date:"d M Y H:i" }}</p>
+                                </div>
+                                <div class="text-right">
+                                    {% if schedule.expired %}
+                                        <span class="badge bg-danger">Expirée</span>
+                                    {% else %}
+                                        <span class="badge bg-success">Active</span>
+                                        <!-- Affichage du nombre de participants pour les séances disponibles -->
+                                        <p class="text-success mt-2" style="font-weight: bold;">{{ schedule.participants.count }}/10 inscrits</p>
+                                    {% endif %}
+                                    <!-- Bouton pour ouvrir le modal d'annulation -->
+                                    <button class="btn btn-danger btn-sm mt-2" data-bs-toggle="modal" data-bs-target="#cancelModal{{ schedule.id }}">
+                                        Annuler
+                                    </button>
+                                </div>
+                            </li>
+
+                            <!-- Modal d'annulation de réservation -->
+                            <div class="modal fade" id="cancelModal{{ schedule.id }}" tabindex="-1" aria-labelledby="cancelModalLabel{{ schedule.id }}" aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h5 class="modal-title" id="cancelModalLabel{{ schedule.id }}">Confirmation d'annulation</h5>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            {% if schedule.can_cancel %}
+                                                <!-- Condition : 24h ou plus avant -->
+                                                Êtes-vous sûr de vouloir annuler cette réservation pour <strong>{{ schedule.workout.title }}</strong> ?
+                                            {% else %}
+                                                <!-- Condition : Moins de 24h avant la séance -->
+                                                Vous ne pouvez annuler une réservation que 24h avant la séance. Pour plus d'informations, veuillez consulter notre <a href="{% url 'faq' %}">FAQ</a>.
+                                            {% endif %}
+                                        </div>
+                                        <div class="modal-footer">
+                                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+                                            {% if schedule.can_cancel %}
+                                                <a href="{% url 'cancel_reservation' schedule.id %}" class="btn btn-danger">Confirmer l'annulation</a>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
                             {% endfor %}
                         </ul>
                     {% else %}
-                        <p>Aucune réservation</p>
+                        <p class="text-muted text-center">Vous n'avez aucune séance réservée.</p>
                     {% endif %}
                 </div>
             </div>
         </div>
+
         <!-- Historique des Réservations -->
-        <div class="col-md-6">
-            <div class="card mb-4">
-                <div class="card-header">
+        <div class="col-md-6 mb-4">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
                     <h2 class="h5 mb-0"><i class="fas fa-history"></i> Historique des Réservations</h2>
                 </div>
                 <div class="card-body">
-                    {% if scheduleWorkout %}
-        <div class="row">
-            {% for schedule in scheduleWorkout %}
-            <div class="col-md-6 mb-4">
-                <div class="card shadow-sm">
-                    <div class="card-body">
-                        <!-- Détails de la séance -->
-                        <h5 class="card-title text-primary">{{ schedule.workout.title }}</h5>
-                        <p><strong>Coach:</strong> {{ schedule.coach.get_full_name }}</p>
-                        <p><strong>Date et Heure:</strong> {{ schedule.start_time|date:"d M Y H:i" }}</p>
-
-                        <!-- Vérifier si la séance est expirée -->
-                        {% if schedule.expired %}
-                        <span class="badge bg-danger">Expirée</span>
-                        {% else %}
-                        <span class="badge bg-success">Active</span>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-            {% endfor %}
-        </div>
-    {% else %}
-        <p class="text-center">Vous n'avez aucune séance réservée.</p>
-    {% endif %}
-                </div>
-            </div>
-        </div>
-    </div>
-    <div class="row">
-        <!-- Statut Premium -->
-        <div class="col-md-12">
-            <div class="card mb-4">
-                <div class="card-header">
-                    <h2 class="h5 mb-0"><i class="fas fa-star"></i> Statut Premium</h2>
-                </div>
-                <div class="card-body">
-                    {% if user.is_premium %}
-                        <p>Vous êtes un membre premium.</p>
+                    {% if pastscheduleWorkout %}
+                        <ul class="list-group">
+                            {% for schedule in pastscheduleWorkout %}
+                            <li class="list-group-item d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h5 class="text-primary">{{ schedule.workout.title }}</h5>
+                                    <p><strong>Coach:</strong> {{ schedule.coach.get_full_name }}</p>
+                                    <p><strong>Date et Heure:</strong> {{ schedule.start_time|date:"d M Y H:i" }}</p>
+                                </div>
+                                <span class="badge bg-danger">Expirée</span>
+                            </li>
+                            {% endfor %}
+                        </ul>
                     {% else %}
-                        <p>Vous n'êtes pas un membre premium.</p>
+                        <p class="text-muted text-center">Aucun historique de réservations.</p>
                     {% endif %}
                 </div>
             </div>
         </div>
     </div>
 </div>
+
+<!-- Styles personnalisés -->
+<style>
+    .card {
+        border: none;
+        border-radius: 10px;
+    }
+    .card-header {
+        border-bottom: none;
+        border-radius: 10px 10px 0 0;
+    }
+    .list-group-item {
+        border: none;
+        border-radius: 10px;
+        margin-bottom: 10px;
+    }
+    .btn {
+        border-radius: 5px;
+    }
+</style>
 {% endblock %}

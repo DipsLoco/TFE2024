@@ -66,73 +66,6 @@ class WorkoutImage(models.Model):
         return self.description if self.description else f'Image for {self.workout.title}'
 
 
-# class WorkoutSchedule(models.Model):
-#     workout = models.ForeignKey(Workout, on_delete=models.CASCADE)  # Séance associée
-#     start_time = models.DateTimeField()  # Heure de début de la séance
-#     end_time = models.DateTimeField()  # Heure de fin de la séance
-#     location = models.ForeignKey(Location, on_delete=models.CASCADE)  # Lieu de la séance
-#     coach = models.ForeignKey(User, on_delete=models.CASCADE, related_name='scheduled_workouts')  # Coach de la séance
-#     booking= models.ForeignKey('Booking', on_delete=models.CASCADE, null=True)
-#     participants = models.ManyToManyField(User, related_name='bookings')  # Participants
-#     datetime = models.DateTimeField() 
-#     available = models.BooleanField(default=True)  # Disponibilité de la réservation
-#     expired = models.BooleanField(default=False)  # Expiré par défaut à False
-
-#     def __str__(self):
-#         return f"{self.workout.title} - {self.start_time.strftime('%d/%m/%Y %H:%M')}"
-
-#     @staticmethod
-#     def create_default_schedules(workout, location, coach):
-#         # Liste des créneaux horaires par défaut
-#         time_slots = [
-#             (8, 10),
-#             (10, 12),
-#             (14, 16),
-#             (16, 18),
-#         ]
-#         for day_offset in range(6):  # Pour les 6 premiers jours de la semaine
-#             date = timezone.now().date() + timedelta(days=day_offset)
-#             for start_hour, end_hour in time_slots:
-#                 start_time = timezone.make_aware(datetime.combine(date, time(start_hour)))
-#                 end_time = timezone.make_aware(datetime.combine(date, time(end_hour)))
-#                 WorkoutSchedule.objects.create(
-#                     workout=workout,
-#                     start_time=start_time,
-#                     end_time=end_time,
-#                     location=location,
-#                     coach=coach,
-#                 )
-#     def update_expired_status(self):
-#         if self.datetime < timezone.now():
-#             self.expired = True
-#             self.save()
-
-#     @receiver(post_save, sender='gym_app.Booking') 
-#     def check_expired_status(sender, instance, **kwargs):
-#         instance.update_expired_status()
-
-#     def clean(self):
-#         if self.participants.count() > 10:
-#             raise ValidationError('Vous ne pouvez pas ajouter plus de 10 participants à une réservation.')
-
-#     def save(self, *args, **kwargs):
-#         self.clean()
-#         super().save(*args, **kwargs)  # Sauvegarde pour obtenir un ID
-#         # Ajout des participants après la sauvegarde pour éviter le problème many-to-many
-#         if 'participants' in self.__dict__:
-#             self.participants.set(self.__dict__['participants'])
-
-#     def update_availability(self):
-#         if self.schedule.bookings.count() >= 10:
-#             self.available = False
-#         else:
-#             self.available = True
-#         self.save()
-
-
-from django.db.models.signals import post_save
-from django.dispatch import receiver
-
 class WorkoutSchedule(models.Model):
     workout = models.ForeignKey('Workout', on_delete=models.CASCADE)  # Séance associée
     start_time = models.DateTimeField()  # Heure de début de la séance
@@ -142,33 +75,69 @@ class WorkoutSchedule(models.Model):
     participants = models.ManyToManyField('User', related_name='workout_participants')  # Participants à la séance
     available = models.BooleanField(default=True)  # Disponibilité de la réservation
     expired = models.BooleanField(default=False)  # Séance expirée par défaut à False
+    complet = models.BooleanField(default=False)  # Séance complète ou non
 
     def __str__(self):
-        return f"{self.workout.title} - {self.start_time.strftime('%d/%m/%Y %H:%M')}"
+        if self.start_time:
+            return f"{self.workout.title} - {self.start_time.strftime('%d/%m/%Y %H:%M')}"
+        return f"{self.workout.title} - (heure non définie)"
 
     def clean(self):
+        # Rendre start_time et end_time "aware" si elles sont "naive"
+        if self.start_time and timezone.is_naive(self.start_time):
+            self.start_time = timezone.make_aware(self.start_time)
+
+        if self.end_time and timezone.is_naive(self.end_time):
+            self.end_time = timezone.make_aware(self.end_time)
+
         # Validation pour limiter le nombre de participants
-        if self.participants.count() > 10:
+        if self.pk and self.participants.count() > 10:
             raise ValidationError('Vous ne pouvez pas ajouter plus de 10 participants à une séance.')
 
+        # Validation pour s'assurer que l'heure de fin est après l'heure de début
+        if self.start_time and self.end_time and self.start_time >= self.end_time:
+            raise ValidationError('L\'heure de début doit être avant l\'heure de fin.')
+
     def save(self, *args, **kwargs):
-        # Validation et mise à jour avant la sauvegarde
-        self.clean()  # Applique la validation
-        super().save(*args, **kwargs)  # Sauvegarde l'objet
-        # Ajout des participants après la sauvegarde
-        if 'participants' in self.__dict__:
-            self.participants.set(self.__dict__['participants'])
+        # Validation avant la sauvegarde
+        self.clean()
+
+        # Sauvegarde initiale de l'objet
+        super().save(*args, **kwargs)
+
+        # Mettre à jour la disponibilité après la sauvegarde
+        self.update_complet()
+
+    def update_complet(self):
+        # Met à jour l'attribut 'complet' et 'available' en fonction du nombre de participants
+        if self.participants.count() >= 10:
+            self.complet = True
+            self.available = False  # Si la séance est complète, elle n'est plus disponible
+        else:
+            self.complet = False
+            self.available = True  # Si la séance n'est pas complète, elle reste disponible
+        super().save(update_fields=['complet', 'available'])  # Sauvegarder uniquement les champs 'complet' et 'available'
 
     def update_expired_status(self):
-        if not self.expired and self.start_time < timezone.now():
-            self.expired = True
-            self.save()
+        # Mise à jour du statut 'expired' en fonction de l'heure actuelle
+        if not self.expired and self.start_time:
+            if timezone.is_naive(self.start_time):
+                self.start_time = timezone.make_aware(self.start_time)
 
+            # Comparer avec l'heure actuelle pour déterminer si la séance est expirée
+            if self.start_time < timezone.now():
+                self.expired = True
+                super().save(update_fields=['expired'])  # Sauvegarder uniquement le champ 'expired'
 
     @staticmethod
     def create_default_schedules(workout, location, coach):
-        # Crée des créneaux horaires par défaut pour la semaine
-        time_slots = [(8, 10), (10, 12), (14, 16), (16, 18)]
+        # Crée des séances par défaut pour une semaine avec des créneaux horaires fixes
+        time_slots = [
+            (8, 10),
+            (10, 12),
+            (14, 16),
+            (16, 18),
+        ]
         for day_offset in range(6):  # Pour les 6 premiers jours de la semaine
             date = timezone.now().date() + timedelta(days=day_offset)
             for start_hour, end_hour in time_slots:
@@ -182,57 +151,18 @@ class WorkoutSchedule(models.Model):
                     coach=coach,
                 )
 
-    def update_availability(self):
-        # Met à jour la disponibilité de la séance en fonction du nombre de participants
-        if self.participants.count() >= 10:
-            self.available = False
-        else:
-            self.available = True
-        self.save()
+# Enregistrer le signal après la définition complète du modèle
+@receiver(m2m_changed, sender=WorkoutSchedule.participants.through)
+def update_complet_status(sender, instance, **kwargs):
+    # Met à jour l'attribut 'complet' et 'available' chaque fois que les participants changent
+    instance.update_complet()
 
-    # Signal pour mettre à jour le statut d'expiration après la sauvegarde d'une réservation
-    @receiver(post_save, sender='gym_app.WorkoutSchedule')
-    def check_expired_status(sender, instance, **kwargs):
-        instance.update_expired_status()
+# Signal pour mettre à jour le statut 'expired' après chaque sauvegarde
+@receiver(post_save, sender=WorkoutSchedule)
+def check_expired_status(sender, instance, **kwargs):
+    instance.update_expired_status()
 
 
-
-
-class Booking(models.Model):
-    schedule = models.ForeignKey(WorkoutSchedule, on_delete=models.CASCADE, related_name='bookings', null=True, default=1)  # Lien avec le planning de la séance
-    participants = models.ManyToManyField(User, related_name='bookings')  # Participants
-    coach = models.ForeignKey(User, on_delete=models.CASCADE, related_name='coached_bookings')  # ID d'un coach
-    location = models.ForeignKey(Location, on_delete=models.CASCADE)  # ID d'une location
-    datetime = models.DateTimeField()  # Date et heure de la réservation
-    available = models.BooleanField(default=True)  # Disponibilité de la réservation
-    expired = models.BooleanField(default=False)  # Expiré par défaut à False
-
-    def update_expired_status(self):
-        if self.datetime < timezone.now():
-            self.expired = True
-            self.save()
-
-    @receiver(post_save, sender='gym_app.Booking') 
-    def check_expired_status(sender, instance, **kwargs):
-        instance.update_expired_status()
-
-    def clean(self):
-        if self.participants.count() > 10:
-            raise ValidationError('Vous ne pouvez pas ajouter plus de 10 participants à une réservation.')
-
-    def save(self, *args, **kwargs):
-        self.clean()
-        super().save(*args, **kwargs)  # Sauvegarde pour obtenir un ID
-        # Ajout des participants après la sauvegarde pour éviter le problème many-to-many
-        if 'participants' in self.__dict__:
-            self.participants.set(self.__dict__['participants'])
-
-    def update_availability(self):
-        if self.schedule.bookings.count() >= 10:
-            self.available = False
-        else:
-            self.available = True
-        self.save()
 
 
 class Coach(models.Model):

@@ -4,7 +4,7 @@ from django.contrib import admin
 from django import forms
 from django.db.models.signals import m2m_changed
 from django.dispatch import receiver
-from .models import User, Workout, Booking, Coach, Location, Plan, Subscription, Review, WorkoutImage, WorkoutSchedule
+from .models import User, Workout, Coach, Location, Plan, Subscription, Review, WorkoutImage, WorkoutSchedule
 
 # Gestion des utilisateurs avec la possibilité d'ajouter des spécialités pour les coachs
 class CoachInline(admin.StackedInline):
@@ -62,7 +62,6 @@ def create_schedules_after_coachs_assigned(sender, instance, action, **kwargs):
     if action == "post_add":  # Une fois que la relation many-to-many est mise à jour
         pass  # Désactivation de la création automatique de créneaux
 
-# Formulaire personnalisé pour les créneaux horaires des workouts
 class WorkoutScheduleForm(forms.ModelForm):
     TIME_SLOTS = [
         ('08:00:00', '08:00 - 10:00'),
@@ -71,78 +70,43 @@ class WorkoutScheduleForm(forms.ModelForm):
         ('16:00:00', '16:00 - 18:00'),
     ]
 
+    # Création du champ de choix pour les créneaux horaires
     time_slot = forms.ChoiceField(choices=TIME_SLOTS, label="Sélectionnez un créneau horaire")
+    date = forms.DateField(label="Date de la séance", widget=forms.SelectDateWidget, initial=timezone.now)  # Date par défaut aujourd'hui
 
     class Meta:
         model = WorkoutSchedule
-        fields = ['workout', 'location', 'coach', 'start_time', 'time_slot']
+        fields = ['workout', 'location', 'coach', 'start_time','date', 'time_slot']  # Limite les champs affichés à 'date' et 'time_slot'
 
     def save(self, commit=True):
-        time_slot = self.cleaned_data['time_slot']
-        start_time = self.cleaned_data['start_time']
+        time_slot = self.cleaned_data['time_slot']  # Récupère le créneau sélectionné
+        date = self.cleaned_data['date']  # Date sélectionnée
 
+        # Transformation du créneau en heures
         start_hour, start_minute, _ = map(int, time_slot.split(':'))
-        start_time = datetime.combine(start_time, time(start_hour, start_minute))
-        end_time = start_time + timedelta(hours=2)
+        start_time = datetime.combine(date, time(start_hour, start_minute))  # Crée la date complète avec l'heure
+        end_time = start_time + timedelta(hours=2)  # Durée fixe de 2 heures pour chaque créneau
 
+        # Affecte les valeurs au modèle
         self.instance.start_time = start_time
         self.instance.end_time = end_time
 
         return super().save(commit)
 
-# class WorkoutScheduleAdmin(admin.ModelAdmin):
-#     form = WorkoutScheduleForm
-#     list_display = ['workout', 'start_time', 'end_time', 'location', 'coach', 'available', 'expired']
-#     list_filter = ['location', 'coach', 'available', 'expired'] 
-#     search_fields = ['workout__title', 'coach__username', 'location__name']
-#     filter_horizontal = ['participants']
 
 class WorkoutScheduleAdmin(admin.ModelAdmin):
-    list_display = ['workout', 'start_time', 'end_time', 'location', 'coach', 'available', 'expired']  # Affiche les champs principaux
-    list_filter = ['location', 'coach', 'available', 'expired']  # Filtres dans la barre latérale
-    search_fields = ['workout__title', 'coach__username', 'location__name']  # Barre de recherche sur le titre, le coach et la location
-    filter_horizontal = ['participants']  # Widget pour ajouter les participants facilement
-    fields = ['workout', 'start_time', 'end_time', 'location', 'coach', 'available', 'expired', 'participants']  # Champs visibles dans l'admin
+    form = WorkoutScheduleForm  # Associe le formulaire personnalisé
+    list_display = ['workout', 'start_time', 'end_time', 'location', 'coach', 'available', 'expired', 'complet']
+    fields = ['workout', 'location', 'coach', 'participants', 'available', 'expired', 'date', 'time_slot', 'complet']  # Ajoutez 'date' et 'time_slot'
+    filter_horizontal = ['participants']  # Pour ajouter des participants
 
     def save_model(self, request, obj, form, change):
-        # Logique pour sauvegarder le modèle et les participants
+        # Utilisez le comportement de sauvegarde défini dans le formulaire
         super().save_model(request, obj, form, change)
-        obj.update_availability()
+        obj.update_complet()  # Met à jour la disponibilité après la sauvegarde
 
 
 
-# Gestion des bookings avec filtrage intelligent des coachs et des locations
-class BookingAdminForm(forms.ModelForm):
-    class Meta:
-        model = Booking
-        fields = '__all__'
-
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-        self.fields['participants'].required = False
-        self.fields['coach'].queryset = User.objects.filter(role='coach')
-        if self.instance.pk and self.instance.schedule_id:
-            self.fields['coach'].queryset = self.instance.schedule.workout.coachs.all()
-            self.fields['location'].queryset = Location.objects.filter(id=self.instance.schedule.location.id)
-        else:
-            self.fields['coach'].queryset = User.objects.filter(role='coach')
-            self.fields['location'].queryset = Location.objects.all()
-
-class BookingAdmin(admin.ModelAdmin):
-    form = BookingAdminForm
-    list_display = ['id', 'get_workout_title', 'datetime', 'available', 'location']
-    filter_horizontal = ['participants']
-
-    def get_workout_title(self, obj):
-        return obj.schedule.workout.title
-    get_workout_title.short_description = 'Workout'
-
-    def save_model(self, request, obj, form, change):
-        if not change and obj.schedule:
-            possible_coaches = Coach.objects.filter(specialties=obj.schedule.workout)
-            if possible_coaches.exists():
-                obj.coach = possible_coaches.first().user
-        super().save_model(request, obj, form, change)
 
 class CoachAdmin(admin.ModelAdmin):
     list_display = ['id', 'username', 'user', 'available', 'exp']
@@ -161,10 +125,10 @@ class SubscriptionAdmin(admin.ModelAdmin):
 class ReviewAdmin(admin.ModelAdmin):
     list_display = ['id', 'user', 'workout', 'content']
 
+# admin.site.register(Booking, BookingAdmin)
 admin.site.register(User, CustomUserAdmin)
 admin.site.register(Workout, WorkoutAdmin)
 admin.site.register(WorkoutImage)
-admin.site.register(Booking, BookingAdmin)
 admin.site.register(Coach, CoachAdmin)
 admin.site.register(Location, LocationAdmin)
 admin.site.register(Plan, PlanAdmin)
