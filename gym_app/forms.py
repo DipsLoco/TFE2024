@@ -5,6 +5,7 @@ from django import forms
 from .models import User, WorkoutSchedule
 import re
 
+
 class WorkoutScheduleForm(forms.ModelForm):
     schedule_choice = forms.ChoiceField(
         label="Choisissez un autre créneau",

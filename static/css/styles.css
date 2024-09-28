@@ -10833,4 +10833,14 @@ textarea.form-control-lg {
   font-size: 2rem;
 }
 
+@keyframes vibrate {
+  0% { transform: translateX(0); }
+  25% { transform: translateX(-5px); }
+  50% { transform: translateX(5px); }
+  75% { transform: translateX(-5px); }
+  100% { transform: translateX(0); }
+}
 
+.vibrate {
+  animation: vibrate 0.5s ease;
+}

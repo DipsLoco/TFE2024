@@ -1,17 +1,16 @@
-<!-- workout.html -->
 {% extends 'base.html' %}
 {% load static %}
 
 {% block content %}
 <br/><br/><br/>
 <div class="container">
-    <div class="card mb-3">
+    <div class="card mb-3 shadow-sm">
         <div class="row g-0">
             <div class="col-md-4">
                 {% if workout.get_main_image %}
                     {% for image in images %}
                         <img src="{{ image.image.url }}" class="img-fluid mb-2" alt="{{ image.description }}"
-                             style="width: 100%; height: auto; object-fit: cover;">
+                             style="width: 100%; height: auto; object-fit: cover; border-radius: 10px;">
                     {% endfor %}
                 {% else %}
                     <img src="path/to/default/image.jpg" class="img-fluid rounded-start" alt="Image par défaut">
@@ -19,27 +18,73 @@
             </div>
             <div class="col-md-8">
                 <div class="card-body">
-                    <h5 class="card-title">{{ workout.title }}</h5>
-                    <p class="card-text">{{ workout.description }}</p>
-                    <p class="card-text"><strong>Durée:</strong> {{ workout.duration }} minutes</p>
-                    <p class="card-text"><strong>Coach(s):</strong>
-                        {% for coach in workout.coachs.all %}
-                            {{ coach.username }}{% if not forloop.last %}, {% endif %}
-                        {% endfor %}
-                    </p>
-                    <p class="card-text"><strong>Localisation:</strong> {{ workout.location }}</p>
-
-                    <!-- Ajouter le bouton de réservation si l'utilisateur est premium -->
+                    <h3 class="card-title text-primary">{{ workout.title }}</h3>
+                    <p class="card-text text-muted">{{ workout.description }}</p>
+                    
+                    <!-- Bouton de réservation selon l'utilisateur premium -->
                     {% if user.is_premium %}
-                        <a href="{% url 'affiche_workout' workout.id %}" class="btn btn-primary">Réserver une séance</a>
+                        <a href="{% url 'affiche_workout' workout.id %}" class="btn btn-primary" style="border-radius: 25px;">
+                            Réserver une séance
+                        </a>
                     {% else %}
-                        <a href="{% url 'subscription_list' %}" class="btn btn-warning">Devenez Premium pour Réserver</a>
+                        <a href="{% url 'subscription_list' %}" class="btn btn-warning" style="border-radius: 25px;">
+                            Devenez Premium pour Réserver
+                        </a>
                     {% endif %}
                 </div>
             </div>
+        </div>
+
+        <!-- Section d'ajout de commentaire -->
+        <div class="card-body">
+            <h4 class="text-secondary">Ajouter un commentaire</h4>
+            <form method="post" action="{% url 'add_review' workout.id %}">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <textarea class="form-control" name="contenu" rows="3" placeholder="Commentaire ..." 
+                              style="border-radius: 10px;"></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary" style="border-radius: 25px;">Ajouter un commentaire</button>
+            </form>
+        </div>
+
+        <!-- Section d'affichage des commentaires -->
+        <div class="card-body">
+            <h4 class="text-secondary mb-4">Commentaires des Membres</h4>
+            
+            {% if reviews %}
+                <div class="row">
+                    {% for review in reviews %}
+                        <div class="col-md-6 mb-4">
+                            <div class="card shadow-sm" style="border-radius: 15px;">
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center mb-3">
+                                        <div class="flex-shrink-0">
+                                            {% if review.user.image %}
+                                                <img src="{{ review.user.image.url }}" alt="{{ review.user.username }}" 
+                                                     class="rounded-circle" style="width: 50px; height: 50px; object-fit: cover;">
+                                            {% else %}
+                                                <img src="{% static 'images/default-profile.png' %}" alt="{{ review.user.username }}" 
+                                                     class="rounded-circle" style="width: 50px; height: 50px; object-fit: cover;">
+                                            {% endif %}
+                                        </div>
+                                        <div class="ms-3">
+                                            <h5 class="fw-bold mb-0">{{ review.user.username }}</h5>
+                                            <p class="card-text mb-1"> Membre depuis : {{review.user.date_joined|date:"d M Y" }}</p>
+                                        </div>
+                                    </div>
+                                    <p class="text-primary fst-italic">{{ review.content }}</p>
+                                    <p class="text-muted mb-0">{{ review.datetime|date:"d M Y H:i" }}</p>
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="text-muted">Aucun commentaire pour le moment. Soyez le premier à en laisser un !</p>
+            {% endif %}
         </div>
     </div>
 </div>
 <br/><br/><br/><br/>
 {% endblock %}
-

@@ -41,7 +41,7 @@
                     <a href="{% url 'cart_summary' %}" class="btn btn-outline-light" type="submit">
                         <i class="bi-cart-fill me-1"></i>
                         Cart
-                        <span class="badge bg-white text-dark ms-1 rounded-pill">0</span>
+                        <span class="badge bg-white text-dark ms-1 rounded-pill" id="cart_quantity">{{ cart | length }}</span>
                     </a>                    
                 </li>
                 {% else %}

@@ -33,6 +33,7 @@ urlpatterns = [
     path('workout_list/', views.workout_list, name='workout_list'),  
     path('subscription/', views.subscription, name='subscription'),  # Si nécessaire
     path('confirmation_reservation/<int:scheduleId>/', views.confirmation_reservation, name='confirmation_reservation'),
+    path('add-review/<int:workout_id>/', views.add_review, name='add_review'),
 
 
     

@@ -15,7 +15,6 @@ from django.utils import timezone
 from datetime import timedelta
 from django.urls import path
 
-
 User = get_user_model()
 
 # Vue pour la page à propos
@@ -174,7 +173,8 @@ def create_or_update_coach(sender, instance, created, **kwargs):
 def workout_detail(request, pk):
     workout = get_object_or_404(Workout, pk=pk)
     images = WorkoutImage.objects.filter(workout=pk)
-    return render(request, 'workout.html', {'workout': workout, 'images': images})
+    reviews = Review.objects.filter(workout = pk)
+    return render(request, 'workout.html', {'workout': workout, 'images': images, 'reviews':reviews})
 
 # Vue pour valider le nom d'utilisateur
 
@@ -311,3 +311,23 @@ def confirmation_reservation(request, scheduleId):
 
     messages.success(request, "Votre réservation a été confirmée avec succès.")
     return redirect('home')
+
+
+@login_required
+def add_review(request, workout_id):
+    workout = get_object_or_404(Workout, id=workout_id)
+    
+    if request.method == 'POST':
+        contenu = request.POST.get('contenu')
+        if contenu:
+            Review.objects.create(
+                user=request.user,
+                workout=workout,
+                content=contenu
+            )
+            messages.success(request, "Votre avis a été ajouté avec succès.")
+        else:
+            messages.error(request, "Le contenu du commentaire ne peut pas être vide.")
+    
+    # Redirection vers la page 'workout_detail'
+    return redirect('workout_detail', pk=workout.id)

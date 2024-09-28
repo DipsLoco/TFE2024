@@ -22,10 +22,80 @@
                     <p class="card-text"><strong>Prix:</strong> {{ plan.price }} €</p>
                     <p class="card-text"><strong>Durée:</strong> {{ plan.duration }} jours</p>
                     <p class="card-text"><strong>Disponibilité:</strong> {{ plan.is_available|yesno:"Oui,Non" }}</p>
+                    <br>
+                    <button type="button" value="{{ plan.id }}" class="add-to-cart-btn" id="add-cart">
+                        Ajouter au panier
+                    </button>
+                    <a href="{% url 'home' %}" class="btn-home">Retourner sur page Accueil</a>
                 </div>
             </div>
         </div>
     </div>
 </div>
 <br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/><br/>
+<style>
+     /* Styles pour le bouton Ajouter au panier */
+     .add-to-cart-btn {
+        background-color: #6a1b9a; /* Couleur violette */
+        color: #fff;
+        border: none;
+        padding: 10px 20px;
+        font-size: 16px;
+        border-radius: 25px;
+        box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+    }
+
+    /* Effet de survol pour le bouton Ajouter au panier */
+    .add-to-cart-btn:hover {
+        background-color: #8e24aa; /* Couleur légèrement plus claire au survol */
+        transform: scale(1.05); /* Effet d'agrandissement au survol */
+        box-shadow: 0px 6px 8px rgba(0, 0, 0, 0.2); /* Augmentation de l'ombre au survol */
+        cursor: pointer; /* Changer le curseur au survol */
+    }
+
+    /* Styles pour le bouton Accueil */
+    .btn-home {
+        background-color: #6c757d; /* Couleur grise */
+        color: #fff; /* Texte blanc */
+        border: none;
+        padding: 10px 20px;
+        font-size: 16px;
+        border-radius: 25px;
+        box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+        transition: all 0.3s ease;
+        text-decoration: none; /* Enlever la sous-ligne */
+    }
+
+    /* Effet de survol pour le bouton Accueil */
+    .btn-home:hover {
+        background-color: #5a6268; /* Couleur grise plus sombre au survol */
+        color: #fff; /* Le texte reste blanc */
+        transform: scale(1.05); /* Effet d'agrandissement au survol */
+        box-shadow: 0px 6px 8px rgba(0, 0, 0, 0.2); /* Augmentation de l'ombre au survol */
+        cursor: pointer; /* Changer le curseur au survol */
+    }
+</style>
+<script>
+    $(document).on('click','#add-cart', function(e){
+       e.preventDefault();
+       $.ajax({
+          type: 'POST',
+          url: '{% url "cart_add" %}',
+          data: {
+            plan_id: $('#add-cart').val(),  // Récupérer la valeur du bouton
+            csrfmiddlewaretoken: '{{ csrf_token }}',
+            action: 'post'
+          },
+          success: function (json) {
+              document.getElementById('cart_quantity').textContent = json.qty;  // Mettre à jour le nombre d'articles dans le panier
+              location.reload();  // Recharger la page
+          },
+          error: function (xhr, errmsg, err) {
+              console.log(xhr.status + ": " + xhr.responseText);
+          }
+       });
+    });
+    </script>
+    
 {% endblock %}
