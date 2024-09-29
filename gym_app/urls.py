@@ -35,6 +35,12 @@ urlpatterns = [
     path('confirmation_reservation/<int:scheduleId>/', views.confirmation_reservation, name='confirmation_reservation'),
     path('add-review/<int:workout_id>/', views.add_review, name='add_review'),
 
+    path('conditions-de-vente/', views.conditions_vente, name='conditions_vente'),
+    path('politique-cookies/', views.cookies, name='cookies'),
+    path('politique-confidentialite/', views.confidentialite, name='confidentialite'),
+    path('mentions-legales/', views.mentions_legales, name='mentions_legales'),
+
+
 
     
 ] 

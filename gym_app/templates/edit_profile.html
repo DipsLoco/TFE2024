@@ -1,12 +1,157 @@
-<!-- edit_profile.html -->
 {% extends 'base.html' %}
 {% block content %}
-<div class="container">
-    <h1>Modifier mes informations</h1>
-    <form method="post" enctype="multipart/form-data">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit" class="btn btn-success">Enregistrer les modifications</button>
-    </form>
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow-lg">
+                <div class="card-header bg-dark text-white">
+                    <h3 class="text-center">Modifier mon profil</h3>
+                </div>
+                <div class="card-body">
+                    <form method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+
+                        <!-- Prénom et Nom -->
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.first_name.id_for_label }}" class="form-label">Prénom :</label>
+                                {{ form.first_name }}
+                                <small class="form-text text-muted">{{ form.first_name.help_text|safe }}</small>
+                                <div class="text-danger">{{ form.first_name.errors }}</div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.last_name.id_for_label }}" class="form-label">Nom :</label>
+                                {{ form.last_name }}
+                                <small class="form-text text-muted">{{ form.last_name.help_text|safe }}</small>
+                                <div class="text-danger">{{ form.last_name.errors }}</div>
+                            </div>
+                        </div>
+
+                        <!-- Email -->
+                        <div class="mb-3">
+                            <label for="{{ form.email.id_for_label }}" class="form-label">Adresse e-mail :</label>
+                            {{ form.email }}
+                            <small class="form-text text-muted">Nous ne partagerons jamais votre e-mail avec quelqu'un d'autre.</small>
+                            <div class="text-danger">{{ form.email.errors }}</div>
+                        </div>
+
+                        <!-- Téléphone -->
+                        <div class="mb-3">
+                            <label for="{{ form.phone.id_for_label }}" class="form-label">Téléphone :</label>
+                            {{ form.phone }}
+                            
+                            <div class="text-danger">{{ form.phone.errors }}</div>
+                        </div>
+
+                        <!-- Adresse et Code Postal -->
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.address.id_for_label }}" class="form-label">Adresse :</label>
+                                {{ form.address }}
+                                <small class="form-text text-muted">{{ form.address.help_text|safe }}</small>
+                                <div class="text-danger">{{ form.address.errors }}</div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label for="{{ form.postal_code.id_for_label }}" class="form-label">Code Postal :</label>
+                                {{ form.postal_code }}
+                                <small class="form-text text-muted">{{ form.postal_code.help_text|safe }}</small>
+                                <div class="text-danger">{{ form.postal_code.errors }}</div>
+                            </div>
+                        </div>
+
+                        <!-- Image de profil -->
+                        <div class="mb-3">
+                            <label for="{{ form.image.id_for_label }}" class="form-label">Image de profil :</label>
+                            {{ form.image }}
+                            <small class="form-text text-muted">Téléchargez une nouvelle image pour mettre à jour votre profil.</small>
+                            <div class="text-danger">{{ form.image.errors }}</div>
+                        </div>
+
+                        <!-- URL des réseaux sociaux avec icônes -->
+                        <div class="mb-3">
+                            <label for="{{ form.social_url.id_for_label }}" class="form-label">Réseaux sociaux :</label>
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="fab fa-facebook-f"></i>
+                                </span>
+                                {{ form.social_url }}
+                            </div>
+                            <small class="form-text text-muted">Ajoutez l'URL de votre profil social.</small>
+                            <div class="text-danger">{{ form.social_url.errors }}</div>
+                        </div>
+
+                        <!-- Boutons d'enregistrement et d'annulation -->
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-dark btn-lg">Enregistrer les modifications</button>
+                            <a href="{% url 'profile' %}" class="btn btn-secondary btn-lg">Annuler</a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
+
+<!-- Styles personnalisés -->
+<style>
+    body {
+        background-color: #f8f9fa;
+    }
+
+    .card-header {
+        background-color: #343a40;
+        color: white;
+        font-weight: bold;
+        text-align: center;
+    }
+
+    .form-label {
+        font-weight: bold;
+    }
+
+    .form-control {
+        border-radius: 0.5rem;
+        border: 1px solid #ced4da;
+        transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    }
+
+    .form-control:focus {
+        border-color: #80bdff;
+        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+    }
+
+    .btn-dark {
+        background-color: #343a40;
+        border-color: #343a40;
+        font-size: 1.2rem;
+    }
+
+    .btn-dark:hover {
+        background-color: #23272b;
+        border-color: #1d2124;
+    }
+
+    .btn-secondary {
+        font-size: 1.2rem;
+        background-color: #6c757d;
+    }
+
+    .btn-secondary:hover {
+        background-color: #5a6268;
+    }
+
+    .input-group-text {
+        background-color: #007bff;
+        color: white;
+        border-radius: 0.5rem;
+    }
+
+    .fab {
+        font-size: 1.25rem;
+    }
+
+    .form-text {
+        font-size: 0.85rem;
+    }
+</style>
 {% endblock %}

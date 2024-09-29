@@ -57,6 +57,7 @@
                                 <strong>Ville :</strong> Bruxelles, BE 1081<br>
                                 <strong>Tél. :</strong> +32 484 86 01 33<br>
                                 <strong>Email :</strong> befit@gmail.com<br>
+                                <strong>Horaires :</strong> Du Lu au Dim de 07h à 19h<br>
                             </p>
                             <div class="social-links mt-3">
                                 <a href="#" style="color: white; margin-right: 10px; font-size: 1.2rem;"><i
@@ -75,16 +76,27 @@
                     <div class="col-lg-2 col-md-6 footer-links">
                         <h4 style="color: white; font-size: 1.1rem; margin-bottom: 10px;">Liens Utiles</h4>
                         <ul style="padding-left: 0;">
-                            <li style="list-style: none; margin-bottom: 5px;"><i class="bx bx-chevron-right"></i> <a
-                                    href="#" style="color: white;">Accueil</a></li>
-                            <li style="list-style: none; margin-bottom: 5px;"><i class="bx bx-chevron-right"></i> <a
-                                    href="{% url 'about' %}" style="color: white;">À propos de Nous</a></li>
-                            <li style="list-style: none; margin-bottom: 5px;"><i class="bx bx-chevron-right"></i> <a
-                                    href="#" style="color: white;">Conditions d'utilisation</a></li>
-                            <li style="list-style: none; margin-bottom: 5px;"><i class="bx bx-chevron-right"></i> <a
-                                    href="#" style="color: white;">Politique de confidentialité</a></li>
+                            <li style="list-style: none; margin-bottom: 5px;">
+                                <i class="bx bx-chevron-right"></i> <a href="{% url 'home' %}" style="color: white;">Accueil</a>
+                            </li>
+                            <li style="list-style: none; margin-bottom: 5px;">
+                                <i class="bx bx-chevron-right"></i> <a href="{% url 'about' %}" style="color: white;">À propos de Nous</a>
+                            </li>
+                            <li style="list-style: none; margin-bottom: 5px;">
+                                <i class="bx bx-chevron-right"></i> <a href="{% url 'conditions_vente' %}" style="color: white;">Conditions Générales de Vente</a>
+                            </li>
+                            <li style="list-style: none; margin-bottom: 5px;">
+                                <i class="bx bx-chevron-right"></i> <a href="{% url 'confidentialite' %}" style="color: white;">Politique de Confidentialité</a>
+                            </li>
+                            <li style="list-style: none; margin-bottom: 5px;">
+                                <i class="bx bx-chevron-right"></i> <a href="{% url 'cookies' %}" style="color: white;">Politique en Matière de Cookies</a>
+                            </li>
+                            <li style="list-style: none; margin-bottom: 5px;">
+                                <i class="bx bx-chevron-right"></i> <a href="{% url 'mentions_legales' %}" style="color: white;">Mentions Légales</a>
+                            </li>
                         </ul>
                     </div>
+                    
 
                     <div class="col-lg-3 col-md-6 footer-links">
                         <h4 style="color: white; font-size: 1.1rem; margin-bottom: 10px;">Nos Services</h4>

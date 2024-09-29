@@ -136,7 +136,7 @@ def logout_user(request):
 
 def register_user(request):
     if request.method == 'POST':
-        form = SignUpForm(request.POST)
+        form = SignUpForm(request.POST, request.FILES)
         if form.is_valid():
             user = form.save()
             username = form.cleaned_data['username']
@@ -331,3 +331,15 @@ def add_review(request, workout_id):
     
     # Redirection vers la page 'workout_detail'
     return redirect('workout_detail', pk=workout.id)
+
+def conditions_vente(request):
+    return render(request, 'conditions_vente.html')
+
+def cookies(request):
+    return render(request, 'cookies.html')
+
+def confidentialite(request):
+    return render(request, 'confidentialite.html')
+
+def mentions_legales(request):
+    return render(request, 'mentions_legales.html')
