@@ -336,7 +336,7 @@ def coach_dashboard(request):
         return HttpResponseForbidden("Vous n'avez pas l'autorisation d'accéder à cette page.")
 
     # Récupérer toutes les séances gérées par le coach connecté ou par les administrateurs
-    schedules = WorkoutSchedule.objects.filter(coach=request.user) if not request.user.is_staff else WorkoutSchedule.objects.all()
+    schedules = WorkoutSchedule.objects.filter(coach=request.user).order_by('-start_time') if not request.user.is_staff else WorkoutSchedule.objects.all()
 
     stats = []
     for schedule in schedules:
@@ -360,13 +360,13 @@ def admin_dashboard(request):
         return HttpResponseForbidden("Vous n'avez pas l'autorisation d'accéder à cette page.")
     
     # Récupérer les coachs
-    coaches = Coach.objects.select_related('user').all()
+    coaches = Coach.objects.select_related('user').order_by('-user__date_joined')
     
     # Récupérer les membres (tous les utilisateurs sauf les coachs)
-    members = User.objects.filter(is_staff=False).exclude(role='coach')
+    members = User.objects.filter(is_staff=False).order_by('-date_joined')
     
     # Récupérer les abonnements
-    subscriptions = Subscription.objects.select_related('user', 'plan').all()
+    subscriptions = Subscription.objects.select_related('user', 'plan').order_by('-start_date')
     
     # Récupérer les statistiques des séances
     schedules = WorkoutSchedule.objects.all()

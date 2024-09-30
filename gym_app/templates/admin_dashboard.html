@@ -1,5 +1,7 @@
 {% extends 'base.html' %}
 {% block content %}
+{% load static %}
+
 <div class="container my-5">
     <h1 class="mb-4">Tableau de Bord Admin</h1>
 
@@ -8,8 +10,10 @@
     <table class="table table-striped">
         <thead>
             <tr>
+                <th>Photo</th>
                 <th>Nom</th>
                 <th>Expérience</th>
+                <th>Spécialités</th>
                 <th>Date d'inscription</th>
                 <th>Dernière connexion</th>
             </tr>
@@ -17,8 +21,21 @@
         <tbody>
             {% for coach in coaches %}
             <tr>
+                <!-- Affichage de l'image du coach -->
+                <td>
+                    {% if coach.user.image %}
+                        <img src="{{ coach.user.image.url }}" alt="Photo de {{ coach.user.get_full_name }}" style="width: 50px; height: 50px; border-radius: 50%;">
+                    {% else %}
+                        <img src="{% static 'images/default-profile.png' %}" alt="Photo par défaut" style="width: 50px; height: 50px; border-radius: 50%;">
+                    {% endif %}
+                </td>
                 <td>{{ coach.user.get_full_name }}</td>
-                <td>{{ coach.experience }}</td>
+                <td>{{ coach.exp }} ans</td>
+                <td>
+                    {% for specialty in coach.specialties.all %}
+                        {{ specialty.title }}{% if not forloop.last %}, {% endif %}
+                    {% endfor %}
+                </td>
                 <td>{{ coach.user.date_joined|date:"d M Y" }}</td>
                 <td>{{ coach.user.last_login|date:"d M Y H:i" }}</td>
             </tr>
@@ -31,6 +48,7 @@
     <table class="table table-striped">
         <thead>
             <tr>
+                <th>Photo</th>
                 <th>Nom</th>
                 <th>Email</th>
                 <th>Date d'inscription</th>
@@ -41,6 +59,14 @@
         <tbody>
             {% for member in members %}
             <tr>
+                <!-- Affichage de l'image du membre -->
+                <td>
+                    {% if member.image %}
+                        <img src="{{ member.image.url }}" alt="Photo de {{ member.get_full_name }}" style="width: 50px; height: 50px; border-radius: 50%;">
+                    {% else %}
+                        <img src="{% static 'images/default-profile.png' %}" alt="Photo par défaut" style="width: 50px; height: 50px; border-radius: 50%;">
+                    {% endif %}
+                </td>
                 <td>{{ member.get_full_name }}</td>
                 <td>{{ member.email }}</td>
                 <td>{{ member.date_joined|date:"d M Y" }}</td>
@@ -100,6 +126,5 @@
             {% endfor %}
         </tbody>
     </table>
-
 </div>
 {% endblock %}

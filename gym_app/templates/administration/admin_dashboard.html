@@ -8,8 +8,10 @@
     <table class="table table-striped">
         <thead>
             <tr>
+                <th>Photo</th>
                 <th>Nom</th>
-                <th>Expérience</th>
+                <th>Expérience (en années)</th>
+                <th>Spécialités</th>
                 <th>Date d'inscription</th>
                 <th>Dernière connexion</th>
             </tr>
@@ -17,8 +19,16 @@
         <tbody>
             {% for coach in coaches %}
             <tr>
+                <td>
+                    {% if coach.user.image %}
+                        <img src="{{ coach.user.image.url }}" alt="Photo de {{ coach.user.get_full_name }}" class="img-fluid rounded-circle" style="max-width: 50px;">
+                    {% else %}
+                        <img src="{% static 'images/default-profile.png' %}" alt="Photo de {{ coach.user.get_full_name }}" class="img-fluid rounded-circle" style="max-width: 50px;">
+                    {% endif %}
+                </td>
                 <td>{{ coach.user.get_full_name }}</td>
-                <td>{{ coach.experience }}</td>
+                <td>{{ coach.experience }} ans</td>
+                <td>{{ coach.specialties }}</td>
                 <td>{{ coach.user.date_joined|date:"d M Y" }}</td>
                 <td>{{ coach.user.last_login|date:"d M Y H:i" }}</td>
             </tr>
@@ -31,6 +41,7 @@
     <table class="table table-striped">
         <thead>
             <tr>
+                <th>Photo</th>
                 <th>Nom</th>
                 <th>Email</th>
                 <th>Date d'inscription</th>
@@ -41,6 +52,13 @@
         <tbody>
             {% for member in members %}
             <tr>
+                <td>
+                    {% if member.image %}
+                        <img src="{{ member.image.url }}" alt="Photo de {{ member.get_full_name }}" class="img-fluid rounded-circle" style="max-width: 50px;">
+                    {% else %}
+                        <img src="{% static 'images/default-profile.png' %}" alt="Photo de {{ member.get_full_name }}" class="img-fluid rounded-circle" style="max-width: 50px;">
+                    {% endif %}
+                </td>
                 <td>{{ member.get_full_name }}</td>
                 <td>{{ member.email }}</td>
                 <td>{{ member.date_joined|date:"d M Y" }}</td>
