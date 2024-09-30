@@ -162,6 +162,18 @@ def update_complet_status(sender, instance, **kwargs):
 def check_expired_status(sender, instance, **kwargs):
     instance.update_expired_status()
 
+class WorkoutParticipation(models.Model):
+    workout_schedule = models.ForeignKey('WorkoutSchedule', on_delete=models.CASCADE)  # Référence à la séance
+    participant = models.ForeignKey(User, on_delete=models.CASCADE)  # Référence à l'utilisateur/participant
+    present = models.BooleanField(default=False)  # Présence validée ou non par le coach
+
+    class Meta:
+        unique_together = ['workout_schedule', 'participant']  # Empêche la duplication des participations
+
+    def __str__(self):
+        return f"{self.participant.username} - {self.workout_schedule.workout.title} - Présent: {self.present}"
+
+
 
 
 
@@ -186,8 +198,6 @@ class Plan(models.Model):
     is_available = models.BooleanField(default=False)  # Disponibilité du plan
     is_premium = models.BooleanField(default=False)  # Si l user a pris un plan alors vip sinon pas vip
 
-    def __str__(self):
-        return self.name
 
 
 class Subscription(models.Model):  # Statut abonnement

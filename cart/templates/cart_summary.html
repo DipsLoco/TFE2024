@@ -1,9 +1,5 @@
 {% extends 'base.html' %}
-
-{% load static %}
-
 {% block content %}
-
 <header class="bg-dark py-5"
     style="background-image: url('/media/background_images/background.jpg'); background-size: cover; background-repeat: no-repeat; background-position: center;">
     <div class="container px-5">
@@ -17,13 +13,86 @@
     </div>
 </header>
 
-<!-- Nos Workouts Section -->
-<section id="workouts" class="py-5 bg-light">
-<h2>mon panier ici</h2>    
-</section>
+<!-- Affichage du panier -->
+<div class="container mt-5">
+    <h2>Votre panier</h2>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Nom du plan</th>
+                <th>Prix</th>
+                <th>Durée</th>
+                <th>Date de début</th>
+                <th>Date d'échéance</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% if cart_plans %}
+                {% for plan in cart_plans %}
+                <tr>
+                    <td>{{ plan.name }}</td>
+                    <td>{{ plan.price }} €</td>
+                    <td>{{ plan.duration }} mois</td>
+                    <td>{{ plan.subscription.start_date|date:"d M Y" }}</td>
+                    <td>{{ plan.subscription.get_end_date|date:"d M Y" }}</td>
+                    <td>
+                        <a href="{% url 'cart_delete' plan.id %}" class="btn btn-danger">Supprimer</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            {% else %}
+                <tr>
+                    <td colspan="6" class="text-center">Votre panier est vide.</td>
+                </tr>
+            {% endif %}
+        </tbody>
+    </table>
 
+    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#paiementModal">
+        Confirmer et Payer
+    </button>
+</div>
 
+<!-- Modal de paiement -->
+<div class="modal fade" id="paiementModal" tabindex="-1" aria-labelledby="paiementModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="paiementModalLabel">Détails du paiement</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+              <dl class="row">
+                  <dt class="col-sm-3">Montant total :</dt>
+                  <dd class="col-sm-9">{{ totaltvac }} €</dd>
+              </dl>
+              <hr>
+              <dl class="row">
+                  <div class="col-sm-12">
+                      <dd style="background-color: rgba(37, 24, 157, 0.735); padding: 10px; border-radius: 5px;">
+                          <small style="font-style: italic; font-size: smaller;">
+                              Dès réception de votre paiement, vous pourrez profiter pleinement de nos services.
+                          </small>
+                      </dd>
+                  </div>
+              </dl>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="confirmPayerBtn">PAYER</button>  {# Lien vers la vue de paiement #}
+            </div>
+        </div>
+    </div>
+</div>
 
-
+<script>
+    document.getElementById('confirmPayerBtn').addEventListener('click', function() {
+        window.location.href = "{% url 'checkout_session' %}"; 
+    });
+  </script>
 
 {% endblock %}
+<!-- <a href="{% url 'create_checkout_session' plan.id %}" class="btn btn-primary" id="confirmPayerBtn">Confirmer et Payer</a> -->
+
+
+

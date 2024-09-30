@@ -4,14 +4,44 @@
 <div class="container my-5">
     <!-- En-tête du profil avec le statut Premium en haut à droite -->
     <div class="d-flex justify-content-between align-items-center">
-        <h1 class="mb-5 text-primary" style="font-weight: bold;">Profil de {{ user.first_name }}</h1>
+        <div class="d-flex align-items-center">
+            <h1 class="mb-5 text-primary" style="font-weight: bold;">Profil de {{ user.first_name }}</h1>
+            
+            {% if user.role == 'coach' or user.is_staff %}
+                <a href="{% url 'coach_dashboard' %}" class="btn btn-warning btn-coach-dashboard ms-3" style="font-size: 1.2rem; font-weight: bold; background-color: #ffc107; color: #000; border-radius: 0.5rem; padding: 0.6rem 1.5rem; transition: background-color 0.3s ease;">
+                    <i class="fas fa-tachometer-alt"></i> Tableau de Bord Coach
+                </a>
+            {% endif %}
+            
+            {% if user.is_staff %}
+                <a href="{% url 'admin_dashboard' %}" class="btn btn-primary ms-3" style="font-size: 1.2rem; font-weight: bold; background-color: #007bff; color: #fff; border-radius: 0.5rem; padding: 0.6rem 1.5rem; transition: background-color 0.3s ease;">
+                    <i class="fas fa-user-shield"></i> Tableau de Bord Admin
+                </a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
         {% if user.is_premium %}
-            <span class="badge bg-success" style="font-size: 1.2rem;">Vous êtes un membre premium</span>
+            <div class="alert alert-success d-flex align-items-center" role="alert" style="font-size: 1.1rem; font-weight: bold;">
+                <i class="fas fa-check-circle me-2"></i>
+                <span>Vous êtes abonné à un Plan Premium. Profitez pleinement de nos services !</span>
+            </div>
         {% else %}
-            <span class="badge bg-danger" style="font-size: 1.2rem;">Statut non premium</span>
+            <div class="d-flex align-items-center">
+                <!-- Texte principal avec arrière-plan rouge -->
+                <div class="text-grey alert-link d-flex align-items-center px-3 py-2" role="alert" style="font-size: 1.1rem; font-weight: bold;">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    <span>Vous n'avez aucun Plan actuellement.</span>
+                </div>
+
+                <!-- Texte cliquable avec arrière-plan vert -->
+                <a href="{% url 'home' %}#nos-offres" class="text-green alert-link d-flex align-items-center px-3 py-2" style="background-color: #04d033e1; color: white; font-weight: bold; border-radius: 5px; text-decoration: none;">
+                    Souscrivez dès maintenant via ce lien pour profiter de tous nos Services.
+                </a>
+            </div>
         {% endif %}
     </div>
-    
     <div class="row">
         <!-- Informations Personnelles et Photo -->
         <div class="col-md-6 mb-4">
@@ -64,7 +94,6 @@
             </div>
         </div>
     </div>
-
     <div class="row">
         <!-- Réservations Actuelles -->
         <div class="col-md-6 mb-4">
@@ -161,8 +190,6 @@
         </div>
     </div>
 </div>
-
-<!-- Styles personnalisés -->
 <style>
     .card {
         border: none;
@@ -180,5 +207,77 @@
     .btn {
         border-radius: 5px;
     }
+
+    .btn-coach-dashboard {
+        background-color: #ffc107;
+        color: #000;
+        font-weight: bold;
+        font-size: 1.2rem;
+        border-radius: 0.5rem;
+        padding: 0.6rem 1.5rem;
+        transition: background-color 0.3s ease;
+    }
+
+    .btn-coach-dashboard:hover {
+        background-color: #e0a800;
+        color: #000;
+    }
+
+    .card {
+        border: none;
+        border-radius: 10px;
+    }
+
+    .card-header {
+        border-bottom: none;
+        border-radius: 10px 10px 0 0;
+    }
+
+    .list-group-item {
+        border: none;
+        border-radius: 10px;
+        margin-bottom: 10px;
+    }
+
+    .btn {
+        border-radius: 5px;
+    }
+
+    /* Lien en vert et effet de survol */
+    .text-green {
+        background-color: #28a745;
+        color: white;
+        font-weight: bold;
+        border-radius: 5px;
+        text-decoration: none;
+        padding: 0.5rem 1rem;
+        transition: background-color 0.3s ease;
+    }
+
+    .text-green:hover {
+        background-color: #1e7e34;
+        text-decoration: none;
+    }
 </style>
+
+<!-- JavaScript pour le défilement doux -->
+<script>
+    // Défilement doux pour les ancres
+    document.addEventListener('DOMContentLoaded', function () {
+        const smoothLinks = document.querySelectorAll('a[href^="#"]');
+        smoothLinks.forEach(link => {
+            link.addEventListener('click', function (e) {
+                e.preventDefault();
+                const targetId = this.getAttribute('href').substring(1);
+                const targetElement = document.getElementById(targetId);
+                if (targetElement) {
+                    window.scrollTo({
+                        top: targetElement.offsetTop - 100, // Ajout d'un offset si nécessaire
+                        behavior: 'smooth' // Défilement doux
+                    });
+                }
+            });
+        });
+    });
+</script>
 {% endblock %}

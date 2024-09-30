@@ -80,6 +80,9 @@ LOGIN_URL = '/login/'
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'
 SESSION_COOKIE_SECURE = False  # True si tu utilises HTTPS
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+STRIPE_SECRET_KEY = 'sk_test_51NAZGUIuDh7cZGu7O2BQQX7pRdlKZ11nz91vU4buwTdCg9YjF1nTG2TrC6gtXzIASog4VnCpP2ENjkKh7vkem2d300yum2ChD2'
+STRIPE_PUBLIC_KEY = 'pk_test_51NAZGUIuDh7cZGu7Fr7Atfzx99eYbTPTN2tWeFluHd2at0fmuif98iChDsRfCvg6Ob0oGF1LKmVe4ITP6e9nZUFo00qjHrXrX4'
+
 
 
 

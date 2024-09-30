@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-5">
+    <div class="alert alert-warning text-center" role="alert">
+        <h4 class="alert-heading">Paiement annulé.</h4>
+        <p>Vous avez annulé votre paiement. Votre commande n'a pas été traitée.</p>
+        <hr>
+        <p class="mb-0">Vous pouvez retourner à <a href="{% url 'cart' %}">votre panier</a> pour réessayer ou <a href="{% url 'home' %}">l'accueil</a>.</p>
+    </div>
+</div>
+{% endblock %}

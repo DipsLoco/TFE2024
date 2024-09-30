@@ -1,7 +1,7 @@
 from django.urls import path
 from django.conf.urls.static import static
 from befit_app import settings
-from .views import (cancel_reservation, payment, affiche_workout, subscribe, subscription_list, validate_username, validate_password, profile, edit_profile, workout_list, subscription)
+from .views import (admin_dashboard, cancel_reservation, affiche_workout, coach_dashboard, subscribe, subscription_list, validate_username, validate_password, profile, edit_profile, workout_list, subscription, coach_dashboard)
 from gym_app import views
 
 
@@ -18,12 +18,12 @@ urlpatterns = [
     path('logout/', views.logout_user, name='logout'),
     path('profile/', profile, name='profile'),
     path('edit_profile/', edit_profile, name='edit_profile'),
+    path('coach_dashboard/', views.coach_dashboard, name='coach_dashboard'),
+    path('admin_dashboard/', views.admin_dashboard, name='admin_dashboard'),
     path('plan/<int:pk>', views.plan, name='plan'),
     path('subscription/<int:pk>/', views.subscribe, name='subscription'),
     path('subscriptions/', subscription_list, name='subscription_list'),
     path('subscribe/<int:pk>/', subscribe, name='subscribe'),
-    path('payment/<int:subscription_id>/', payment, name='payment'),
-    path('payment_success/<int:subscription_id>/', views.payment_success, name='payment_success'),
     path('register/', views.register_user, name='register'),
     path('workout/<int:pk>/', views.workout_detail, name='workout_detail'),
     path('validate_username/', validate_username, name='validate_username'),
@@ -39,6 +39,12 @@ urlpatterns = [
     path('politique-cookies/', views.cookies, name='cookies'),
     path('politique-confidentialite/', views.confidentialite, name='confidentialite'),
     path('mentions-legales/', views.mentions_legales, name='mentions_legales'),
+
+    # path('payment/<int:subscription_id>/', payment, name='payment'),
+    path('payment_success/<int:subscription_id>/', views.payment_success, name='payment_success'),
+    path('create-checkout-session/<int:plan_id>/', views.create_checkout_session, name='create_checkout_session'),
+
+    
 
 
 

@@ -1,21 +1,65 @@
 {% extends 'base.html' %}
 {% block content %}
-<div class="container">
-    <h1>Souscription au plan {{ plan.name }}</h1>
-    <p>Description: {{ plan.description }}</p>
-    <p>Prix: {{ plan.price }}€</p>
-    <p>Durée: {{ plan.duration }} jours</p>
+<header class="bg-dark py-5"
+    style="background-image: url('/media/background_images/background.jpg'); background-size: cover; background-repeat: no-repeat; background-position: center;">
+    <div class="container px-5">
+        <div class="row gx-5 justify-content-center">
+            <div class="col-lg-10 text-center my-5"
+                style="background-color: rgba(0, 0, 0, 0.6); padding: 20px; border-radius: 10px;">
+                <h1 class="display-4 fw-bold text-white mb-2">BE-FIT - Sélectionnez votre plan</h1>
+                <p class="lead text-white-50 mb-4">Choisissez un plan et procédez au paiement pour commencer votre abonnement !</p>
+            </div>
+        </div>
+    </div>
+</header>
 
-    <!-- Afficher l'image du plan -->
-    {% if plan.image %}
-    <img src="{{ plan.image.url }}" alt="{{ plan.name }}" class="img-fluid mb-3">
-    {% else %}
-    <img src="path/to/default/image.jpg" alt="Image par défaut" class="img-fluid mb-3">
-    {% endif %}
-
-    <form method="post">
-        {% csrf_token %}
-        <button type="submit" class="btn btn-success">Confirmer et Payer</button>
-    </form>
+<div class="container mt-5">
+    <h2 class="text-primary">Sélectionnez un plan</h2>
+    <div class="row">
+        {% for plan in plans %}
+        <div class="col-lg-4 mb-4">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title">{{ plan.name }}</h5>
+                    <p class="card-text">Durée : {{ plan.duration }} jours</p>
+                    <p class="card-text">Prix : {{ plan.price }} €</p>
+                    <button class="btn btn-primary btn-block" id="checkout-button-{{ plan.id }}" data-plan="{{ plan.id }}">
+                        Payer avec Stripe
+                    </button>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
 </div>
+
+<!-- Stripe Checkout script -->
+<script src="https://js.stripe.com/v3/"></script>
+<script>
+    const stripe = Stripe('{{ stripe_public_key }}');  // Clé publique Stripe du projet
+
+    document.querySelectorAll('button[id^="checkout-button"]').forEach(button => {
+        button.addEventListener('click', function () {
+            const planId = this.dataset.plan;
+            fetch("{% url 'create_checkout_session' %}?plan_id=" + planId, {
+                method: "POST",
+                headers: {
+                    "X-CSRFToken": "{{ csrf_token }}"
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                return stripe.redirectToCheckout({ sessionId: data.id });
+            })
+            .then(result => {
+                if (result.error) {
+                    alert(result.error.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        });
+    });
+</script>
 {% endblock %}

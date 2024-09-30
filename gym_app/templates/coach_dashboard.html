@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-5">
+    <h2 class="text-primary">Tableau de Bord du Coach</h2>
+    
+    {% if stats %}
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Séance</th>
+                <th>Date</th>
+                <th>Nombre de Participants</th>
+                <th>Présents</th>
+                <th>Absents</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for stat in stats %}
+            <tr>
+                <td>{{ stat.schedule.workout.title }}</td>
+                <td>{{ stat.schedule.start_time|date:"d M Y H:i" }}</td>
+                <td>{{ stat.total_participants }}</td>
+                <td>{{ stat.present_count }}</td>
+                <td>{{ stat.absence_count }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p class="text-muted">Aucune donnée disponible pour vos séances actuellement.</p>
+    {% endif %}
+</div>
+{% endblock %}

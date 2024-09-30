@@ -4,7 +4,16 @@ from django.contrib.auth.forms import UserCreationForm
 from django import forms
 from .models import User, WorkoutSchedule
 import re
+from django import forms
+from .models import WorkoutParticipation
 
+class WorkoutParticipationForm(forms.ModelForm):
+    class Meta:
+        model = WorkoutParticipation
+        fields = ['present']
+        widgets = {
+            'present': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+        }
 
 class WorkoutScheduleForm(forms.ModelForm):
     schedule_choice = forms.ChoiceField(

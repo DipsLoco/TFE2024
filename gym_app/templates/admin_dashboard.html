@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container my-5">
+    <h1 class="mb-4">Tableau de Bord Admin</h1>
+
+    <!-- Section pour les coachs -->
+    <h2 class="h4">Liste des Coachs</h2>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Nom</th>
+                <th>Expérience</th>
+                <th>Date d'inscription</th>
+                <th>Dernière connexion</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for coach in coaches %}
+            <tr>
+                <td>{{ coach.user.get_full_name }}</td>
+                <td>{{ coach.experience }}</td>
+                <td>{{ coach.user.date_joined|date:"d M Y" }}</td>
+                <td>{{ coach.user.last_login|date:"d M Y H:i" }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- Section pour les membres -->
+    <h2 class="h4 mt-5">Liste des Membres</h2>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Nom</th>
+                <th>Email</th>
+                <th>Date d'inscription</th>
+                <th>Dernière connexion</th>
+                <th>Statut Premium</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for member in members %}
+            <tr>
+                <td>{{ member.get_full_name }}</td>
+                <td>{{ member.email }}</td>
+                <td>{{ member.date_joined|date:"d M Y" }}</td>
+                <td>{{ member.last_login|date:"d M Y H:i" }}</td>
+                <td>{{ member.is_premium|yesno:"Oui,Non" }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- Section pour les abonnements -->
+    <h2 class="h4 mt-5">Statut des Abonnements</h2>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Membre</th>
+                <th>Plan</th>
+                <th>Date de début</th>
+                <th>Date d'échéance</th>
+                <th>Statut de paiement</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for subscription in subscriptions %}
+            <tr>
+                <td>{{ subscription.user.get_full_name }}</td>
+                <td>{{ subscription.plan.name }}</td>
+                <td>{{ subscription.start_date|date:"d M Y" }}</td>
+                <td>{{ subscription.get_end_date|date:"d M Y" }}</td>
+                <td>{{ subscription.payment_status }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- Section pour les statistiques des séances -->
+    <h2 class="h4 mt-5">Statistiques des Séances d'Entraînement</h2>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Séance</th>
+                <th>Date</th>
+                <th>Participants</th>
+                <th>Présents</th>
+                <th>Absents</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for stat in stats %}
+            <tr>
+                <td>{{ stat.schedule.workout.title }}</td>
+                <td>{{ stat.schedule.start_time|date:"d M Y H:i" }}</td>
+                <td>{{ stat.total_participants }}</td>
+                <td>{{ stat.present_count }}</td>
+                <td>{{ stat.absence_count }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+</div>
+{% endblock %}

@@ -1,10 +1,11 @@
 from datetime import datetime, timedelta, time
+from django.shortcuts import render
 from django.utils import timezone
 from django.contrib import admin
 from django import forms
 from django.db.models.signals import m2m_changed
 from django.dispatch import receiver
-from .models import User, Workout, Coach, Location, Plan, Subscription, Review, WorkoutImage, WorkoutSchedule
+from .models import User, Workout, Coach, Location, Plan, Subscription, Review, WorkoutImage, WorkoutParticipation, WorkoutSchedule
 
 # Gestion des utilisateurs avec la possibilité d'ajouter des spécialités pour les coachs
 class CoachInline(admin.StackedInline):
@@ -106,6 +107,64 @@ class WorkoutScheduleAdmin(admin.ModelAdmin):
         obj.update_complet()  # Met à jour la disponibilité après la sauvegarde
 
 
+@admin.register(WorkoutParticipation)
+class WorkoutParticipationAdmin(admin.ModelAdmin):
+    list_display = ['workout_schedule', 'participant', 'present']
+    list_filter = ['present', 'workout_schedule__start_time']
+    search_fields = ['participant__username', 'workout_schedule__workout__title']
+
+from django.contrib.admin import AdminSite
+from django.urls import path
+from django.utils.html import format_html
+from django.db.models import Count
+from .models import WorkoutSchedule, WorkoutParticipation
+
+class MyAdminSite(AdminSite):
+    site_header = 'Gestion des séances BE-FIT'
+
+    def get_urls(self):
+        urls = super().get_urls()
+        custom_urls = [
+            path('workout-statistics/', self.admin_view(self.workout_statistics), name='workout_statistics'),
+        ]
+        return custom_urls + urls
+
+    def workout_statistics(self, request):
+        # Récupérer toutes les séances avec leur taux de présence
+        schedules = WorkoutSchedule.objects.all()
+        stats = []
+        for schedule in schedules:
+            total_participants = schedule.participants.count()
+            present_count = WorkoutParticipation.objects.filter(workout_schedule=schedule, present=True).count()
+            stats.append({
+                'schedule': schedule,
+                'total_participants': total_participants,
+                'present_count': present_count,
+                'absence_count': total_participants - present_count,
+            })
+        
+        # Affichage des statistiques dans le tableau de bord
+        output = format_html(
+            "<h2>Statistiques des séances</h2><table class='table'><thead><tr><th>Séance</th><th>Participants</th><th>Présents</th><th>Absents</th></tr></thead><tbody>"
+        )
+        for stat in stats:
+            output += format_html(
+                "<tr><td>{}</td><td>{}</td><td>{}</td><td>{}</td></tr>",
+                stat['schedule'].workout.title,
+                stat['total_participants'],
+                stat['present_count'],
+                stat['absence_count'],
+            )
+        output += format_html("</tbody></table>")
+        return render(request, 'admin/workout_statistics.html', {'stats': stats, 'output': output})
+
+# Activer la personnalisation dans admin
+admin_site = MyAdminSite(name='myadmin')
+
+
+
+
+
 
 
 class CoachAdmin(admin.ModelAdmin):
@@ -134,6 +193,7 @@ admin.site.register(Location, LocationAdmin)
 admin.site.register(Plan, PlanAdmin)
 admin.site.register(Subscription, SubscriptionAdmin)
 admin.site.register(Review, ReviewAdmin)
-admin.site.register(WorkoutSchedule, WorkoutScheduleAdmin)
+admin.site.register(WorkoutSchedule, WorkoutScheduleAdmin,)
+admin_site.register(WorkoutParticipation)
 
 
