@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container my-5">
+    <h1 class="mb-4">Boîte de Réception</h1>
+
+    <!-- Liste des messages reçus -->
+    {% if messages %}
+        <ul class="list-group">
+            {% for message in messages %}
+            <li class="list-group-item">
+                <h5>{{ message.subject }}</h5>
+                <p><strong>De :</strong> {{ message.sender.get_full_name }} | <strong>Reçu le :</strong> {{ message.timestamp|date:"d M Y H:i" }}</p>
+                <p>{{ message.body }}</p>
+                <a href="{% url 'send_message' message.sender.id %}" class="btn btn-primary mt-2">Répondre</a>
+            </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p class="text-muted">Vous n'avez pas de messages pour l'instant.</p>
+    {% endif %}
+</div>
+{% endblock %}

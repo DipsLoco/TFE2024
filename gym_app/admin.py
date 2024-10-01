@@ -1,11 +1,12 @@
 from datetime import datetime, timedelta, time
+from mailbox import Message
 from django.shortcuts import render
 from django.utils import timezone
 from django.contrib import admin
 from django import forms
 from django.db.models.signals import m2m_changed
 from django.dispatch import receiver
-from .models import User, Workout, Coach, Location, Plan, Subscription, Review, WorkoutImage, WorkoutParticipation, WorkoutSchedule
+from .models import User, Workout, Coach, Location, Plan, Subscription, Review, WorkoutImage, WorkoutParticipation, WorkoutSchedule, Message
 
 # Gestion des utilisateurs avec la possibilité d'ajouter des spécialités pour les coachs
 class CoachInline(admin.StackedInline):
@@ -184,6 +185,10 @@ class SubscriptionAdmin(admin.ModelAdmin):
 class ReviewAdmin(admin.ModelAdmin):
     list_display = ['id', 'user', 'workout', 'content']
 
+
+class MessageAdmin(admin.ModelAdmin):
+    list_display = ('sender', 'recipient', 'subject', 'timestamp', 'is_read')
+
 # admin.site.register(Booking, BookingAdmin)
 admin.site.register(User, CustomUserAdmin)
 admin.site.register(Workout, WorkoutAdmin)
@@ -194,6 +199,7 @@ admin.site.register(Plan, PlanAdmin)
 admin.site.register(Subscription, SubscriptionAdmin)
 admin.site.register(Review, ReviewAdmin)
 admin.site.register(WorkoutSchedule, WorkoutScheduleAdmin,)
-admin_site.register(WorkoutParticipation)
+admin.site.register(Message)
+
 
 

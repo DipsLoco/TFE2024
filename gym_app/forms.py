@@ -1,11 +1,10 @@
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
-from django import forms
 from .models import User, WorkoutSchedule
-import re
-from django import forms
 from .models import WorkoutParticipation
+from django import forms
+import re
 
 class WorkoutParticipationForm(forms.ModelForm):
     class Meta:

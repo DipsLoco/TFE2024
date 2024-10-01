@@ -15,7 +15,7 @@
                     <a class="nav-link" href="{% url 'about' %}">À propos</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{% url 'home' %}#contact">Contact</a>  
+                    <a class="nav-link" href="{% url 'home' %}#contact">Contact</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="#!">Services</a>
@@ -28,6 +28,16 @@
                 {% if user.is_authenticated %}
                 <li class="nav-item">
                     <a class="nav-link" href="{% url 'profile' %}">Mon profil</a>
+                </li>
+                <!-- Enveloppe de message visible uniquement pour les utilisateurs connectés -->
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'messages_inbox' %}">
+                        <i class="fas fa-envelope text-white"></i> <!-- Enveloppe stylisée en blanc -->
+                        <!-- Afficher le badge des messages non lus -->
+                        {% if unread_messages > 0 %}
+                            <span class="badge badge-danger">{{ unread_messages }}</span>
+                        {% endif %}
+                    </a>
                 </li>
                     {% if user.is_superuser %}
                     <li class="nav-item">

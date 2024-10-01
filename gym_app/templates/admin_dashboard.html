@@ -3,12 +3,107 @@
 {% load static %}
 
 <div class="container my-5">
-    <h1 class="mb-4">Tableau de Bord Admin</h1>
+    <h1 class="mb-4 text-center" style="color: #007bff; font-weight: bold;">Tableau de Bord Admin</h1>
+
+    <!-- Section Statistiques Globales -->
+    <h2 class="h4 mt-5 mb-4" style="color: #343a40; font-weight: bold;">Statistiques Globales</h2>
+
+    <div class="row mb-4">
+        <div class="col-lg-4">
+            <div class="card shadow-sm">
+                <div class="card-body text-center">
+                    <h5>Taux d'inscription ce mois-ci</h5>
+                    <h2 style="color: #007bff;">{{ monthly_registration_percentage|floatformat:1 }}%</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="card shadow-sm">
+                <div class="card-body text-center">
+                    <h5>Taux de Présence</h5>
+                    <h2 style="color: #28a745;">{{ attendance_percentage|floatformat:1 }}%</h2>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="card shadow-sm">
+                <div class="card-body text-center">
+                    <h3>Heures les plus fréquentées (7h - 19h)</h3>
+                    <ul>
+                     {% for hour, count in busy_hour_counts.items %}
+                        <li>Heure {{ hour }}h : {{ count }} séance(s)</li>
+                     {% endfor %}
+                    </ul>
+                    <h2 style="color: #dc3545;">{{ busy_hours_percentage|floatformat:1 }}%</h2>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Section pour les Plans les plus achetés -->
+    <h2 class="h4 mt-5 mb-4" style="color: #343a40; font-weight: bold;">Plans les Plus Achetés</h2>
+    <table class="table table-striped">
+        <thead class="thead-dark">
+            <tr>
+                <th>Plan</th>
+                <th>Pourcentage</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for plan in plan_percentages %}
+            <tr>
+                <td>{{ plan.plan_name }}</td>
+                <td>{{ plan.percentage|floatformat:1 }}%</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- Section pour les Séances de Workout les plus fréquentées -->
+    <h2 class="h4 mt-5 mb-4" style="color: #343a40; font-weight: bold;">Séances de Workout les Plus Fréquentées</h2>
+    <table class="table table-striped">
+        <thead class="thead-dark">
+            <tr>
+                <th>Séance</th>
+                <th>Pourcentage</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for workout in workout_percentages %}
+            <tr>
+                <td>{{ workout.workout_title }}</td>
+                <td>{{ workout.percentage|floatformat:1 }}%</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <!-- Section pour les Coachs les plus actifs -->
+    <h2 class="h4 mt-5 mb-4" style="color: #343a40; font-weight: bold;">Coach les Plus Actifs</h2>
+    <table class="table table-striped">
+        <thead class="thead-dark">
+            <tr>
+                <th>Coach</th>
+                <th>Pourcentage</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for coach in coach_percentages %}
+            <tr>
+                <td>{{ coach.coach_name }}</td>
+                <td>{{ coach.percentage|floatformat:1 }}%</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+
 
     <!-- Section pour les coachs -->
-    <h2 class="h4">Liste des Coachs</h2>
-    <table class="table table-striped">
-        <thead>
+    <h2 class="h4 mb-4" style="color: #343a40; font-weight: bold;">Liste des Coachs</h2>
+    <table class="table table-striped table-hover shadow-sm">
+        <thead class="thead-dark">
             <tr>
                 <th>Photo</th>
                 <th>Nom</th>
@@ -16,6 +111,7 @@
                 <th>Spécialités</th>
                 <th>Date d'inscription</th>
                 <th>Dernière connexion</th>
+                <th>Contacter</th>
             </tr>
         </thead>
         <tbody>
@@ -38,15 +134,42 @@
                 </td>
                 <td>{{ coach.user.date_joined|date:"d M Y" }}</td>
                 <td>{{ coach.user.last_login|date:"d M Y H:i" }}</td>
+                <td>
+                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#contactCoachModal{{ coach.user.id }}">
+                        Contacter
+                    </button>
+                </td>
             </tr>
+
+            <!-- Modal de contact -->
+<div class="modal fade" id="contactModal{{ coach.user.id }}" tabindex="-1" aria-labelledby="contactModalLabel{{ coach.user.id }}" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="contactModalLabel{{ coach.user.id }}">Contacter {{ coach.user.get_full_name }}</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form method="POST" action="{% url 'contact_coach' coach.user.id %}">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="message">Message :</label>
+                        <textarea class="form-control" id="message" name="message" rows="4" required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-success mt-3">Envoyer</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
             {% endfor %}
         </tbody>
     </table>
 
     <!-- Section pour les membres -->
-    <h2 class="h4 mt-5">Liste des Membres</h2>
-    <table class="table table-striped">
-        <thead>
+    <h2 class="h4 mt-5 mb-4" style="color: #343a40; font-weight: bold;">Liste des Membres</h2>
+    <table class="table table-striped table-hover shadow-sm">
+        <thead class="thead-dark">
             <tr>
                 <th>Photo</th>
                 <th>Nom</th>
@@ -54,6 +177,7 @@
                 <th>Date d'inscription</th>
                 <th>Dernière connexion</th>
                 <th>Statut Premium</th>
+                <th>Contacter</th>
             </tr>
         </thead>
         <tbody>
@@ -72,15 +196,42 @@
                 <td>{{ member.date_joined|date:"d M Y" }}</td>
                 <td>{{ member.last_login|date:"d M Y H:i" }}</td>
                 <td>{{ member.is_premium|yesno:"Oui,Non" }}</td>
+                <td>
+                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#contactMemberModal{{ member.id }}">
+                        Contacter
+                    </button>
+                </td>
             </tr>
+
+            <!-- Modal de contact pour membre -->
+            <div class="modal fade" id="contactMemberModal{{ member.id }}" tabindex="-1" aria-labelledby="contactMemberModalLabel{{ member.id }}" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="contactMemberModalLabel{{ member.id }}">Contacter {{ member.get_full_name }}</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <form method="POST" action="{% url 'contact_member' member.id %}">
+                                {% csrf_token %}
+                                <div class="form-group">
+                                    <label for="message">Message :</label>
+                                    <textarea class="form-control" id="message" name="message" rows="4" required></textarea>
+                                </div>
+                                <button type="submit" class="btn btn-success mt-3">Envoyer</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
             {% endfor %}
         </tbody>
     </table>
 
     <!-- Section pour les abonnements -->
-    <h2 class="h4 mt-5">Statut des Abonnements</h2>
-    <table class="table table-striped">
-        <thead>
+    <h2 class="h4 mt-5 mb-4" style="color: #343a40; font-weight: bold;">Statut des Abonnements</h2>
+    <table class="table table-striped table-hover shadow-sm">
+        <thead class="thead-dark">
             <tr>
                 <th>Membre</th>
                 <th>Plan</th>
@@ -103,9 +254,9 @@
     </table>
 
     <!-- Section pour les statistiques des séances -->
-    <h2 class="h4 mt-5">Statistiques des Séances d'Entraînement</h2>
-    <table class="table table-striped">
-        <thead>
+    <h2 class="h4 mt-5 mb-4" style="color: #343a40; font-weight: bold;">Statistiques des Séances d'Entraînement</h2>
+    <table class="table table-striped table-hover shadow-sm">
+        <thead class="thead-dark">
             <tr>
                 <th>Séance</th>
                 <th>Date</th>
@@ -127,4 +278,26 @@
         </tbody>
     </table>
 </div>
+
+<style>
+    .btn-coach-dashboard {
+        font-size: 1.1rem;
+        padding: 0.5rem 1rem;
+        transition: background-color 0.3s ease;
+    }
+    .btn-coach-dashboard:hover {
+        background-color: #0056b3;
+    }
+    .modal-dialog {
+        max-width: 600px;
+    }
+    .modal-header {
+        background-color: #007bff;
+        color: white;
+    }
+    .modal-title {
+        font-weight: bold;
+    }
+</style>
+
 {% endblock %}

@@ -6,6 +6,7 @@ from django.contrib.auth.models import AbstractUser, Group, Permission
 from django.utils import timezone
 from django.dispatch import receiver
 from django.db.models.signals import m2m_changed
+from django.contrib.auth import get_user_model
 
 class User(AbstractUser):
     ROLE_CHOICES = [
@@ -28,6 +29,20 @@ class User(AbstractUser):
     image = models.ImageField(upload_to='membre_images/', blank=True, null=True)  # Image du membre
     groups = models.ManyToManyField(Group, related_name='custom_user_groups', blank=True)  # Nom unique pour éviter les conflits
     user_permissions = models.ManyToManyField(Permission, related_name='custom_user_permissions', blank=True)  # Nom unique pour éviter les conflits
+    
+
+User = get_user_model()
+
+class Message(models.Model):
+    sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sent_messages')
+    recipient = models.ForeignKey(User, on_delete=models.CASCADE, related_name='received_messages')
+    subject = models.CharField(max_length=255)
+    body = models.TextField()
+    timestamp = models.DateTimeField(auto_now_add=True)
+    is_read = models.BooleanField(default=False)
+
+    def __str__(self):
+        return f"De {self.sender} à {self.recipient} - {self.subject}"
 
 
 class Location(models.Model):

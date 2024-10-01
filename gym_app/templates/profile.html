@@ -7,12 +7,19 @@
         <div class="d-flex align-items-center">
             <h1 class="mb-5 text-primary" style="font-weight: bold;">Profil de {{ user.first_name }}</h1>
             
+            <!-- Bouton pour contacter le staff pour les membres -->
+            {% if user.role == 'member' %}
+                <a href="{% url 'send_message' staff_id %}" class="btn btn-primary">Contacter le staff</a>
+            {% endif %}
+            
+            <!-- Tableau de bord Coach -->
             {% if user.role == 'coach' or user.is_staff %}
                 <a href="{% url 'coach_dashboard' %}" class="btn btn-warning btn-coach-dashboard ms-3" style="font-size: 1.2rem; font-weight: bold; background-color: #ffc107; color: #000; border-radius: 0.5rem; padding: 0.6rem 1.5rem; transition: background-color 0.3s ease;">
                     <i class="fas fa-tachometer-alt"></i> Tableau de Bord Coach
                 </a>
             {% endif %}
             
+            <!-- Tableau de bord Admin -->
             {% if user.is_staff %}
                 <a href="{% url 'admin_dashboard' %}" class="btn btn-primary ms-3" style="font-size: 1.2rem; font-weight: bold; background-color: #007bff; color: #fff; border-radius: 0.5rem; padding: 0.6rem 1.5rem; transition: background-color 0.3s ease;">
                     <i class="fas fa-user-shield"></i> Tableau de Bord Admin
@@ -20,30 +27,91 @@
             {% endif %}
         </div>
     </div>
+
+    <!-- Icône de message pour lire les messages reçus -->
+    <div class="d-flex align-items-center mb-3">
+        <a href="#" class="nav-link" data-bs-toggle="modal" data-bs-target="#messagesInboxModal">
+            <i class="fas fa-envelope text-white"></i>
+            <!-- Afficher le badge des messages non lus -->
+            {% if unread_messages > 0 %}
+                <span class="badge badge-danger">{{ unread_messages }}</span>
+            {% endif %}
+        </a>
+    </div>
+
+    <!-- Modal pour les messages reçus -->
+    <div class="modal fade" id="messagesInboxModal" tabindex="-1" aria-labelledby="messagesInboxLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="messagesInboxLabel">Boîte de Réception</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    {% if messages %}
+                        <ul class="list-group">
+                            {% for message in messages %}
+                            <li class="list-group-item">
+                                <h5>{{ message.subject }}</h5>
+                                <p><strong>De :</strong> {{ message.sender.get_full_name }} | <strong>Reçu le :</strong> {{ message.timestamp|date:"d M Y H:i" }}</p>
+                                <p>{{ message.body }}</p>
+                                <!-- Bouton pour répondre au message -->
+                                <a href="{% url 'send_message' message.sender.id %}" class="btn btn-primary btn-sm mt-2">Répondre</a>
+                            </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p class="text-muted">Aucun message reçu pour l'instant.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if user.is_premium %}
+        <div class="alert alert-success d-flex align-items-center" role="alert" style="font-size: 1.1rem; font-weight: bold;">
+            <i class="fas fa-check-circle me-2"></i>
+            <span>Vous êtes abonné à un Plan Premium. Profitez pleinement de nos services !</span>
+        </div>
+    {% else %}
+        <div class="d-flex align-items-center">
+            <!-- Texte principal avec arrière-plan rouge -->
+            <div class="text-grey alert-link d-flex align-items-center px-3 py-2" role="alert" style="font-size: 1.1rem; font-weight: bold;">
+                <i class="fas fa-exclamation-triangle me-2"></i>
+                <span>Vous n'avez aucun Plan actuellement.</span>
+            </div>
+            <!-- Texte cliquable avec arrière-plan vert -->
+            <a href="{% url 'home' %}#nos-offres" class="text-green alert-link d-flex align-items-center px-3 py-2" style="background-color: #04d033e1; color: white; font-weight: bold; border-radius: 5px; text-decoration: none;">
+                Souscrivez dès maintenant via ce lien pour profiter de tous nos Services.
+            </a>
+        </div>
+    {% endif %}
+    
+    <!-- Affichage des membres et des séances passées si coach/admin -->
+    {% if members_with_sessions %}
+    <div class="card mb-4">
+        <div class="card-header bg-primary text-white">
+            <h2 class="h5 mb-0">Séances avec les membres</h2>
+        </div>
+        <div class="card-body">
+            <p>Total de séances : {{ total_sessions }}</p>
+            <ul class="list-group">
+                {% for member in members_with_sessions %}
+                    <li class="list-group-item">
+                        {{ member.participants__first_name }} {{ member.participants__last_name }} - {{ member.participants__email }}
+                        {% if member.participants__is_premium %}
+                            <span class="badge bg-success">Premium</span>
+                        {% endif %}
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+    {% endif %}
 </div>
 
-        {% if user.is_premium %}
-            <div class="alert alert-success d-flex align-items-center" role="alert" style="font-size: 1.1rem; font-weight: bold;">
-                <i class="fas fa-check-circle me-2"></i>
-                <span>Vous êtes abonné à un Plan Premium. Profitez pleinement de nos services !</span>
-            </div>
-        {% else %}
-            <div class="d-flex align-items-center">
-                <!-- Texte principal avec arrière-plan rouge -->
-                <div class="text-grey alert-link d-flex align-items-center px-3 py-2" role="alert" style="font-size: 1.1rem; font-weight: bold;">
-                    <i class="fas fa-exclamation-triangle me-2"></i>
-                    <span>Vous n'avez aucun Plan actuellement.</span>
-                </div>
-
-                <!-- Texte cliquable avec arrière-plan vert -->
-                <a href="{% url 'home' %}#nos-offres" class="text-green alert-link d-flex align-items-center px-3 py-2" style="background-color: #04d033e1; color: white; font-weight: bold; border-radius: 5px; text-decoration: none;">
-                    Souscrivez dès maintenant via ce lien pour profiter de tous nos Services.
-                </a>
-            </div>
-        {% endif %}
-    </div>
+    <!-- Informations Personnelles et Photo -->
     <div class="row">
-        <!-- Informations Personnelles et Photo -->
         <div class="col-md-6 mb-4">
             <div class="card shadow-sm">
                 <div class="card-header bg-primary text-white">
@@ -94,6 +162,7 @@
             </div>
         </div>
     </div>
+
     <div class="row">
         <!-- Réservations Actuelles -->
         <div class="col-md-6 mb-4">
@@ -116,7 +185,6 @@
                                         <span class="badge bg-danger">Expirée</span>
                                     {% else %}
                                         <span class="badge bg-success">Active</span>
-                                        <!-- Affichage du nombre de participants pour les séances disponibles -->
                                         <p class="text-success mt-2" style="font-weight: bold;">{{ schedule.participants.count }}/10 inscrits</p>
                                     {% endif %}
                                     <!-- Bouton pour ouvrir le modal d'annulation -->
@@ -136,10 +204,8 @@
                                         </div>
                                         <div class="modal-body">
                                             {% if schedule.can_cancel %}
-                                                <!-- Condition : 24h ou plus avant -->
                                                 Êtes-vous sûr de vouloir annuler cette réservation pour <strong>{{ schedule.workout.title }}</strong> ?
                                             {% else %}
-                                                <!-- Condition : Moins de 24h avant la séance -->
                                                 Vous ne pouvez annuler une réservation que 24h avant la séance. Pour plus d'informations, veuillez consulter notre <a href="{% url 'faq' %}">FAQ</a>.
                                             {% endif %}
                                         </div>
@@ -152,7 +218,6 @@
                                     </div>
                                 </div>
                             </div>
-
                             {% endfor %}
                         </ul>
                     {% else %}
@@ -190,6 +255,7 @@
         </div>
     </div>
 </div>
+
 <style>
     .card {
         border: none;
@@ -223,27 +289,6 @@
         color: #000;
     }
 
-    .card {
-        border: none;
-        border-radius: 10px;
-    }
-
-    .card-header {
-        border-bottom: none;
-        border-radius: 10px 10px 0 0;
-    }
-
-    .list-group-item {
-        border: none;
-        border-radius: 10px;
-        margin-bottom: 10px;
-    }
-
-    .btn {
-        border-radius: 5px;
-    }
-
-    /* Lien en vert et effet de survol */
     .text-green {
         background-color: #28a745;
         color: white;
@@ -262,7 +307,6 @@
 
 <!-- JavaScript pour le défilement doux -->
 <script>
-    // Défilement doux pour les ancres
     document.addEventListener('DOMContentLoaded', function () {
         const smoothLinks = document.querySelectorAll('a[href^="#"]');
         smoothLinks.forEach(link => {
@@ -272,8 +316,8 @@
                 const targetElement = document.getElementById(targetId);
                 if (targetElement) {
                     window.scrollTo({
-                        top: targetElement.offsetTop - 100, // Ajout d'un offset si nécessaire
-                        behavior: 'smooth' // Défilement doux
+                        top: targetElement.offsetTop - 100,
+                        behavior: 'smooth'
                     });
                 }
             });

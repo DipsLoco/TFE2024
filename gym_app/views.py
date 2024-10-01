@@ -1,7 +1,10 @@
 import stripe
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
-from django.shortcuts import get_object_or_404, redirect, render, redirect
+from django.core.mail import send_mail
+from django.shortcuts import get_object_or_404, redirect, render
+from django.http import HttpResponseRedirect
+from django.http import HttpResponseForbidden
 from django.contrib.auth import authenticate, login, logout, get_user_model
 from django.contrib.auth.decorators import user_passes_test
 from django.contrib import messages
@@ -9,13 +12,16 @@ from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
 from django.db.models.signals import post_save
 from django.dispatch import receiver
+from django.urls import reverse
 from django.http import HttpResponseForbidden, JsonResponse
-from gym_app.models import Coach, Plan, Review, Subscription, Workout, WorkoutImage, WorkoutSchedule, WorkoutParticipation
+from gym_app.models import Coach, Message, Plan, Review, Subscription, Workout, WorkoutImage, WorkoutSchedule, WorkoutParticipation
 from .forms import SignUpForm, UserProfileForm, WorkoutParticipationForm
 from datetime import timedelta
 from django.utils import timezone
 from datetime import timedelta
 from django.urls import path
+from django.db.models import Count, Avg, F, Q
+from django.db.models.functions import TruncMonth, ExtractHour
 
 
 
@@ -237,6 +243,58 @@ def register_user(request):
         form = SignUpForm()
     return render(request, 'administration/register.html', {'form': form})
 
+@login_required
+def send_message(request, recipient_id):
+    recipient = get_object_or_404(User, id=recipient_id)
+    if request.method == 'POST':
+        subject = request.POST.get('subject')
+        body = request.POST.get('body')
+        Message.objects.create(
+            sender=request.user,
+            recipient=recipient,
+            subject=subject,
+            body=body
+        )
+        messages.success(request, "Votre message a été envoyé.")
+        return redirect('profile')  # Rediriger vers le profil ou une autre page
+    return render(request, 'send_message.html', {'recipient': recipient})
+
+
+@login_required
+def inbox(request):
+    messages_received = Message.objects.filter(recipient=request.user).order_by('-timestamp')
+    return render(request, 'inbox.html', {'messages': messages_received})
+
+@login_required
+def messages_inbox(request):
+    # Récupérer les messages reçus par l'utilisateur
+    messages = Message.objects.filter(recipient=request.user).order_by('-timestamp')  # Utilisation de 'timestamp' au lieu de 'date_sent'
+    
+    # Comptabiliser les messages non lus
+    unread_messages = messages.filter(is_read=False).count()
+
+    context = {
+        'messages': messages,
+        'unread_messages': unread_messages,
+    }
+    
+    return render(request, 'messages_inbox.html', context)
+
+
+@login_required
+def base_view(request):
+    unread_messages = Message.objects.filter(recipient=request.user, is_read=False).count()
+    return render(request, 'base.html', {'unread_messages': unread_messages})
+
+
+@login_required
+def message_detail(request, message_id):
+    message = get_object_or_404(Message, id=message_id, recipient=request.user)
+    message.is_read = True
+    message.save()
+    return render(request, 'message_detail.html', {'message': message})
+
+
 
 @receiver(post_save, sender=User)
 def create_or_update_coach(sender, instance, created, **kwargs):
@@ -285,26 +343,35 @@ def validate_password(request):
 @login_required
 def profile(request):
     user = request.user
-    scheduleWorkout = WorkoutSchedule.objects.filter(participants=user, start_time__gte=timezone.now())
-    pastscheduleWorkout = WorkoutSchedule.objects.filter(participants=user, end_time__lt=timezone.now())
+    unread_messages = Message.objects.filter(recipient=user, is_read=False).count()
 
-    # **Ajout d'une vérification si l'utilisateur peut annuler 24h avant ou plus**
-    for schedule in scheduleWorkout:
-        schedule.can_cancel = schedule.start_time > timezone.now() + timedelta(hours=24)
+    # Récupérer le staff (si disponible)
+    staff_id = User.objects.filter(is_staff=True).first().id if user.role == 'member' else None
 
+    # Récupérer les séances passées avec ce coach (si l'utilisateur est un coach ou admin)
+    if user.is_staff or user.role == 'coach':
+        member_sessions = WorkoutSchedule.objects.filter(coach=user).prefetch_related('participants')
+        total_sessions = member_sessions.count()
+        members_with_sessions = member_sessions.values('participants__first_name', 'participants__last_name', 'participants__email', 'participants__is_premium').distinct()
+    else:
+        total_sessions = 0
+        members_with_sessions = None
 
-    # Récupérer les abonnements actuels et passés
-    current_subscription = Subscription.objects.filter(
-        user=user, payment_status='paid').first()
-    # Préparer les données pour le template
+    # Récupérer les messages de la boîte de réception
+    messages = Message.objects.filter(recipient=user).order_by('-timestamp')
+
     context = {
-        'user': user,  # S'assure que l'utilisateur est bien passé au template
-        'current_subscription': current_subscription,
-        'scheduleWorkout': scheduleWorkout,
-        'pastscheduleWorkout': pastscheduleWorkout,
-        'is_premium': user.is_premium  # Optionnel, car user.is_premium est déjà disponible,
+        'user': user,
+        'unread_messages': unread_messages,
+        'messages': messages,
+        'staff_id': staff_id,
+        'total_sessions': total_sessions,
+        'members_with_sessions': members_with_sessions,
     }
+
     return render(request, 'profile.html', context)
+
+
 
 
 @login_required
@@ -336,7 +403,7 @@ def coach_dashboard(request):
         return HttpResponseForbidden("Vous n'avez pas l'autorisation d'accéder à cette page.")
 
     # Récupérer toutes les séances gérées par le coach connecté ou par les administrateurs
-    schedules = WorkoutSchedule.objects.filter(coach=request.user).order_by('-start_time') if not request.user.is_staff else WorkoutSchedule.objects.all()
+    schedules = WorkoutSchedule.objects.filter(coach=request.user) if not request.user.is_staff else WorkoutSchedule.objects.all()
 
     stats = []
     for schedule in schedules:
@@ -350,45 +417,146 @@ def coach_dashboard(request):
         })
     
     return render(request, 'coach_dashboard.html', {'stats': stats})
-# Vérifie si l'utilisateur est administrateur
-def is_admin(user):
-    return user.is_staff
 
 @login_required
 def admin_dashboard(request):
     if not request.user.is_staff:
         return HttpResponseForbidden("Vous n'avez pas l'autorisation d'accéder à cette page.")
-    
-    # Récupérer les coachs
+
+    # Récupérer les coachs et les membres
     coaches = Coach.objects.select_related('user').order_by('-user__date_joined')
-    
-    # Récupérer les membres (tous les utilisateurs sauf les coachs)
     members = User.objects.filter(is_staff=False).order_by('-date_joined')
-    
+
     # Récupérer les abonnements
     subscriptions = Subscription.objects.select_related('user', 'plan').order_by('-start_date')
-    
+
     # Récupérer les statistiques des séances
     schedules = WorkoutSchedule.objects.all()
     stats = []
+    total_participants = 0
+    total_present = 0
     for schedule in schedules:
-        total_participants = schedule.participants.count()
+        participant_count = schedule.participants.count()
         present_count = WorkoutParticipation.objects.filter(workout_schedule=schedule, present=True).count()
+        total_participants += participant_count
+        total_present += present_count
         stats.append({
             'schedule': schedule,
-            'total_participants': total_participants,
+            'total_participants': participant_count,
             'present_count': present_count,
-            'absence_count': total_participants - present_count,
+            'absence_count': participant_count - present_count,
         })
-    
+
+    # Calcul du taux d'inscription par mois
+    current_month = timezone.now().month
+    total_members = members.count()
+    monthly_new_members = members.filter(date_joined__month=current_month).count()
+    if total_members > 0:
+        monthly_registration_percentage = (monthly_new_members / total_members) * 100
+    else:
+        monthly_registration_percentage = 0
+
+    # Calcul du taux de participation
+    if total_participants > 0:
+        attendance_percentage = (total_present / total_participants) * 100
+    else:
+        attendance_percentage = 0
+
+    # Calcul du taux d'occupation des séances entre 7h et 19h
+    total_schedules = schedules.count()
+    busy_hours_schedules = schedules.filter(start_time__hour__gte=7, start_time__hour__lt=19).count()
+    if total_schedules > 0:
+        busy_hours_percentage = (busy_hours_schedules / total_schedules) * 100
+    else:
+        busy_hours_percentage = 0
+
+    # Calcul des heures les plus fréquentées entre 7h et 19h
+    busy_hour_counts = {}
+    for hour in range(7, 19):
+        busy_hour_counts[hour] = schedules.filter(start_time__hour=hour).count()
+
+    # Déterminer l'heure avec le plus de participants
+    most_frequent_hour = max(busy_hour_counts, key=busy_hour_counts.get)
+    most_frequent_hour_count = busy_hour_counts[most_frequent_hour]
+
+    # Calcul des plans les plus achetés
+    plan_counts = subscriptions.values('plan__name').annotate(count=Count('plan')).order_by('-count')
+    total_subscriptions = subscriptions.count()
+    plan_percentages = []
+    if total_subscriptions > 0:
+        for plan in plan_counts:
+            plan_percentages.append({
+                'plan_name': plan['plan__name'],
+                'percentage': (plan['count'] / total_subscriptions) * 100
+            })
+
+    # Calcul des séances de workout les plus fréquentées
+    workout_frequencies = schedules.values('workout__title').annotate(count=Count('workout')).order_by('-count')
+    workout_percentages = []
+    if total_schedules > 0:
+        for workout in workout_frequencies:
+            workout_percentages.append({
+                'workout_title': workout['workout__title'],
+                'percentage': (workout['count'] / total_schedules) * 100
+            })
+
+    # Calcul du taux de séances par coach
+    coach_schedule_counts = schedules.values('coach__first_name', 'coach__last_name').annotate(count=Count('coach')).order_by('-count')
+    coach_percentages = []
+    if total_schedules > 0:
+        for coach in coach_schedule_counts:
+            coach_percentages.append({
+                'coach_name': f"{coach['coach__first_name']} {coach['coach__last_name']}",
+                'percentage': (coach['count'] / total_schedules) * 100
+            })
+
     context = {
         'coaches': coaches,
         'members': members,
         'subscriptions': subscriptions,
-        'stats': stats,  # Ajout des statistiques de présence
+        'stats': stats,
+        'attendance_percentage': attendance_percentage,
+        'monthly_registration_percentage': monthly_registration_percentage,
+        'busy_hours_percentage': busy_hours_percentage,
+        'plan_percentages': plan_percentages,
+        'workout_percentages': workout_percentages,
+        'coach_percentages': coach_percentages,
+        'busy_hour_counts': busy_hour_counts,
+        'most_frequent_hour': most_frequent_hour,
+        'most_frequent_hour_count': most_frequent_hour_count,
     }
-    
+
     return render(request, 'admin_dashboard.html', context)
+
+
+
+@login_required
+def contact_coach(request, coach_id):
+    coach = get_object_or_404(User, id=coach_id)
+    if request.method == 'POST':
+        message = request.POST.get('message')
+        send_mail(
+            subject=f"Message de {request.user.get_full_name()}",
+            message=message,
+            from_email=request.user.email,
+            recipient_list=[coach.email],
+            fail_silently=False,
+        )
+        return HttpResponseRedirect(reverse('admin_dashboard'))
+
+@login_required
+def contact_member(request, member_id):
+    member = get_object_or_404(User, id=member_id)
+    if request.method == 'POST':
+        message = request.POST.get('message')
+        send_mail(
+            subject=f"Message de {request.user.get_full_name()}",
+            message=message,
+            from_email=request.user.email,
+            recipient_list=[member.email],
+            fail_silently=False,
+        )
+        return HttpResponseRedirect(reverse('admin_dashboard'))
 
 
 @login_required

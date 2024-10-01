@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load static %}
 {% block content %}
 <div class="container mt-5">
     <h2 class="text-primary">Tableau de Bord du Coach</h2>
@@ -30,4 +31,138 @@
     <p class="text-muted">Aucune donnée disponible pour vos séances actuellement.</p>
     {% endif %}
 </div>
+<!-- Section pour les membres -->
+<h2 class="h4 mt-5 mb-4" style="color: #343a40; font-weight: bold;">Liste des Membres</h2>
+<table class="table table-striped table-hover shadow-sm">
+    <thead class="thead-dark">
+        <tr>
+            <th>Photo</th>
+            <th>Nom</th>
+            <th>Email</th>
+            <th>Date d'inscription</th>
+            <th>Dernière connexion</th>
+            <th>Statut Premium</th>
+            <th>Contacter</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for member in members %}
+        <tr>
+            <!-- Affichage de l'image du membre -->
+            <td>
+                {% if member.image %}
+                    <img src="{{ member.image.url }}" alt="Photo de {{ member.get_full_name }}" style="width: 50px; height: 50px; border-radius: 50%;">
+                {% else %}
+                    <img src="{% static 'images/default-profile.png' %}" alt="Photo par défaut" style="width: 50px; height: 50px; border-radius: 50%;">
+                {% endif %}
+            </td>
+            <td>{{ member.get_full_name }}</td>
+            <td>{{ member.email }}</td>
+            <td>{{ member.date_joined|date:"d M Y" }}</td>
+            <td>{{ member.last_login|date:"d M Y H:i" }}</td>
+            <td>{{ member.is_premium|yesno:"Oui,Non" }}</td>
+            <td>
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#contactMemberModal{{ member.id }}">
+                    Contacter
+                </button>
+            </td>
+        </tr>
+
+        <!-- Modal de contact pour membre -->
+        <div class="modal fade" id="contactMemberModal{{ member.id }}" tabindex="-1" aria-labelledby="contactMemberModalLabel{{ member.id }}" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="contactMemberModalLabel{{ member.id }}">Contacter {{ member.get_full_name }}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form method="POST" action="{% url 'contact_member' member.id %}">
+                            {% csrf_token %}
+                            <div class="form-group">
+                                <label for="message">Message :</label>
+                                <textarea class="form-control" id="message" name="message" rows="4" required></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-success mt-3">Envoyer</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </tbody>
+</table>
+
+<!-- Section pour les abonnements -->
+<h2 class="h4 mt-5 mb-4" style="color: #343a40; font-weight: bold;">Statut des Abonnements</h2>
+<table class="table table-striped table-hover shadow-sm">
+    <thead class="thead-dark">
+        <tr>
+            <th>Membre</th>
+            <th>Plan</th>
+            <th>Date de début</th>
+            <th>Date d'échéance</th>
+            <th>Statut de paiement</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for subscription in subscriptions %}
+        <tr>
+            <td>{{ subscription.user.get_full_name }}</td>
+            <td>{{ subscription.plan.name }}</td>
+            <td>{{ subscription.start_date|date:"d M Y" }}</td>
+            <td>{{ subscription.get_end_date|date:"d M Y" }}</td>
+            <td>{{ subscription.payment_status }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<!-- Section pour les statistiques des séances -->
+<h2 class="h4 mt-5 mb-4" style="color: #343a40; font-weight: bold;">Statistiques des Séances d'Entraînement</h2>
+<table class="table table-striped table-hover shadow-sm">
+    <thead class="thead-dark">
+        <tr>
+            <th>Séance</th>
+            <th>Date</th>
+            <th>Participants</th>
+            <th>Présents</th>
+            <th>Absents</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for stat in stats %}
+        <tr>
+            <td>{{ stat.schedule.workout.title }}</td>
+            <td>{{ stat.schedule.start_time|date:"d M Y H:i" }}</td>
+            <td>{{ stat.total_participants }}</td>
+            <td>{{ stat.present_count }}</td>
+            <td>{{ stat.absence_count }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+</div>
+
+<style>
+.btn-coach-dashboard {
+    font-size: 1.1rem;
+    padding: 0.5rem 1rem;
+    transition: background-color 0.3s ease;
+}
+.btn-coach-dashboard:hover {
+    background-color: #0056b3;
+}
+.modal-dialog {
+    max-width: 600px;
+}
+.modal-header {
+    background-color: #007bff;
+    color: white;
+}
+.modal-title {
+    font-weight: bold;
+}
+</style>
+
 {% endblock %}
