@@ -396,6 +396,12 @@ def edit_profile(request):
     }
     return render(request, 'edit_profile.html', context)
 
+@receiver(post_save, sender=User)
+def create_coach_profile(sender, instance, created, **kwargs):
+    if not created:  # Si l'utilisateur existe déjà
+        if instance.role == 'coach':
+            Coach.objects.get_or_create(user=instance)
+            
 @login_required
 def coach_dashboard(request):
     # Vérifier si l'utilisateur est un coach ou un administrateur (is_staff)
