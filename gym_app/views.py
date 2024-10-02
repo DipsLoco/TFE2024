@@ -24,6 +24,7 @@ from django.db.models import Count, Avg, F, Q
 from django.db.models.functions import TruncMonth, ExtractHour
 from django_q.tasks import schedule
 from django_q.tasks import async_task
+from .models import CatalogService
 
 
 
@@ -36,17 +37,37 @@ User = get_user_model()
 def about(request):
     return render(request, 'about.html')
 
-# Vue pour la page d'accueil
-
-
 def home(request):
+    # Filtre pour les plans disponibles
     plans = Plan.objects.filter(is_available=True)
+    
+    # Filtre pour les séances d'entraînement disponibles
     workouts = Workout.objects.filter(available=True)
+    
+    # Récupération de tous les coachs
     coachs = Coach.objects.all()
+    
+    # Récupération des avis utilisateurs
     reviews = Review.objects.all()
-    bookings = WorkoutSchedule.objects.select_related(
-        'coach', 'location').all()
-    return render(request, 'home.html', {'plans': plans, 'workouts': workouts, 'coachs': coachs, 'reviews': reviews, 'bookings': bookings})
+    
+    # Récupération des services disponibles
+    services = CatalogService.objects.filter(is_available=True)
+    
+    # Récupération des réservations avec les relations associées
+    bookings = WorkoutSchedule.objects.select_related('coach', 'location').all()
+
+    # Contexte avec toutes les données à afficher
+    context = {
+        'plans': plans,
+        'workouts': workouts,
+        'coachs': coachs,
+        'reviews': reviews,
+        'bookings': bookings,
+        'services': services,  # Ajout des services ici
+    }
+    
+    # Retourne le rendu de la page 'home.html' avec le contexte
+    return render(request, 'home.html', context)
 
 # Vue pour la page FAQ
 

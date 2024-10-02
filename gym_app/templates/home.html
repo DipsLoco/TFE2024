@@ -87,6 +87,32 @@
         </div>
     </div>
 </section>
+<!-- Section Nos Services -->
+<section id="services" class="py-5 bg-light">
+    <div class="container">
+        <h2 class="text-center mb-4">Nos Services</h2>
+        <div class="row">
+            {% for service in services %}
+                <div class="col-lg-4 col-md-6 mb-4">
+                    <div class="card shadow-sm">
+                        {% if service.image %}
+                            <img src="{{ service.image.url }}" class="card-img-top" alt="{{ service.name }}">
+                        {% else %}
+                            <img src="{% static 'images/default_service.jpg' %}" class="card-img-top" alt="Service Image">
+                        {% endif %}
+                        <div class="card-body">
+                            <h5 class="card-title">{{ service.name }}</h5>
+                            <p class="card-text">{{ service.description }}</p>
+                            <p class="card-text"><strong>Prix:</strong> {{ service.price }} €</p>
+                            <p class="card-text"><strong>Durée:</strong> {{ service.duration }} jours</p>
+                            <a href="{% url 'subscribe_service' service.id %}" class="btn btn-primary">Souscrire</a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
 
 
 
@@ -166,6 +192,66 @@
         </div>
     </div>
 </section>
+<!-- Section Nos Services -->
+<section id="nos-services" class="services-section">
+    <div class="container">
+        <h2 class="section-title">Nos Services</h2>
+        <div class="services-grid">
+            {% for service in services %}
+                <div class="service-card">
+                    <img src="{{ service.image.url }}" alt="{{ service.name }}" class="service-image">
+                    <div class="service-content">
+                        <h3>{{ service.name }}</h3>
+                        <p>{{ service.description }}</p>
+                        <p><strong>Prix:</strong> {{ service.price }} €</p>
+                        <p><strong>Durée:</strong> {{ service.duration }} jours</p>
+                        <a href="#" class="btn btn-primary">Souscrire</a>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<style>
+    .services-section {
+        padding: 50px 0;
+        background-color: #f9f9f9;
+    }
+    .services-grid {
+        display: flex;
+        gap: 20px;
+        flex-wrap: wrap;
+        justify-content: space-around;
+    }
+    .service-card {
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+        max-width: 300px;
+        text-align: center;
+    }
+    .service-image {
+        width: 100%;
+        height: auto;
+        border-radius: 10px;
+    }
+    .service-content {
+        margin-top: 15px;
+    }
+    .btn {
+        background-color: #007bff;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 5px;
+        text-decoration: none;
+    }
+    .btn:hover {
+        background-color: #0056b3;
+    }
+</style>
+
 
      <!-- Contact Section -->
      <section id="contact" class="bg-light py-5">

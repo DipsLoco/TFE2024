@@ -243,3 +243,30 @@ class Review(models.Model):
     content = models.TextField()  # Contenu du commentaire utilisateur
     datetime = models.DateTimeField(default=timezone.now)  # Date et heure du commentaire
 
+from django.db import models
+
+class CatalogService(models.Model):
+    name = models.CharField(max_length=100)
+    description = models.TextField()
+    price = models.IntegerField()
+    duration = models.IntegerField()  # en jours ou en mois
+    is_available = models.BooleanField(default=True)
+    image = models.ImageField(upload_to='service_images/', null=True, blank=True)
+
+    def __str__(self):
+        return self.name
+
+class PersonalizedCoaching(models.Model):
+    catalog_service = models.ForeignKey(CatalogService, on_delete=models.CASCADE)
+    coach = models.ForeignKey('User', on_delete=models.CASCADE, limit_choices_to={'role': 'Coach'})
+    duration = models.IntegerField()
+
+class GymAccessory(models.Model):
+    catalog_service = models.ForeignKey(CatalogService, on_delete=models.CASCADE)
+    stock = models.IntegerField()
+    
+class DietPlan(models.Model):
+    catalog_service = models.ForeignKey(CatalogService, on_delete=models.CASCADE)
+    partner_company = models.CharField(max_length=255)
+    description = models.TextField()
+    price = models.IntegerField()

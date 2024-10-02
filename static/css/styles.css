@@ -10844,3 +10844,62 @@ textarea.form-control-lg {
 .vibrate {
   animation: vibrate 0.5s ease;
 }
+<!-- Section Nos Services -->
+<section id="nos-services" class="services-section">
+    <div class="container">
+        <h2 class="section-title">Nos Services</h2>
+        <div class="services-grid">
+            {% for service in services %}
+                <div class="service-card">
+                    <img src="{{ service.image.url }}" alt="{{ service.name }}" class="service-image">
+                    <div class="service-content">
+                        <h3>{{ service.name }}</h3>
+                        <p>{{ service.description }}</p>
+                        <p><strong>Prix:</strong> {{ service.price }} €</p>
+                        <p><strong>Durée:</strong> {{ service.duration }} jours</p>
+                        <a href="#" class="btn btn-primary">Souscrire</a>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<style>
+    .services-section {
+        padding: 50px 0;
+        background-color: #f9f9f9;
+    }
+    .services-grid {
+        display: flex;
+        gap: 20px;
+        flex-wrap: wrap;
+        justify-content: space-around;
+    }
+    .service-card {
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        padding: 20px;
+        max-width: 300px;
+        text-align: center;
+    }
+    .service-image {
+        width: 100%;
+        height: auto;
+        border-radius: 10px;
+    }
+    .service-content {
+        margin-top: 15px;
+    }
+    .btn {
+        background-color: #007bff;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 5px;
+        text-decoration: none;
+    }
+    .btn:hover {
+        background-color: #0056b3;
+    }
+</style>
