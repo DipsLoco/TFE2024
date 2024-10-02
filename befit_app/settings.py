@@ -31,6 +31,7 @@ INSTALLED_APPS = [
     'befit_app',
     'gym_app',
     'cart',
+    'django_q',
 ]
 
 MIDDLEWARE = [
@@ -74,6 +75,19 @@ DATABASES = {
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
+
+Q_CLUSTER = {
+    'name': 'DjangoQ',
+    'workers': 4,
+    'recycle': 500,
+    'timeout': 60,
+    'django_redis': 'default',
+    'retry': 90,
+    'queue_limit': 50,
+    'bulk': 10,
+    'orm': 'default',  # Utiliser l'ORM pour stocker les tâches dans la base de données
+}
+
 
 AUTH_USER_MODEL = 'gym_app.User'
 LOGIN_URL = '/login/'

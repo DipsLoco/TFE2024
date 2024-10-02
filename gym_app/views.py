@@ -22,6 +22,9 @@ from datetime import timedelta
 from django.urls import path
 from django.db.models import Count, Avg, F, Q
 from django.db.models.functions import TruncMonth, ExtractHour
+from django_q.tasks import schedule
+from django_q.tasks import async_task
+
 
 
 
@@ -79,6 +82,9 @@ def remind_subscription(request, user_id):
         return redirect('coach_dashboard')
 
     return HttpResponseForbidden("Méthode non autorisée.")
+
+
+
 
 
 # Configuration de la clé secrète Stripe

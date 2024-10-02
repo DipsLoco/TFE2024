@@ -1,8 +1,9 @@
 from django.urls import path
 from django.conf.urls.static import static
 from befit_app import settings
-from .views import (admin_dashboard, cancel_reservation, affiche_workout, coach_dashboard, inbox, message_detail, send_message, subscribe, subscription_list, validate_username, validate_password, profile, edit_profile, workout_list, subscription, coach_dashboard, contact_coach, contact_member)
+from .views import (admin_dashboard, cancel_reservation, affiche_workout, coach_dashboard, inbox, message_detail, send_message, subscribe, subscription_list, validate_username, validate_password, profile, edit_profile, workout_list, subscription, coach_dashboard, contact_coach, contact_member, remind_subscription)
 from gym_app import views
+from django_q.tasks import schedule
 
 
 
@@ -27,6 +28,7 @@ urlpatterns = [
     path('inbox/', inbox, name='inbox'),
     path('message/<int:message_id>/', message_detail, name='message_detail'),
     path('plan/<int:pk>', views.plan, name='plan'),
+    path('remind_subscription/<int:user_id>/', views.remind_subscription, name='remind_subscription'),
     path('subscription/<int:pk>/', views.subscribe, name='subscription'),
     path('subscriptions/', subscription_list, name='subscription_list'),
     path('subscribe/<int:pk>/', subscribe, name='subscribe'),
