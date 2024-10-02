@@ -52,6 +52,35 @@ def faq(request):
     return render(request, 'faq.html')
 
 
+# Notification pour relancer abonnement arriver a echeance
+@login_required
+def remind_subscription(request, user_id):
+    if request.method == 'POST':
+        user = get_object_or_404(User, id=user_id)
+        subscription = get_object_or_404(Subscription, user=user, payment_status='pending')
+
+        # Créez un message de relance
+        subject = "Relance d'abonnement"
+        body = f"Bonjour {user.get_full_name()}, votre abonnement est en attente. " \
+               f"Veuillez le renouveler ou envisager notre offre de 12 mois - Evolve."
+
+        # Enregistrer le message de notification dans la base de données
+        Message.objects.create(
+            sender=request.user,
+            recipient=user,
+            subject=subject,
+            body=body,
+            is_read=False
+        )
+
+        # Notification réussie
+        messages.success(request, f'La relance a été envoyée à {user.get_full_name()}.')
+
+        return redirect('coach_dashboard')
+
+    return HttpResponseForbidden("Méthode non autorisée.")
+
+
 # Configuration de la clé secrète Stripe
 stripe.api_key = settings.STRIPE_SECRET_KEY
 
@@ -401,7 +430,6 @@ def create_coach_profile(sender, instance, created, **kwargs):
     if not created:  # Si l'utilisateur existe déjà
         if instance.role == 'coach':
             Coach.objects.get_or_create(user=instance)
-            
 @login_required
 def coach_dashboard(request):
     # Vérifier si l'utilisateur est un coach ou un administrateur (is_staff)
@@ -409,7 +437,14 @@ def coach_dashboard(request):
         return HttpResponseForbidden("Vous n'avez pas l'autorisation d'accéder à cette page.")
 
     # Récupérer toutes les séances gérées par le coach connecté ou par les administrateurs
-    schedules = WorkoutSchedule.objects.filter(coach=request.user) if not request.user.is_staff else WorkoutSchedule.objects.all()
+    schedules = WorkoutSchedule.objects.filter(coach=request.user).order_by('-start_time') if not request.user.is_staff else WorkoutSchedule.objects.all().order_by('-start_time')
+
+    # Récupérer les membres et les abonnements (comme dans le dashboard admin)
+    members = User.objects.filter(is_staff=False).order_by('-date_joined')  # Pour récupérer les membres
+    subscriptions = Subscription.objects.select_related('user', 'plan').order_by('-start_date')
+
+    # Récupérer les autres coachs sauf le coach connecté
+    coaches = Coach.objects.exclude(user=request.user).select_related('user').order_by('-user__date_joined')
 
     stats = []
     for schedule in schedules:
@@ -421,8 +456,15 @@ def coach_dashboard(request):
             'present_count': present_count,
             'absence_count': total_participants - present_count,
         })
-    
-    return render(request, 'coach_dashboard.html', {'stats': stats})
+
+    return render(request, 'coach_dashboard.html', {
+        'stats': stats,
+        'members': members,
+        'subscriptions': subscriptions,
+        'coaches': coaches  # Ajout de la liste des coachs pour le template
+    })
+
+
 
 @login_required
 def admin_dashboard(request):
@@ -539,16 +581,19 @@ def admin_dashboard(request):
 @login_required
 def contact_coach(request, coach_id):
     coach = get_object_or_404(User, id=coach_id)
+
     if request.method == 'POST':
-        message = request.POST.get('message')
-        send_mail(
-            subject=f"Message de {request.user.get_full_name()}",
-            message=message,
-            from_email=request.user.email,
-            recipient_list=[coach.email],
-            fail_silently=False,
+        message_body = request.POST.get('message')
+        Message.objects.create(
+            sender=request.user,
+            recipient=coach,
+            subject=f"Nouveau message de {request.user.get_full_name()}",
+            body=message_body
         )
-        return HttpResponseRedirect(reverse('admin_dashboard'))
+        messages.success(request, f"Message envoyé à {coach.get_full_name()}")
+        return redirect('coach_dashboard')
+
+    return HttpResponseForbidden("Action non autorisée")
 
 @login_required
 def contact_member(request, member_id):
