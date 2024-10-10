@@ -14,7 +14,7 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.urls import reverse
 from django.http import HttpResponseForbidden, JsonResponse
-from gym_app.models import Coach, Message, Plan, Review, Subscription, Workout, WorkoutImage, WorkoutSchedule, WorkoutParticipation
+from gym_app.models import CatalogService, Coach, DietPlan, GymAccessory, Message, PersonalizedCoaching, Plan, Review, Subscription, Workout, WorkoutImage, WorkoutSchedule, WorkoutParticipation
 from .forms import SignUpForm, UserProfileForm, WorkoutParticipationForm
 from datetime import timedelta
 from django.utils import timezone
@@ -24,7 +24,7 @@ from django.db.models import Count, Avg, F, Q
 from django.db.models.functions import TruncMonth, ExtractHour
 from django_q.tasks import schedule
 from django_q.tasks import async_task
-from .models import CatalogService
+
 
 
 
@@ -37,37 +37,33 @@ User = get_user_model()
 def about(request):
     return render(request, 'about.html')
 
-def home(request):
-    # Filtre pour les plans disponibles
-    plans = Plan.objects.filter(is_available=True)
-    
-    # Filtre pour les séances d'entraînement disponibles
-    workouts = Workout.objects.filter(available=True)
-    
-    # Récupération de tous les coachs
-    coachs = Coach.objects.all()
-    
-    # Récupération des avis utilisateurs
-    reviews = Review.objects.all()
-    
-    # Récupération des services disponibles
-    services = CatalogService.objects.filter(is_available=True)
-    
-    # Récupération des réservations avec les relations associées
-    bookings = WorkoutSchedule.objects.select_related('coach', 'location').all()
+# Vue pour la page d'accueil
 
-    # Contexte avec toutes les données à afficher
-    context = {
+
+def home(request):
+    plans = Plan.objects.filter(is_available=True)
+    workouts = Workout.objects.filter(available=True)
+    coachs = Coach.objects.all()
+    reviews = Review.objects.all()
+    workoutschedules = WorkoutSchedule.objects.select_related('coach', 'location').all()
+
+    # Ajouter les services du catalogue
+    catalog_services = CatalogService.objects.filter(is_available=True)
+    personalized_coaching = PersonalizedCoaching.objects.all()
+    gym_accessories = GymAccessory.objects.all()
+    diet_plans = DietPlan.objects.all()
+
+    return render(request, 'home.html', {
         'plans': plans,
         'workouts': workouts,
         'coachs': coachs,
         'reviews': reviews,
-        'bookings': bookings,
-        'services': services,  # Ajout des services ici
-    }
-    
-    # Retourne le rendu de la page 'home.html' avec le contexte
-    return render(request, 'home.html', context)
+        'workoutschedules': workoutschedules,
+        'catalog_services': catalog_services,
+        'personalized_coaching': personalized_coaching,
+        'gym_accessories': gym_accessories,
+        'diet_plans': diet_plans,
+    })
 
 # Vue pour la page FAQ
 
@@ -405,13 +401,13 @@ def profile(request):
     staff_id = User.objects.filter(is_staff=True).first().id if user.role == 'member' else None
 
     # Récupérer les séances passées avec ce coach (si l'utilisateur est un coach ou admin)
-    if user.is_staff or user.role == 'coach':
-        member_sessions = WorkoutSchedule.objects.filter(coach=user).prefetch_related('participants')
-        total_sessions = member_sessions.count()
-        members_with_sessions = member_sessions.values('participants__first_name', 'participants__last_name', 'participants__email', 'participants__is_premium').distinct()
-    else:
-        total_sessions = 0
-        members_with_sessions = None
+    # if user.is_staff or user.role == 'coach':
+    #     member_sessions = WorkoutSchedule.objects.filter(coach=user).prefetch_related('participants')
+    #     total_sessions = member_sessions.count()
+    #     members_with_sessions = member_sessions.values('participants__first_name', 'participants__last_name', 'participants__email', 'participants__is_premium').distinct()
+    # else:
+    #     total_sessions = 0
+    #     members_with_sessions = None
 
     # Récupérer les messages de la boîte de réception
     messages = Message.objects.filter(recipient=user).order_by('-timestamp')
@@ -421,8 +417,8 @@ def profile(request):
         'unread_messages': unread_messages,
         'messages': messages,
         'staff_id': staff_id,
-        'total_sessions': total_sessions,
-        'members_with_sessions': members_with_sessions,
+        # 'total_sessions': total_sessions,
+        # 'members_with_sessions': members_with_sessions,
     }
 
     return render(request, 'profile.html', context)
@@ -462,17 +458,37 @@ def coach_dashboard(request):
     # Vérifier si l'utilisateur est un coach ou un administrateur (is_staff)
     if request.user.role != 'coach' and not request.user.is_staff:
         return HttpResponseForbidden("Vous n'avez pas l'autorisation d'accéder à cette page.")
+    
+    user = request.user
 
     # Récupérer toutes les séances gérées par le coach connecté ou par les administrateurs
-    schedules = WorkoutSchedule.objects.filter(coach=request.user).order_by('-start_time') if not request.user.is_staff else WorkoutSchedule.objects.all().order_by('-start_time')
+    if user.is_staff:
+        schedules = WorkoutSchedule.objects.all().order_by('-start_time')
+    else:
+        schedules = WorkoutSchedule.objects.filter(coach=user).order_by('-start_time')
 
-    # Récupérer les membres et les abonnements (comme dans le dashboard admin)
+    # Récupérer les membres et leurs abonnements
     members = User.objects.filter(is_staff=False).order_by('-date_joined')  # Pour récupérer les membres
     subscriptions = Subscription.objects.select_related('user', 'plan').order_by('-start_date')
+
+    # Récupérer les séances passées avec ce coach
+    if user.is_staff or user.role == 'coach':
+        member_sessions = WorkoutSchedule.objects.prefetch_related('participants').filter(coach=user)
+        total_sessions = member_sessions.count()
+        members_with_sessions = member_sessions.values(
+            'participants__first_name', 
+            'participants__last_name', 
+            'participants__email', 
+            'participants__is_premium'
+        ).distinct()
+    else:
+        total_sessions = 0
+        members_with_sessions = None
 
     # Récupérer les autres coachs sauf le coach connecté
     coaches = Coach.objects.exclude(user=request.user).select_related('user').order_by('-user__date_joined')
 
+    # Statistiques des séances
     stats = []
     for schedule in schedules:
         total_participants = schedule.participants.count()
@@ -484,11 +500,14 @@ def coach_dashboard(request):
             'absence_count': total_participants - present_count,
         })
 
+    # Passer toutes les données au template
     return render(request, 'coach_dashboard.html', {
         'stats': stats,
         'members': members,
         'subscriptions': subscriptions,
-        'coaches': coaches  # Ajout de la liste des coachs pour le template
+        'coaches': coaches,
+        'total_sessions':  total_sessions,
+        'members_with_sessions': members_with_sessions,
     })
 
 

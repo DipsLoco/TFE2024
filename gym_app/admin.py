@@ -6,7 +6,12 @@ from django.contrib import admin
 from django import forms
 from django.db.models.signals import m2m_changed
 from django.dispatch import receiver
-from .models import User, Workout, Coach, Location, Plan, Subscription, Review, WorkoutImage, WorkoutParticipation, WorkoutSchedule, Message
+from .models import User, Workout, Coach, Location, Plan, Subscription, Review, WorkoutImage, WorkoutParticipation, WorkoutSchedule, Message, CatalogService, PersonalizedCoaching, GymAccessory, DietPlan
+from django.contrib.admin import AdminSite
+from django.urls import path
+from django.utils.html import format_html
+from django.db.models import Count
+from .models import WorkoutSchedule, WorkoutParticipation
 
 # Gestion des utilisateurs avec la possibilité d'ajouter des spécialités pour les coachs
 class CoachInline(admin.StackedInline):
@@ -114,12 +119,6 @@ class WorkoutParticipationAdmin(admin.ModelAdmin):
     list_filter = ['present', 'workout_schedule__start_time']
     search_fields = ['participant__username', 'workout_schedule__workout__title']
 
-from django.contrib.admin import AdminSite
-from django.urls import path
-from django.utils.html import format_html
-from django.db.models import Count
-from .models import WorkoutSchedule, WorkoutParticipation
-
 class MyAdminSite(AdminSite):
     site_header = 'Gestion des séances BE-FIT'
 
@@ -200,6 +199,10 @@ admin.site.register(Subscription, SubscriptionAdmin)
 admin.site.register(Review, ReviewAdmin)
 admin.site.register(WorkoutSchedule, WorkoutScheduleAdmin,)
 admin.site.register(Message)
+admin.site.register(CatalogService)
+admin.site.register(PersonalizedCoaching)
+admin.site.register(GymAccessory)
+admin.site.register(DietPlan)
 
 
 

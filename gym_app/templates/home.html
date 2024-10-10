@@ -87,7 +87,7 @@
         </div>
     </div>
 </section>
-<!-- Section Nos Services -->
+<!-- Section Nos Services
 <section id="services" class="py-5 bg-light">
     <div class="container">
         <h2 class="text-center mb-4">Nos Services</h2>
@@ -112,7 +112,7 @@
             {% endfor %}
         </div>
     </div>
-</section>
+</section> -->
 
 
 
@@ -251,6 +251,76 @@
         background-color: #0056b3;
     }
 </style>
+
+<!-- Section Nos Services -->
+<section class="catalog-services">
+    <h2>Nos Services</h2>
+
+    <!-- Coaching Personnalisé -->
+    <div class="service-section">
+        <h3>Coaching Personnalisé</h3>
+        <div class="service-items">
+            {% for coaching in personalized_coaching %}
+                <div class="service-item">
+                    <h4>{{ coaching.catalog_service.name }}</h4>
+                    <p>{{ coaching.catalog_service.description }}</p>
+                    <p><strong>Durée : </strong>{{ coaching.duration }} jours</p>
+                    <p><strong>Prix : </strong>{{ coaching.catalog_service.price }}€</p>
+                    {% if coaching.catalog_service.image %}
+                        <div class="service-image">
+                            <img src="{{ coaching.catalog_service.image.url }}" alt="{{ coaching.catalog_service.name }}">
+                        </div>
+                    {% endif %}
+                    <a href="#" class="btn">Souscrire</a>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Plan Diététique -->
+    <div class="service-section">
+        <h3>Plans Diététiques</h3>
+        <div class="service-items">
+            {% for plan in diet_plans %}
+                <div class="service-item">
+                    <h4>{{ plan.catalog_service.name }}</h4>
+                    <p>{{ plan.catalog_service.description }}</p>
+                    <p><strong>Prix : </strong>{{ plan.catalog_service.price }}€</p>
+                    <p><strong>Partenaire : </strong>{{ plan.partner_company }}</p>
+                    {% if plan.catalog_service.image %}
+                        <div class="service-image">
+                            <img src="{{ plan.catalog_service.image.url }}" alt="{{ plan.catalog_service.name }}">
+                        </div>
+                    {% endif %}
+                    <a href="#" class="btn">Souscrire</a>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Accessoires de Gym -->
+    <div class="service-section">
+        <h3>Accessoires de Gym</h3>
+        <div class="service-items">
+            {% for accessory in gym_accessories %}
+                <div class="service-item">
+                    <h4>{{ accessory.catalog_service.name }}</h4>
+                    <p>{{ accessory.catalog_service.description }}</p>
+                    <p><strong>Prix : </strong>{{ accessory.catalog_service.price }}€</p>
+                    <p><strong>Stock : </strong>{{ accessory.stock }}</p>
+                    {% if accessory.catalog_service.image %}
+                        <div class="service-image">
+                            <img src="{{ accessory.catalog_service.image.url }}" alt="{{ accessory.catalog_service.name }}">
+                        </div>
+                    {% endif %}
+                    <a href="#" class="btn">Souscrire</a>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+
+</section>
+
 
 
      <!-- Contact Section -->

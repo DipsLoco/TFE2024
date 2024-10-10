@@ -238,6 +238,7 @@
                 <th>Date de début</th>
                 <th>Date d'échéance</th>
                 <th>Statut de paiement</th>
+                <th>Contacter</th>
             </tr>
         </thead>
         <tbody>
@@ -247,11 +248,71 @@
                 <td>{{ subscription.plan.name }}</td>
                 <td>{{ subscription.start_date|date:"d M Y" }}</td>
                 <td>{{ subscription.get_end_date|date:"d M Y" }}</td>
-                <td>{{ subscription.payment_status }}</td>
+                <td>
+                    {% if subscription.payment_status == 'paid' %}
+                        <span class="badge bg-success">Payé</span>
+                    {% elif subscription.payment_status == 'pending' %}
+                        <span class="badge bg-warning">En attente</span>
+                    {% else %}
+                        <span class="badge bg-danger">Refusé</span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if subscription.payment_status == 'pending' %}
+                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#reminderModal{{ subscription.user.id }}">
+                        Relancer
+                    </button>
+                    {% endif %}
+                </td>
             </tr>
+
+            <!-- Modal de relance pour abonnement en attente -->
+            <div class="modal fade" id="reminderModal{{ subscription.user.id }}" tabindex="-1" aria-labelledby="reminderModalLabel{{ subscription.user.id }}" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="reminderModalLabel{{ subscription.user.id }}">Relancer {{ subscription.user.get_full_name }}</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                        </div>
+                        <div class="modal-body">
+                            <form method="POST" action="{% url 'remind_subscription' subscription.user.id %}">
+                                {% csrf_token %}
+                                <div class="form-group">
+                                    <label for="message">Message :</label>
+                                    <textarea class="form-control" id="message" name="message" rows="4" required>Bonjour {{ subscription.user.get_full_name }}, votre abonnement est en attente. Veuillez le renouveler ou envisager notre offre de 12 mois - Evolve.</textarea>
+                                </div>
+                                <button type="submit" class="btn btn-warning mt-3">Envoyer Relance</button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
             {% endfor %}
         </tbody>
     </table>
+</div>
+
+<style>
+    .btn-coach-dashboard {
+        font-size: 1.1rem;
+        padding: 0.5rem 1rem;
+        transition: background-color 0.3s ease;
+    }
+    .btn-coach-dashboard:hover {
+        background-color: #0056b3;
+    }
+    .modal-dialog {
+        max-width: 600px;
+    }
+    .modal-header {
+        background-color: #007bff;
+        color: white;
+    }
+    .modal-title {
+        font-weight: bold;
+    }
+    </style>
+    
 
     <!-- Section pour les statistiques des séances -->
     <h2 class="h4 mt-5 mb-4" style="color: #343a40; font-weight: bold;">Statistiques des Séances d'Entraînement</h2>
@@ -266,7 +327,7 @@
             </tr>
         </thead>
         <tbody>
-            {% for stat in stats %}
+            {% for stat in stats|dictsortreversed:"schedule.start_time" %}
             <tr>
                 <td>{{ stat.schedule.workout.title }}</td>
                 <td>{{ stat.schedule.start_time|date:"d M Y H:i" }}</td>
