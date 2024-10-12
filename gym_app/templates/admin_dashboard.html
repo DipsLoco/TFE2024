@@ -2,6 +2,10 @@
 {% block content %}
 {% load static %}
 
+
+
+
+
 <div class="container my-5">
     <h1 class="mb-4 text-center" style="color: #007bff; font-weight: bold;">Tableau de Bord Admin</h1>
 
@@ -9,287 +13,360 @@
     <h2 class="h4 mt-5 mb-4" style="color: #343a40; font-weight: bold;">Statistiques Globales</h2>
 
     <div class="row mb-4">
+        <!-- Colonne pour le taux d'inscription -->
         <div class="col-lg-4">
             <div class="card shadow-sm">
                 <div class="card-body text-center">
-                    <h5>Taux d'inscription ce mois-ci</h5>
-                    <h2 style="color: #007bff;">{{ monthly_registration_percentage|floatformat:1 }}%</h2>
+                    <h5>Taux d'inscription</h5>
+                    <!-- Cercle Progressif pour le taux d'inscription -->
+                    <div id="registrationCircle" style="height: 200px; width: 200px; margin: 0 auto;"></div>
+                    <!-- Le pourcentage ne doit plus apparaître dans le cercle -->
+
+                    <!-- Affichage du mois actuel -->
+                    <p>Mois actuel : {{ selected_month_name }} {{ selected_year }}</p>
+
+                    <!-- Navigation entre les mois -->
+                    <div class="month-navigation mt-3 d-flex justify-content-between">
+                        <a href="?year={{ previous_year }}&month={{ previous_month }}" class="btn btn-outline-primary btn-sm" 
+                           {% if no_previous_data %}disabled{% endif %}>
+                            <i class="bi bi-chevron-left"></i> Mois précédent
+                        </a>
+                        <a href="?year={{ next_year }}&month={{ next_month }}" class="btn btn-outline-primary btn-sm" 
+                           {% if no_next_data %}disabled{% endif %}>
+                            Mois suivant <i class="bi bi-chevron-right"></i>
+                        </a>
+                    </div>
+                    
+                    <!-- Bouton retour au mois actuel -->
+                    <div class="text-center mt-3">
+                        <a href="?year={{ current_year }}&month={{ current_month }}" class="btn btn-primary btn-sm">
+                            <i class="bi bi-calendar"></i> Retour au mois actuel
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
+
+        <!-- Colonne pour le taux de présence -->
         <div class="col-lg-4">
             <div class="card shadow-sm">
                 <div class="card-body text-center">
                     <h5>Taux de Présence</h5>
-                    <h2 style="color: #28a745;">{{ attendance_percentage|floatformat:1 }}%</h2>
+                    <!-- Cercle Progressif pour le taux de présence -->
+                    <div id="attendanceCircle" style="height: 200px; width: 200px; margin: 0 auto;"></div>
+
+                    <!-- Affichage du mois actuel -->
+                    <p>Mois affiché : {{ selected_month_name }} {{ selected_year }}</p>
+
+                    <!-- Navigation entre les mois -->
+                    <div class="month-navigation mt-3 d-flex justify-content-between">
+                        <a href="?year={{ previous_year }}&month={{ previous_month }}" class="btn btn-outline-primary btn-sm" 
+                           {% if no_previous_data %}disabled{% endif %}>
+                            <i class="bi bi-chevron-left"></i> Mois précédent
+                        </a>
+                        <a href="?year={{ next_year }}&month={{ next_month }}" class="btn btn-outline-primary btn-sm" 
+                           {% if no_next_data %}disabled{% endif %}>
+                            Mois suivant <i class="bi bi-chevron-right"></i>
+                        </a>
+                    </div>
+                    
+                    <!-- Bouton retour au mois actuel -->
+                    <div class="text-center mt-3">
+                        <a href="?year={{ current_year }}&month={{ current_month }}" class="btn btn-primary btn-sm">
+                            <i class="bi bi-calendar"></i> Retour au mois actuel
+                        </a>
+                    </div>
                 </div>
             </div>
         </div>
+
+        <!-- Colonne pour les heures les plus fréquentées -->
         <div class="col-lg-4">
             <div class="card shadow-sm">
                 <div class="card-body text-center">
-                    <h3>Heures les plus fréquentées (7h - 19h)</h3>
+                    <h5>Heures les plus fréquentées (7h - 19h)</h5>
+                    <!-- Graphique pour les heures les plus fréquentées -->
+                    <canvas id="busyHoursChart"></canvas>
                     <ul>
-                     {% for hour, count in busy_hour_counts.items %}
+                        {% for hour, count in busy_hour_counts.items %}
                         <li>Heure {{ hour }}h : {{ count }} séance(s)</li>
-                     {% endfor %}
+                        {% endfor %}
                     </ul>
                     <h2 style="color: #dc3545;">{{ busy_hours_percentage|floatformat:1 }}%</h2>
                 </div>
             </div>
         </div>
     </div>
-
-    <!-- Section pour les Plans les plus achetés -->
-    <h2 class="h4 mt-5 mb-4" style="color: #343a40; font-weight: bold;">Plans les Plus Achetés</h2>
-    <table class="table table-striped">
-        <thead class="thead-dark">
-            <tr>
-                <th>Plan</th>
-                <th>Pourcentage</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for plan in plan_percentages %}
-            <tr>
-                <td>{{ plan.plan_name }}</td>
-                <td>{{ plan.percentage|floatformat:1 }}%</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-
-    <!-- Section pour les Séances de Workout les plus fréquentées -->
-    <h2 class="h4 mt-5 mb-4" style="color: #343a40; font-weight: bold;">Séances de Workout les Plus Fréquentées</h2>
-    <table class="table table-striped">
-        <thead class="thead-dark">
-            <tr>
-                <th>Séance</th>
-                <th>Pourcentage</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for workout in workout_percentages %}
-            <tr>
-                <td>{{ workout.workout_title }}</td>
-                <td>{{ workout.percentage|floatformat:1 }}%</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-
-    <!-- Section pour les Coachs les plus actifs -->
-    <h2 class="h4 mt-5 mb-4" style="color: #343a40; font-weight: bold;">Coach les Plus Actifs</h2>
-    <table class="table table-striped">
-        <thead class="thead-dark">
-            <tr>
-                <th>Coach</th>
-                <th>Pourcentage</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for coach in coach_percentages %}
-            <tr>
-                <td>{{ coach.coach_name }}</td>
-                <td>{{ coach.percentage|floatformat:1 }}%</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
 </div>
 
 
 
-    <!-- Section pour les coachs -->
-    <h2 class="h4 mb-4" style="color: #343a40; font-weight: bold;">Liste des Coachs</h2>
-    <table class="table table-striped table-hover shadow-sm">
-        <thead class="thead-dark">
-            <tr>
-                <th>Photo</th>
-                <th>Nom</th>
-                <th>Expérience</th>
-                <th>Spécialités</th>
-                <th>Date d'inscription</th>
-                <th>Dernière connexion</th>
-                <th>Contacter</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for coach in coaches %}
-            <tr>
-                <!-- Affichage de l'image du coach -->
-                <td>
-                    {% if coach.user.image %}
-                        <img src="{{ coach.user.image.url }}" alt="Photo de {{ coach.user.get_full_name }}" style="width: 50px; height: 50px; border-radius: 50%;">
-                    {% else %}
-                        <img src="{% static 'images/default-profile.png' %}" alt="Photo par défaut" style="width: 50px; height: 50px; border-radius: 50%;">
-                    {% endif %}
-                </td>
-                <td>{{ coach.user.get_full_name }}</td>
-                <td>{{ coach.exp }} ans</td>
-                <td>
-                    {% for specialty in coach.specialties.all %}
-                        {{ specialty.title }}{% if not forloop.last %}, {% endif %}
-                    {% endfor %}
-                </td>
-                <td>{{ coach.user.date_joined|date:"d M Y" }}</td>
-                <td>{{ coach.user.last_login|date:"d M Y H:i" }}</td>
-                <td>
-                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#contactCoachModal{{ coach.user.id }}">
-                        Contacter
-                    </button>
-                </td>
-            </tr>
 
-            <!-- Modal de contact -->
-<div class="modal fade" id="contactModal{{ coach.user.id }}" tabindex="-1" aria-labelledby="contactModalLabel{{ coach.user.id }}" aria-hidden="true">
-    <div class="modal-dialog">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="contactModalLabel{{ coach.user.id }}">Contacter {{ coach.user.get_full_name }}</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <form method="POST" action="{% url 'contact_coach' coach.user.id %}">
-                    {% csrf_token %}
-                    <div class="form-group">
-                        <label for="message">Message :</label>
-                        <textarea class="form-control" id="message" name="message" rows="4" required></textarea>
-                    </div>
-                    <button type="submit" class="btn btn-success mt-3">Envoyer</button>
-                </form>
+   <!-- Section pour les Plans les Plus Achetés -->
+<h2 class="h4 mt-5 mb-4 text-center" style="color: #343a40; font-weight: bold;">Plans les Plus Achetés</h2>
+<div class="progress-table mb-5 text-center">
+    {% for plan in plan_percentages %}
+    <div class="d-flex align-items-center justify-content-center mb-2">
+        <div class="text-right" style="width: 25%;">
+            <h6 style="margin: 0;">{{ plan.plan_name }}</h6>
+        </div>
+        <div class="progress" style="width: 60%; margin-left: 10px; height: 20px; background-color: #e9ecef;">
+            <div class="progress-bar" role="progressbar" style="width: {{ plan.percentage }}%; background-color: {% cycle '#28a745' '#007bff' '#ffc107' %};" aria-valuenow="{{ plan.percentage }}" aria-valuemin="0" aria-valuemax="100">
+                <span style="color: #fff; font-weight: bold;">{{ plan.percentage|floatformat:1 }}%</span>
             </div>
         </div>
     </div>
+    {% endfor %}
 </div>
-            {% endfor %}
-        </tbody>
-    </table>
 
-    <!-- Section pour les membres -->
-    <h2 class="h4 mt-5 mb-4" style="color: #343a40; font-weight: bold;">Liste des Membres</h2>
-    <table class="table table-striped table-hover shadow-sm">
-        <thead class="thead-dark">
-            <tr>
-                <th>Photo</th>
-                <th>Nom</th>
-                <th>Email</th>
-                <th>Date d'inscription</th>
-                <th>Dernière connexion</th>
-                <th>Statut Premium</th>
-                <th>Contacter</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for member in members %}
-            <tr>
-                <!-- Affichage de l'image du membre -->
-                <td>
-                    {% if member.image %}
-                        <img src="{{ member.image.url }}" alt="Photo de {{ member.get_full_name }}" style="width: 50px; height: 50px; border-radius: 50%;">
-                    {% else %}
-                        <img src="{% static 'images/default-profile.png' %}" alt="Photo par défaut" style="width: 50px; height: 50px; border-radius: 50%;">
-                    {% endif %}
-                </td>
-                <td>{{ member.get_full_name }}</td>
-                <td>{{ member.email }}</td>
-                <td>{{ member.date_joined|date:"d M Y" }}</td>
-                <td>{{ member.last_login|date:"d M Y H:i" }}</td>
-                <td>{{ member.is_premium|yesno:"Oui,Non" }}</td>
-                <td>
-                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#contactMemberModal{{ member.id }}">
-                        Contacter
-                    </button>
-                </td>
-            </tr>
+<!-- Section pour les Séances de Workout les Plus Fréquentées -->
+<h2 class="h4 mt-5 mb-4 text-center" style="color: #343a40; font-weight: bold;">Séances de Workout les Plus Fréquentées</h2>
+<div class="progress-table mb-5 text-center">
+    {% for workout in workout_percentages %}
+    <div class="d-flex align-items-center justify-content-center mb-2">
+        <div class="text-right" style="width: 25%;">
+            <h6 style="margin: 0;">{{ workout.workout_title }}</h6>
+        </div>
+        <div class="progress" style="width: 60%; margin-left: 10px; height: 20px; background-color: #e9ecef;">
+            <div class="progress-bar" role="progressbar" style="width: {{ workout.percentage }}%; background-color: {% cycle '#17a2b8' '#dc3545' '#ffc107' %};" aria-valuenow="{{ workout.percentage }}" aria-valuemin="0" aria-valuemax="100">
+                <span style="color: #fff; font-weight: bold;">{{ workout.percentage|floatformat:1 }}%</span>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
 
-            <!-- Modal de contact pour membre -->
-            <div class="modal fade" id="contactMemberModal{{ member.id }}" tabindex="-1" aria-labelledby="contactMemberModalLabel{{ member.id }}" aria-hidden="true">
-                <div class="modal-dialog">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title" id="contactMemberModalLabel{{ member.id }}">Contacter {{ member.get_full_name }}</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <div class="modal-body">
-                            <form method="POST" action="{% url 'contact_member' member.id %}">
-                                {% csrf_token %}
-                                <div class="form-group">
-                                    <label for="message">Message :</label>
-                                    <textarea class="form-control" id="message" name="message" rows="4" required></textarea>
-                                </div>
-                                <button type="submit" class="btn btn-success mt-3">Envoyer</button>
-                            </form>
-                        </div>
+<!-- Section pour les Coachs les Plus Actifs -->
+<h2 class="h4 mt-5 mb-4 text-center" style="color: #343a40; font-weight: bold;">Coach les Plus Actifs</h2>
+<div class="progress-table mb-5 text-center">
+    {% for coach in coach_percentages %}
+    <div class="d-flex align-items-center justify-content-center mb-2">
+        <div class="text-right" style="width: 25%;">
+            <h6 style="margin: 0;">{{ coach.coach_name }}</h6>
+        </div>
+        <div class="progress" style="width: 60%; margin-left: 10px; height: 20px; background-color: #e9ecef;">
+            <div class="progress-bar" role="progressbar" style="width: {{ coach.percentage }}%; background-color: {% cycle '#6f42c1' '#fd7e14' '#007bff' %};" aria-valuenow="{{ coach.percentage }}" aria-valuemin="0" aria-valuemax="100">
+                <span style="color: #fff; font-weight: bold;">{{ coach.percentage|floatformat:1 }}%</span>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+
+
+
+
+
+
+
+
+
+
+
+<!-- Section pour les coachs -->
+<h2 class="h4 mb-4" style="color: #343a40; font-weight: bold;">Liste des Coachs</h2>
+<table class="table table-striped table-hover shadow-sm">
+    <thead class="thead-dark">
+        <tr>
+            <th>Photo</th>
+            <th>Nom</th>
+            <th>Expérience</th>
+            <th>Spécialités</th>
+            <th>Date d'inscription</th>
+            <th>Dernière connexion</th>
+            <th>Contacter</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for coach in coaches %}
+        <tr>
+            <!-- Affichage de l'image du coach -->
+            <td>
+                {% if coach.user.image %}
+                <img src="{{ coach.user.image.url }}" alt="Photo de {{ coach.user.get_full_name }}"
+                    style="width: 50px; height: 50px; border-radius: 50%;">
+                {% else %}
+                <img src="{% static 'images/default-profile.png' %}" alt="Photo par défaut"
+                    style="width: 50px; height: 50px; border-radius: 50%;">
+                {% endif %}
+            </td>
+            <td>{{ coach.user.get_full_name }}</td>
+            <td>{{ coach.exp }} ans</td>
+            <td>
+                {% for specialty in coach.specialties.all %}
+                {{ specialty.title }}{% if not forloop.last %}, {% endif %}
+                {% endfor %}
+            </td>
+            <td>{{ coach.user.date_joined|date:"d M Y" }}</td>
+            <td>{{ coach.user.last_login|date:"d M Y H:i" }}</td>
+            <td>
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal"
+                    data-bs-target="#contactCoachModal{{ coach.user.id }}">
+                    Contacter
+                </button>
+            </td>
+        </tr>
+
+        <!-- Modal de contact -->
+        <div class="modal fade" id="contactModal{{ coach.user.id }}" tabindex="-1"
+            aria-labelledby="contactModalLabel{{ coach.user.id }}" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="contactModalLabel{{ coach.user.id }}">Contacter {{
+                            coach.user.get_full_name }}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form method="POST" action="{% url 'contact_coach' coach.user.id %}">
+                            {% csrf_token %}
+                            <div class="form-group">
+                                <label for="message">Message :</label>
+                                <textarea class="form-control" id="message" name="message" rows="4" required></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-success mt-3">Envoyer</button>
+                        </form>
                     </div>
                 </div>
             </div>
-            {% endfor %}
-        </tbody>
-    </table>
+        </div>
+        {% endfor %}
+    </tbody>
+</table>
 
-    <!-- Section pour les abonnements -->
-    <h2 class="h4 mt-5 mb-4" style="color: #343a40; font-weight: bold;">Statut des Abonnements</h2>
-    <table class="table table-striped table-hover shadow-sm">
-        <thead class="thead-dark">
-            <tr>
-                <th>Membre</th>
-                <th>Plan</th>
-                <th>Date de début</th>
-                <th>Date d'échéance</th>
-                <th>Statut de paiement</th>
-                <th>Contacter</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for subscription in subscriptions %}
-            <tr>
-                <td>{{ subscription.user.get_full_name }}</td>
-                <td>{{ subscription.plan.name }}</td>
-                <td>{{ subscription.start_date|date:"d M Y" }}</td>
-                <td>{{ subscription.get_end_date|date:"d M Y" }}</td>
-                <td>
-                    {% if subscription.payment_status == 'paid' %}
-                        <span class="badge bg-success">Payé</span>
-                    {% elif subscription.payment_status == 'pending' %}
-                        <span class="badge bg-warning">En attente</span>
-                    {% else %}
-                        <span class="badge bg-danger">Refusé</span>
-                    {% endif %}
-                </td>
-                <td>
-                    {% if subscription.payment_status == 'pending' %}
-                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#reminderModal{{ subscription.user.id }}">
-                        Relancer
-                    </button>
-                    {% endif %}
-                </td>
-            </tr>
+<!-- Section pour les membres -->
+<h2 class="h4 mt-5 mb-4" style="color: #343a40; font-weight: bold;">Liste des Membres</h2>
+<table class="table table-striped table-hover shadow-sm">
+    <thead class="thead-dark">
+        <tr>
+            <th>Photo</th>
+            <th>Nom</th>
+            <th>Email</th>
+            <th>Date d'inscription</th>
+            <th>Dernière connexion</th>
+            <th>Statut Premium</th>
+            <th>Contacter</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for member in members %}
+        <tr>
+            <!-- Affichage de l'image du membre -->
+            <td>
+                {% if member.image %}
+                <img src="{{ member.image.url }}" alt="Photo de {{ member.get_full_name }}"
+                    style="width: 50px; height: 50px; border-radius: 50%;">
+                {% else %}
+                <img src="{% static 'images/default-profile.png' %}" alt="Photo par défaut"
+                    style="width: 50px; height: 50px; border-radius: 50%;">
+                {% endif %}
+            </td>
+            <td>{{ member.get_full_name }}</td>
+            <td>{{ member.email }}</td>
+            <td>{{ member.date_joined|date:"d M Y" }}</td>
+            <td>{{ member.last_login|date:"d M Y H:i" }}</td>
+            <td>{{ member.is_premium|yesno:"Oui,Non" }}</td>
+            <td>
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal"
+                    data-bs-target="#contactMemberModal{{ member.id }}">
+                    Contacter
+                </button>
+            </td>
+        </tr>
 
-            <!-- Modal de relance pour abonnement en attente -->
-            <div class="modal fade" id="reminderModal{{ subscription.user.id }}" tabindex="-1" aria-labelledby="reminderModalLabel{{ subscription.user.id }}" aria-hidden="true">
-                <div class="modal-dialog">
-                    <div class="modal-content">
-                        <div class="modal-header">
-                            <h5 class="modal-title" id="reminderModalLabel{{ subscription.user.id }}">Relancer {{ subscription.user.get_full_name }}</h5>
-                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                        </div>
-                        <div class="modal-body">
-                            <form method="POST" action="{% url 'remind_subscription' subscription.user.id %}">
-                                {% csrf_token %}
-                                <div class="form-group">
-                                    <label for="message">Message :</label>
-                                    <textarea class="form-control" id="message" name="message" rows="4" required>Bonjour {{ subscription.user.get_full_name }}, votre abonnement est en attente. Veuillez le renouveler ou envisager notre offre de 12 mois - Evolve.</textarea>
-                                </div>
-                                <button type="submit" class="btn btn-warning mt-3">Envoyer Relance</button>
-                            </form>
-                        </div>
+        <!-- Modal de contact pour membre -->
+        <div class="modal fade" id="contactMemberModal{{ member.id }}" tabindex="-1"
+            aria-labelledby="contactMemberModalLabel{{ member.id }}" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="contactMemberModalLabel{{ member.id }}">Contacter {{
+                            member.get_full_name }}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form method="POST" action="{% url 'contact_member' member.id %}">
+                            {% csrf_token %}
+                            <div class="form-group">
+                                <label for="message">Message :</label>
+                                <textarea class="form-control" id="message" name="message" rows="4" required></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-success mt-3">Envoyer</button>
+                        </form>
                     </div>
                 </div>
             </div>
-            {% endfor %}
-        </tbody>
-    </table>
+        </div>
+        {% endfor %}
+    </tbody>
+</table>
+
+<!-- Section pour les abonnements -->
+<h2 class="h4 mt-5 mb-4" style="color: #343a40; font-weight: bold;">Statut des Abonnements</h2>
+<table class="table table-striped table-hover shadow-sm">
+    <thead class="thead-dark">
+        <tr>
+            <th>Membre</th>
+            <th>Plan</th>
+            <th>Date de début</th>
+            <th>Date d'échéance</th>
+            <th>Statut de paiement</th>
+            <th>Contacter</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for subscription in subscriptions %}
+        <tr>
+            <td>{{ subscription.user.get_full_name }}</td>
+            <td>{{ subscription.plan.name }}</td>
+            <td>{{ subscription.start_date|date:"d M Y" }}</td>
+            <td>{{ subscription.get_end_date|date:"d M Y" }}</td>
+            <td>
+                {% if subscription.payment_status == 'paid' %}
+                <span class="badge bg-success">Payé</span>
+                {% elif subscription.payment_status == 'pending' %}
+                <span class="badge bg-warning">En attente</span>
+                {% else %}
+                <span class="badge bg-danger">Refusé</span>
+                {% endif %}
+            </td>
+            <td>
+                {% if subscription.payment_status == 'pending' %}
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal"
+                    data-bs-target="#reminderModal{{ subscription.user.id }}">
+                    Relancer
+                </button>
+                {% endif %}
+            </td>
+        </tr>
+
+        <!-- Modal de relance pour abonnement en attente -->
+        <div class="modal fade" id="reminderModal{{ subscription.user.id }}" tabindex="-1"
+            aria-labelledby="reminderModalLabel{{ subscription.user.id }}" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="reminderModalLabel{{ subscription.user.id }}">Relancer {{
+                            subscription.user.get_full_name }}</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form method="POST" action="{% url 'remind_subscription' subscription.user.id %}">
+                            {% csrf_token %}
+                            <div class="form-group">
+                                <label for="message">Message :</label>
+                                <textarea class="form-control" id="message" name="message" rows="4"
+                                    required>Bonjour {{ subscription.user.get_full_name }}, votre abonnement est en attente. Veuillez le renouveler ou envisager notre offre de 12 mois - Evolve.</textarea>
+                            </div>
+                            <button type="submit" class="btn btn-warning mt-3">Envoyer Relance</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </tbody>
+</table>
 </div>
 
 <style>
@@ -298,67 +375,183 @@
         padding: 0.5rem 1rem;
         transition: background-color 0.3s ease;
     }
+
     .btn-coach-dashboard:hover {
         background-color: #0056b3;
     }
+
     .modal-dialog {
         max-width: 600px;
     }
+
     .modal-header {
         background-color: #007bff;
         color: white;
     }
-    .modal-title {
-        font-weight: bold;
-    }
-    </style>
-    
 
-    <!-- Section pour les statistiques des séances -->
-    <h2 class="h4 mt-5 mb-4" style="color: #343a40; font-weight: bold;">Statistiques des Séances d'Entraînement</h2>
-    <table class="table table-striped table-hover shadow-sm">
-        <thead class="thead-dark">
-            <tr>
-                <th>Séance</th>
-                <th>Date</th>
-                <th>Participants</th>
-                <th>Présents</th>
-                <th>Absents</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% for stat in stats|dictsortreversed:"schedule.start_time" %}
-            <tr>
-                <td>{{ stat.schedule.workout.title }}</td>
-                <td>{{ stat.schedule.start_time|date:"d M Y H:i" }}</td>
-                <td>{{ stat.total_participants }}</td>
-                <td>{{ stat.present_count }}</td>
-                <td>{{ stat.absence_count }}</td>
-            </tr>
-            {% endfor %}
-        </tbody>
-    </table>
-</div>
-
-<style>
-    .btn-coach-dashboard {
-        font-size: 1.1rem;
-        padding: 0.5rem 1rem;
-        transition: background-color 0.3s ease;
-    }
-    .btn-coach-dashboard:hover {
-        background-color: #0056b3;
-    }
-    .modal-dialog {
-        max-width: 600px;
-    }
-    .modal-header {
-        background-color: #007bff;
-        color: white;
-    }
     .modal-title {
         font-weight: bold;
     }
 </style>
+
+
+<!-- Section pour les statistiques des séances -->
+<h2 class="h4 mt-5 mb-4" style="color: #343a40; font-weight: bold;">Statistiques des Séances d'Entraînement</h2>
+<table class="table table-striped table-hover shadow-sm">
+    <thead class="thead-dark">
+        <tr>
+            <th>Séance</th>
+            <th>Date</th>
+            <th>Participants</th>
+            <th>Présents</th>
+            <th>Absents</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for stat in stats|dictsortreversed:"schedule.start_time" %}
+        <tr>
+            <td>{{ stat.schedule.workout.title }}</td>
+            <td>{{ stat.schedule.start_time|date:"d M Y H:i" }}</td>
+            <td>{{ stat.total_participants }}</td>
+            <td>{{ stat.present_count }}</td>
+            <td>{{ stat.absence_count }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+</div>
+<br>
+
+<style>
+    .btn-coach-dashboard {
+        font-size: 1.1rem;
+        padding: 0.5rem 1rem;
+        transition: background-color 0.3s ease;
+    }
+
+    .btn-coach-dashboard:hover {
+        background-color: #0056b3;
+    }
+
+    .modal-dialog {
+        max-width: 600px;
+    }
+
+    .modal-header {
+        background-color: #007bff;
+        color: white;
+    }
+
+    .modal-title {
+        font-weight: bold;
+    }
+</style>
+
+<!-- Script pour Charts.js et ProgressBar.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/progressbar.js"></script>
+
+<!-- Script JSON généré par Django -->
+<script id="data-json" type="application/json">
+    {
+        "monthlyRegistrationPercentage": "{{ monthly_registration_percentage|default_if_none:'0' }}",
+        "attendancePercentage": "{{ attendance_percentage|default_if_none:'0' }}",
+        "busyHourCountsKeys": {{ busy_hour_counts_keys|safe }},
+        "busyHourCountsValues": {{ busy_hour_counts_values|safe }}
+    }
+</script>
+
+<script>
+    // Récupérer les données du script JSON
+    const data = JSON.parse(document.getElementById('data-json').textContent);
+    console.log(data);  // Debug pour voir si les données sont bien récupérées
+
+    // Utilisation des variables dans ton script JavaScript
+    var monthlyRegistrationPercentage = parseFloat(data.monthlyRegistrationPercentage);
+    var attendancePercentage = parseFloat(data.attendancePercentage);
+    
+    // Extraction des clés et valeurs directement du JSON
+    var busyHourCountsKeys = data.busyHourCountsKeys;  
+    var busyHourCountsValues = data.busyHourCountsValues.map(Number);  
+
+    // Cercle progressif pour le taux d'inscription
+    var registrationCircle = new ProgressBar.Circle('#registrationCircle', {
+        color: '#007bff',
+        strokeWidth: 6,
+        duration: 1400,
+        from: { color: '#eee' },
+        to: { color: '#007bff' },
+        step: function (state, circle) {
+            circle.path.setAttribute('stroke', state.color);
+            circle.setText(monthlyRegistrationPercentage.toFixed(1) + '%');
+        }
+    });
+    registrationCircle.animate(monthlyRegistrationPercentage / 100);
+
+    // Cercle progressif pour le taux de présence
+    var attendanceCircle = new ProgressBar.Circle('#attendanceCircle', {
+        color: '#28a745',
+        strokeWidth: 6,
+        duration: 1400,
+        from: { color: '#eee' },
+        to: { color: '#28a745' },
+        step: function (state, circle) {
+            circle.path.setAttribute('stroke', state.color);
+            circle.setText(attendancePercentage.toFixed(1) + '%');
+        }
+    });
+    attendanceCircle.animate(attendancePercentage / 100);
+
+    // Graphique des heures les plus fréquentées
+    var ctx = document.getElementById('busyHoursChart').getContext('2d');
+
+    // Tableau des heures en format correct à partir des clés JSON
+    var hours = busyHourCountsKeys;
+
+    // Valeurs dynamiques associées aux heures
+    var values = busyHourCountsValues;
+
+    // Appliquer des couleurs dynamiques
+    var backgroundColors = values.map(function(value) {
+        if (value >= 10) {
+            return 'rgba(255, 99, 132, 0.6)';  // Rouge pour les heures très fréquentées
+        } else if (value >= 5) {
+            return 'rgba(255, 159, 64, 0.6)';  // Orange pour les heures moyennement fréquentées
+        } else {
+            return 'rgba(75, 192, 192, 0.6)';  // Vert pour les heures peu fréquentées
+        }
+    });
+
+    var busyHoursChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: hours,  // Utiliser les heures extraites du JSON
+            datasets: [{
+                label: 'Séances',
+                data: values,  // Utiliser les valeurs extraites du JSON
+                backgroundColor: backgroundColors,  // Appliquer les couleurs dynamiques
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1
+            }]
+        },
+        options: {
+            scales: {
+                x: {
+                    beginAtZero: true
+                },
+                y: {
+                    beginAtZero: true
+                }
+            }
+        }
+    });
+
+</script>
+
+
+
+
+
+
 
 {% endblock %}

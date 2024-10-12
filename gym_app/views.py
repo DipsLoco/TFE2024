@@ -24,6 +24,9 @@ from django.db.models import Count, Avg, F, Q
 from django.db.models.functions import TruncMonth, ExtractHour
 from django_q.tasks import schedule
 from django_q.tasks import async_task
+from django.utils.timezone import now
+from calendar import month_name
+from django.utils.dateformat import format
 
 
 
@@ -70,6 +73,8 @@ def home(request):
 
 def faq(request):
     return render(request, 'faq.html')
+
+
 
 
 # Notification pour relancer abonnement arriver a echeance
@@ -512,23 +517,46 @@ def coach_dashboard(request):
 
 
 
+
+
+
 @login_required
 def admin_dashboard(request):
     if not request.user.is_staff:
         return HttpResponseForbidden("Vous n'avez pas l'autorisation d'accéder à cette page.")
 
-    # Récupérer les coachs et les membres
+    # Récupérer l'année et le mois depuis l'URL
+    selected_year = request.GET.get('year')
+    selected_month = request.GET.get('month')
+
+    # Utiliser le mois actuel si aucun mois n'est sélectionné
+    if not selected_year or not selected_month:
+        now = timezone.now()
+        selected_year = now.year
+        selected_month = now.month
+    else:
+        selected_year = int(selected_year)
+        selected_month = int(selected_month)
+
+    # Bloquer la navigation dans le futur
+    now = timezone.now()
+    if selected_year > now.year or (selected_year == now.year and selected_month > now.month):
+        return render(request, 'admin_dashboard.html', {
+            'message': "Aucune donnée disponible pour ce mois.",
+            'current_year': now.year,
+            'current_month': now.month,
+        })
+
+    # Récupérer les coachs, membres et abonnements
     coaches = Coach.objects.select_related('user').order_by('-user__date_joined')
     members = User.objects.filter(is_staff=False).order_by('-date_joined')
-
-    # Récupérer les abonnements
     subscriptions = Subscription.objects.select_related('user', 'plan').order_by('-start_date')
 
-    # Récupérer les statistiques des séances
-    schedules = WorkoutSchedule.objects.all()
-    stats = []
+    # Statistiques des séances, calcul des pourcentages
+    schedules = WorkoutSchedule.objects.filter(start_time__month=selected_month, start_time__year=selected_year)
     total_participants = 0
     total_present = 0
+    stats = []
     for schedule in schedules:
         participant_count = schedule.participants.count()
         present_count = WorkoutParticipation.objects.filter(workout_schedule=schedule, present=True).count()
@@ -541,10 +569,9 @@ def admin_dashboard(request):
             'absence_count': participant_count - present_count,
         })
 
-    # Calcul du taux d'inscription par mois
-    current_month = timezone.now().month
+    # Calcul du taux d'inscription
     total_members = members.count()
-    monthly_new_members = members.filter(date_joined__month=current_month).count()
+    monthly_new_members = members.filter(date_joined__year=selected_year, date_joined__month=selected_month).count()
     if total_members > 0:
         monthly_registration_percentage = (monthly_new_members / total_members) * 100
     else:
@@ -556,22 +583,10 @@ def admin_dashboard(request):
     else:
         attendance_percentage = 0
 
-    # Calcul du taux d'occupation des séances entre 7h et 19h
-    total_schedules = schedules.count()
-    busy_hours_schedules = schedules.filter(start_time__hour__gte=7, start_time__hour__lt=19).count()
-    if total_schedules > 0:
-        busy_hours_percentage = (busy_hours_schedules / total_schedules) * 100
-    else:
-        busy_hours_percentage = 0
-
-    # Calcul des heures les plus fréquentées entre 7h et 19h
+    # Calcul des heures les plus fréquentées
     busy_hour_counts = {}
     for hour in range(7, 19):
         busy_hour_counts[hour] = schedules.filter(start_time__hour=hour).count()
-
-    # Déterminer l'heure avec le plus de participants
-    most_frequent_hour = max(busy_hour_counts, key=busy_hour_counts.get)
-    most_frequent_hour_count = busy_hour_counts[most_frequent_hour]
 
     # Calcul des plans les plus achetés
     plan_counts = subscriptions.values('plan__name').annotate(count=Count('plan')).order_by('-count')
@@ -587,40 +602,72 @@ def admin_dashboard(request):
     # Calcul des séances de workout les plus fréquentées
     workout_frequencies = schedules.values('workout__title').annotate(count=Count('workout')).order_by('-count')
     workout_percentages = []
-    if total_schedules > 0:
+    if schedules.count() > 0:
         for workout in workout_frequencies:
             workout_percentages.append({
                 'workout_title': workout['workout__title'],
-                'percentage': (workout['count'] / total_schedules) * 100
+                'percentage': (workout['count'] / schedules.count()) * 100
             })
 
     # Calcul du taux de séances par coach
     coach_schedule_counts = schedules.values('coach__first_name', 'coach__last_name').annotate(count=Count('coach')).order_by('-count')
     coach_percentages = []
-    if total_schedules > 0:
+    if schedules.count() > 0:
         for coach in coach_schedule_counts:
             coach_percentages.append({
                 'coach_name': f"{coach['coach__first_name']} {coach['coach__last_name']}",
-                'percentage': (coach['count'] / total_schedules) * 100
+                'percentage': (coach['count'] / schedules.count()) * 100
             })
+
+    # Calculer les mois précédent et suivant
+    def get_previous_month(year, month):
+        if month == 1:
+            return (year - 1, 12)
+        else:
+            return (year, month - 1)
+
+    def get_next_month(year, month):
+        if month == 12:
+            return (year + 1, 1)
+        else:
+            return (year, month + 1)
+
+    previous_year, previous_month = get_previous_month(selected_year, selected_month)
+    next_year, next_month = get_next_month(selected_year, selected_month)
+
+    # Bloquer le mois futur
+    no_next_data = next_year > now.year or (next_year == now.year and next_month > now.month)
 
     context = {
         'coaches': coaches,
         'members': members,
         'subscriptions': subscriptions,
-        'stats': stats,
         'attendance_percentage': attendance_percentage,
         'monthly_registration_percentage': monthly_registration_percentage,
-        'busy_hours_percentage': busy_hours_percentage,
         'plan_percentages': plan_percentages,
         'workout_percentages': workout_percentages,
         'coach_percentages': coach_percentages,
-        'busy_hour_counts': busy_hour_counts,
-        'most_frequent_hour': most_frequent_hour,
-        'most_frequent_hour_count': most_frequent_hour_count,
+        'busy_hour_counts_keys': list(busy_hour_counts.keys()),
+        'busy_hour_counts_values': list(busy_hour_counts.values()),
+        'selected_year': selected_year,
+        'selected_month': selected_month,
+        'selected_month_name': month_name[selected_month],  # Nom du mois
+        'current_year': now.year,
+        'current_month': now.month,
+        'previous_year': previous_year,
+        'previous_month': previous_month,
+        'next_year': next_year,
+        'next_month': next_month,
+        'no_next_data': no_next_data,
     }
 
     return render(request, 'admin_dashboard.html', context)
+
+
+
+
+
+
 
 
 

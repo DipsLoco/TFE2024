@@ -3,15 +3,10 @@
 {% block content %}
 <div class="container my-5">
     <!-- En-tête du profil avec le statut Premium en haut à droite -->
-    <div class="d-flex justify-content-between align-items-center">
+    <div class="d-flex justify-content-between align-items-center mb-5">
+        <h1 class="text-primary" style="font-weight: bold;">Profil de {{ user.first_name }}</h1>
+
         <div class="d-flex align-items-center">
-            <h1 class="mb-5 text-primary" style="font-weight: bold;">Profil de {{ user.first_name }}</h1>
-            
-            <!-- Bouton pour contacter le staff pour les membres -->
-            {% if user.role == 'member' %}
-                <a href="{% url 'send_message' staff_id %}" class="btn btn-primary">Contacter le staff</a>
-            {% endif %}
-            
             <!-- Tableau de bord Coach -->
             {% if user.role == 'coach' or user.is_staff %}
                 <a href="{% url 'coach_dashboard' %}" class="btn btn-warning btn-coach-dashboard ms-3" style="font-size: 1.2rem; font-weight: bold; background-color: #ffc107; color: #000; border-radius: 0.5rem; padding: 0.6rem 1.5rem; transition: background-color 0.3s ease;">
@@ -24,6 +19,16 @@
                 <a href="{% url 'admin_dashboard' %}" class="btn btn-primary ms-3" style="font-size: 1.2rem; font-weight: bold; background-color: #007bff; color: #fff; border-radius: 0.5rem; padding: 0.6rem 1.5rem; transition: background-color 0.3s ease;">
                     <i class="fas fa-user-shield"></i> Tableau de Bord Admin
                 </a>
+            {% endif %}
+            
+            <!-- Bouton pour contacter le staff pour les membres -->
+            {% if user.role == 'member' %}
+                <a href="{% url 'send_message' staff_id %}" class="btn btn-primary ms-3">Contacter le staff</a>
+            {% endif %}
+            
+            <!-- Bouton pour souscrire si l'utilisateur n'est pas premium -->
+            {% if not user.is_premium %}
+                <a href="{% url 'home' %}#nos-offres" class="btn btn-success ms-3">Souscrire</a>
             {% endif %}
         </div>
     </div>
@@ -138,7 +143,7 @@
                             <p><strong>Membre depuis :</strong> {{ user.date_joined|date:"d M Y" }}</p>
                         </div>
                     </div>
-                    <a href="{% url 'edit_profile' %}" class="btn btn-primary mt-3">Modifier mes informations</a>
+                    <a class="tags">Modifier mes informations</a>
                 </div>
             </div>
         </div>

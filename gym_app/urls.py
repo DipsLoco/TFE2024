@@ -4,6 +4,8 @@ from befit_app import settings
 from .views import (admin_dashboard, cancel_reservation, affiche_workout, coach_dashboard, inbox, message_detail, send_message, subscribe, subscription_list, validate_username, validate_password, profile, edit_profile, workout_list, subscription, coach_dashboard, contact_coach, contact_member, remind_subscription)
 from gym_app import views
 from django_q.tasks import schedule
+from django.conf import settings
+from django.conf.urls.static import static
 
 
 
@@ -51,6 +53,9 @@ urlpatterns = [
     # path('payment/<int:subscription_id>/', payment, name='payment'),
     path('payment_success/<int:subscription_id>/', views.payment_success, name='payment_success'),
     path('create-checkout-session/<int:plan_id>/', views.create_checkout_session, name='create_checkout_session'),
+    
+
+    
 
     
 
@@ -60,9 +65,10 @@ urlpatterns = [
 ] 
 
 
+
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
-
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
 # static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT) : 
 # Cette ligne permet de servir les fichiers médias (comme les images téléchargées) pendant le développement lorsque le mode debug est activé.
