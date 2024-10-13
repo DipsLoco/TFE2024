@@ -53,6 +53,8 @@ urlpatterns = [
     # path('payment/<int:subscription_id>/', payment, name='payment'),
     path('payment_success/<int:subscription_id>/', views.payment_success, name='payment_success'),
     path('create-checkout-session/<int:plan_id>/', views.create_checkout_session, name='create_checkout_session'),
+
+    path('new_workoutSchedule/', views.newWorkoutSchedule , name='newWorkoutSchedule'),
     
 
     

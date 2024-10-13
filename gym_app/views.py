@@ -506,7 +506,7 @@ def coach_dashboard(request):
         })
 
     # Passer toutes les données au template
-    return render(request, 'coach_dashboard.html', {
+    return render(request, 'home_dashboard.html', {
         'stats': stats,
         'members': members,
         'subscriptions': subscriptions,
@@ -516,7 +516,9 @@ def coach_dashboard(request):
     })
 
 
-
+@login_required
+def newWorkoutSchedule(request):
+    return render(request, 'newWorkoutSchedule.html' , {})
 
 
 

@@ -1,9 +1,9 @@
 from datetime import timedelta
 from pyexpat.errors import messages
 from django.http import HttpResponseForbidden
-from django.shortcuts import redirect
+from django.shortcuts import get_object_or_404, redirect
 from django.utils import timezone
-from .models import Subscription, Message
+from .models import Subscription, Message, User
 from django_q.tasks import schedule
 from django.contrib.auth.decorators import login_required
 
