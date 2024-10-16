@@ -1,6 +1,8 @@
 {% extends 'base.html' %}
+{% load i18n %}
 {% block content %}
 {% load static %}
+
 
 
 
@@ -152,14 +154,6 @@
     </div>
     {% endfor %}
 </div>
-
-
-
-
-
-
-
-
 
 
 
@@ -369,31 +363,6 @@
 </table>
 </div>
 
-<style>
-    .btn-coach-dashboard {
-        font-size: 1.1rem;
-        padding: 0.5rem 1rem;
-        transition: background-color 0.3s ease;
-    }
-
-    .btn-coach-dashboard:hover {
-        background-color: #0056b3;
-    }
-
-    .modal-dialog {
-        max-width: 600px;
-    }
-
-    .modal-header {
-        background-color: #007bff;
-        color: white;
-    }
-
-    .modal-title {
-        font-weight: bold;
-    }
-</style>
-
 
 <!-- Section pour les statistiques des séances -->
 <h2 class="h4 mt-5 mb-4" style="color: #343a40; font-weight: bold;">Statistiques des Séances d'Entraînement</h2>
@@ -421,32 +390,6 @@
 </table>
 </div>
 <br>
-
-<style>
-    .btn-coach-dashboard {
-        font-size: 1.1rem;
-        padding: 0.5rem 1rem;
-        transition: background-color 0.3s ease;
-    }
-
-    .btn-coach-dashboard:hover {
-        background-color: #0056b3;
-    }
-
-    .modal-dialog {
-        max-width: 600px;
-    }
-
-    .modal-header {
-        background-color: #007bff;
-        color: white;
-    }
-
-    .modal-title {
-        font-weight: bold;
-    }
-</style>
-
 <!-- Script pour Charts.js et ProgressBar.js -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/progressbar.js"></script>
@@ -475,18 +418,18 @@
     var busyHourCountsValues = data.busyHourCountsValues.map(Number);  
 
     // Cercle progressif pour le taux d'inscription
-    var registrationCircle = new ProgressBar.Circle('#registrationCircle', {
-        color: '#007bff',
-        strokeWidth: 6,
-        duration: 1400,
-        from: { color: '#eee' },
-        to: { color: '#007bff' },
-        step: function (state, circle) {
-            circle.path.setAttribute('stroke', state.color);
-            circle.setText(monthlyRegistrationPercentage.toFixed(1) + '%');
-        }
-    });
-    registrationCircle.animate(monthlyRegistrationPercentage / 100);
+    // var registrationCircle = new ProgressBar.Circle('#registrationCircle', {
+    //     color: '#007bff',
+    //     strokeWidth: 6,
+    //     duration: 1400,
+    //     from: { color: '#eee' },
+    //     to: { color: '#007bff' },
+    //     step: function (state, circle) {
+    //         circle.path.setAttribute('stroke', state.color);
+    //         circle.setText(monthlyRegistrationPercentage.toFixed(1) + '%');
+    //     }
+    // });
+    // registrationCircle.animate(monthlyRegistrationPercentage / 100);
 
     // Cercle progressif pour le taux de présence
     var attendanceCircle = new ProgressBar.Circle('#attendanceCircle', {

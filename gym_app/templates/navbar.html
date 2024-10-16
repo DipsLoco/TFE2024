@@ -1,3 +1,6 @@
+{% load static %}
+{% load i18n %}
+
 <!-- Responsive navbar-->
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
     <div class="container px-4">
@@ -9,52 +12,68 @@
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
             <ul class="navbar-nav me-auto mb-2 mb-lg-0">
                 <li class="nav-item">
-                    <a class="nav-link active" aria-current="page" href="{% url 'home' %}">Accueil</a>
+                    <a class="nav-link active" aria-current="page" href="{% url 'home' %}">{{ _('Accueil') }}</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{% url 'about' %}">À propos</a>
+                    <a class="nav-link" href="{% url 'about' %}">{{ _('À propos') }}</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{% url 'home' %}#contact">Contact</a>
+                    <a class="nav-link" href="{% url 'home' %}#contact">{{ _('Contact') }}</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#!">Services</a>
+                    <a class="nav-link" href="#!">{{ _('Services') }}</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{% url 'faq' %}">Faq</a>
+                    <a class="nav-link" href="{% url 'faq' %}">{{ _('Faq') }}</a>
                 </li>
             </ul>
-            <ul class="navbar-nav mb-2 mb-lg-0">
+
+            <ul class="navbar-nav mb-2 mb-lg-0 ms-auto d-flex align-items-center">
                 {% if user.is_authenticated %}
                 <li class="nav-item">
                     <a class="nav-link" href="{% url 'profile' %}">Mon profil</a>
                 </li>
-                <!-- Enveloppe de message visible uniquement pour les utilisateurs connectés -->
                 <li class="nav-item">
                     <a class="nav-link" href="{% url 'messages_inbox' %}">
-                        <i class="fas fa-envelope text-white">Courrier</i> <!-- Enveloppe stylisée en blanc -->
-                        <!-- Afficher le badge des messages non lus -->
+                        <i class="fas fa-envelope text-white"></i>
                         {% if unread_messages > 0 %}
                             <span class="badge badge-danger">{{ unread_messages }}</span>
                         {% endif %}
                     </a>
                 </li>
-                    {% if user.is_superuser %}
-                    <li class="nav-item">
-                        <a class="nav-link" href="/admin">Admin</a>
-                    </li>
-                    {% endif %}
+                {% if user.is_superuser %}
+                <li class="nav-item">
+                    <a class="nav-link" href="/admin">Admin</a>
+                </li>
+                {% endif %}
                 <li class="nav-item">
                     <a class="nav-link" href="{% url 'logout' %}">Se déconnecter</a>
                 </li>
-                <li>
-                    <a href="{% url 'cart_summary' %}" class="btn btn-outline-light" type="submit">
-                        <i class="bi-cart-fill me-1"></i>
-                        Cart
+                <li class="nav-item">
+                    <a href="{% url 'cart_summary' %}" class="btn btn-outline-light btn-sm" type="submit" style="padding: 5px 8px;">
+                        <i class="bi-cart-fill me-1"></i> Cart
                         <span class="badge bg-white text-dark ms-1 rounded-pill" id="cart_quantity">{{ cart | length }}</span>
                     </a>                    
                 </li>
-                {% else %}
+                {% endif %}
+                
+                <!-- Sélecteur de langue visible pour tous les utilisateurs -->
+                <form action="{% url 'set_language' %}" method="post" id="languageForm" class="d-inline-block language-form">
+                    {% csrf_token %}
+                    <input name="next" type="hidden" value="{{ request.path }}">
+                    <div class="language-selector">
+                        <select name="language" id="languageSelect" class="form-select">
+                            <!-- Option par défaut avec drapeau et texte "Votre langue" -->
+                            <option value="" disabled selected>🇫🇷 Votre langue</option>
+                            <option value="fr" {% if LANGUAGE_CODE == 'fr' %}selected{% endif %}>🇫🇷 FR - {{ _('Votre langue') }}</option>
+                            <option value="nl" {% if LANGUAGE_CODE == 'nl' %}selected{% endif %}>🇳🇱 NL - {{ _('Uw taal') }}</option>
+                            <option value="en" {% if LANGUAGE_CODE == 'en' %}selected{% endif %}>🇬🇧 EN - {{ _('Your language') }}</option>
+                        </select>
+                    </div>
+                </form>
+                
+                
+                {% if not user.is_authenticated %}
                 <li class="nav-item">
                     <a class="nav-link" href="{% url 'login' %}">Se connecter</a>
                 </li>
@@ -66,3 +85,42 @@
         </div>
     </div>
 </nav>
+
+<style>
+    /* Style du sélecteur de langue */
+    .language-selector select {
+        appearance: none;
+        padding: 5px 20px;
+        border-radius: 5px;
+        border: 1px solid #ccc;
+        background-color: #f9f9f9;
+        font-size: 14px;
+        cursor: pointer;
+    }
+
+    /* Bouton Cart plus petit */
+    .btn-outline-light {
+        font-size: 12px;
+        padding: 5px 8px;  /* Ajustement de la taille du bouton Cart */
+    }
+
+    /* Aligner le sélecteur de langue à droite */
+    .language-form {
+        margin-left: auto;
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+    }
+
+    /* Alignement et espacement général des éléments de la navigation */
+    .navbar-nav {
+        margin: 0 auto;
+        display: flex;
+        align-items: center;
+    }
+
+    /* Éviter le chevauchement des éléments */
+    .nav-item {
+        padding: 0 10px;
+    }
+</style>

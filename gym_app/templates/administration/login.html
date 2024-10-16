@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-
+{% load i18n %}
 {% load static %}
 
 {% block content %}
@@ -42,9 +42,9 @@
                     </form>
                 </div>
                 <div class="card-footer text-center py-3">
-                    <div class="small"><a href="{% url 'register' %}" class="btn btn-link">Vous n'avez pas de compte ? Inscrivez-vous</a>
-                        <div class="animation-container">
-                            <img src="{% static 'images/anim.gif' %}" alt="Sporty Guy" class="sporty-guy">
+                    <div class="small"><a href="{% url 'register' %}" class="btn btn-primary btn-lg">Vous n'avez pas de compte ? Inscrivez-vous</a>
+                        <!-- <div class="animation-container">
+                            <img src="{% static 'images/anim.gif' %}" alt="Sporty Guy" class="sporty-guy"> -->
                         </div>
                     </div>
                 </div>

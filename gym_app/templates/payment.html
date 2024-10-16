@@ -1,7 +1,7 @@
 
 <!-- payment.html -->
 {% extends "base.html" %}
-
+{% load i18n %}
 {% block content %}
 <h1>Paiement pour {{ subscription.plan.name }}</h1>
 <p>Prix : {{ subscription.plan.price }}€</p>

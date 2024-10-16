@@ -1,5 +1,5 @@
 {% extends 'base.html' %}
-
+{% load i18n %}
 {% load static %}
 
 {% block content %}
@@ -11,7 +11,7 @@
             <div class="col-lg-10 text-center my-5"
                 style="background-color: rgba(0, 0, 0, 0.6); padding: 20px; border-radius: 10px;">
                 <h1 class="display-4 fw-bold text-white mb-2">BE-FIT</h1>
-                <p class="lead text-white-50 mb-4">Restez en forme</p>
+                <p class="lead text-white-50 mb-4">{% trans "Restez en forme" %}</p>
                 <p class="card-text text-white h4 mb-4">Repoussez vos limites, devenez la meilleure version de vous-même
                     avec BeFit. Votre transformation commence ici maintenant.</p>
                 <a class="btn btn-outline-warning btn-lg px-4" href="#nos-offres">Nos Formules</a>

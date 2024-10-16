@@ -1,7 +1,8 @@
 from pathlib import Path
+from django.utils.translation import gettext_lazy as _
 import os
 import sys
-
+from babel.core import Locale
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -15,6 +16,9 @@ SECRET_KEY = os.getenv('SECRET_KEY', 'django-insecure-@q_sm4h4&_)m5p*3r-k-)yde&0
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.getenv('DEBUG', 'True') == 'True'
+
+
+
 
 ALLOWED_HOSTS = ['127.0.0.1', 'localhost']
 
@@ -43,6 +47,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+     'django.middleware.locale.LocaleMiddleware',
 ]
 
 ROOT_URLCONF = 'befit_app.urls'
@@ -124,19 +129,34 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
 
-# forcer l'encodage UTF-8
-sys.stdout.reconfigure(encoding='utf-8')
 
-LANGUAGE_CODE = 'fr-fr'
+sys.stdout.reconfigure(encoding='utf-8')  # Forcer l'encodage UTF-8
+
+LANGUAGE_CODE = 'fr' 
+
 DEFAULT_CHARSET = 'utf-8'
 
-TIME_ZONE = 'Europe/Brussels'  # Mon fuseau horaire 
+TIME_ZONE = 'Europe/Brussels'  # Fuseau horaire
 
+LANGUAGES = [
+    ('fr', _('French')),
+    ('nl', _('Dutch')),
+    ('en', _('English')),
+]
 
+LOCALE_PATHS = [
+    BASE_DIR / 'locale',  
+]
 
 USE_I18N = True
+USE_L10N = True
 
 USE_TZ = True
+# WAGTAIL_I18N_ENABLED = True
+
+
+# Option pour toujours afficher le préfixe de la langue, même pour la langue par défaut
+PREFIX_DEFAULT_LANGUAGE = False  # Si tu veux forcer /fr/ dans l'URL pour la langue par défaut
 
 
 # Static files (CSS, JavaScript, Images)

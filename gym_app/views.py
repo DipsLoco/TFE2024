@@ -27,6 +27,7 @@ from django_q.tasks import async_task
 from django.utils.timezone import now
 from calendar import month_name
 from django.utils.dateformat import format
+from django.utils.translation import gettext as _
 
 
 
@@ -48,6 +49,7 @@ def home(request):
     workouts = Workout.objects.filter(available=True)
     coachs = Coach.objects.all()
     reviews = Review.objects.all()
+    message = _("Restez en forme")
     workoutschedules = WorkoutSchedule.objects.select_related('coach', 'location').all()
 
     # Ajouter les services du catalogue
@@ -66,6 +68,7 @@ def home(request):
         'personalized_coaching': personalized_coaching,
         'gym_accessories': gym_accessories,
         'diet_plans': diet_plans,
+        'message': message,
     })
 
 # Vue pour la page FAQ

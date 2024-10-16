@@ -18,6 +18,8 @@ document.addEventListener('DOMContentLoaded', function () {
         var busyHourCountsKeys = data.busyHourCountsKeys;
         var busyHourCountsValues = data.busyHourCountsValues;
 
+        
+
         // Couleur plus vive pour le cercle de l'inscription
         var registrationCircle = new ProgressBar.Circle('#registrationCircle', {
             color: '#00cc44', // Vert vif
@@ -84,4 +86,79 @@ document.addEventListener('DOMContentLoaded', function () {
         console.error("Aucune donnée JSON trouvée dans le script.");
     }
 });
+
+
+
+    
+// Fonction pour gérer le changement de langue et soumettre le formulaire
+function handleLanguageChange() {
+    var languageSelect = document.getElementById("languageSelect");
+    var selectedLanguageValue = languageSelect.value;
+
+    // Traductions avec emoji drapeaux et texte correspondant
+    var translations = {
+        'fr': '🇫🇷 Votre langue',
+        'nl': '🇳🇱 Uw taal',
+        'en': '🇬🇧 Your language'
+    };
+
+    // Mettre à jour le texte par défaut avec la traduction et l'emoji drapeau
+    var defaultOption = languageSelect.querySelector('option[disabled]');
+    if (translations[selectedLanguageValue] && defaultOption) {
+        defaultOption.text = translations[selectedLanguageValue];
+    }
+
+    // Stocker la langue sélectionnée dans localStorage pour la persister
+    localStorage.setItem('selectedLanguage', selectedLanguageValue);
+
+    // Soumettre le formulaire pour changer la langue
+    document.getElementById("languageForm").submit();
+}
+
+// Fonction pour maintenir la traduction après rechargement
+function updateDefaultOptionText() {
+    var languageSelect = document.getElementById("languageSelect");
+    var selectedLanguageValue = localStorage.getItem('selectedLanguage') || languageSelect.value;
+
+    // Traductions avec emoji drapeaux
+    var translations = {
+        'fr': '🇫🇷 Votre langue',
+        'nl': '🇳🇱 Uw taal',
+        'en': '🇬🇧 Your language'
+    };
+
+    // Mettre à jour le texte par défaut avec la traduction et l'emoji
+    var defaultOption = languageSelect.querySelector('option[disabled]');
+    if (translations[selectedLanguageValue] && defaultOption) {
+        defaultOption.text = translations[selectedLanguageValue];
+    }
+}
+
+// Initialiser l'événement au chargement de la page
+document.addEventListener("DOMContentLoaded", function() {
+    var languageSelect = document.getElementById("languageSelect");
+    updateDefaultOptionText();
+
+    // Attacher l'événement de changement de langue
+    languageSelect.addEventListener("change", handleLanguageChange);
+});
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
