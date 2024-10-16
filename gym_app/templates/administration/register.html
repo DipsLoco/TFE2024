@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% load i18n %}
 {% block content %}
-<header class="bg-dark py-1">
+<header class="bg-dark custom-header">
     <div class="container px-5">
         <div class="row gx-5 justify-content-center">
             <div class="col-lg-6">
@@ -18,9 +18,7 @@
     <div class="row justify-content-center my-5">
         <div class="col-md-6">
             <div class="card shadow-lg border-2 rounded-lg mt-2">
-                <div class="card-header">
-                    
-                </div>
+                <div class="card-header"></div>
                 <div class="card-body">
                     {% if messages %}
                         {% for message in messages %}
@@ -40,7 +38,23 @@
                                 <div class="text-danger">{{ field.errors }}</div>
                             </div>
                         {% endfor %}
+                    
+                        <!-- Champ Mot de passe -->
+                        <!-- <div class="form-floating mb-3">
+                            {{ form.password1.label_tag }}
+                            {{ form.password1 }}
+                            <div class="form-text text-muted">{{ form.password1.help_text|safe }}</div>
+                            <div class="text-danger">{{ form.password1.errors }}</div>
+                        </div>
                         
+                        <div class="form-floating mb-3">
+                            {{ form.password2.label_tag }}
+                            {{ form.password2 }}
+                            <div class="form-text text-muted">{{ form.password2.help_text|safe }}</div>
+                            <div class="text-danger">{{ form.password2.errors }}</div>
+                        </div> -->
+                        
+
                         <div class="d-grid gap-2">
                             <button class="btn btn-primary btn-lg" type="submit">S'inscrire</button>
                         </div>
@@ -54,129 +68,403 @@
     </div>
 </div>
 
+<!-- Modal pour afficher les erreurs générales -->
+<div class="modal fade" id="errorModal" tabindex="-1" aria-labelledby="errorModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="errorModalLabel">Erreurs dans le formulaire</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="error-modal-body">
+                <!-- Contenu des erreurs sera injecté ici dynamiquement -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Fermer</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+
+
 <style>
-    body {
-        background-color: #f8f9fa;
-    }
+   /* Styles de base pour le formulaire */
+body {
+    background-color: #f8f9fa;
+}
 
-    .card-header {
-        background-color: #343a40;
-        color: white;
-    }
+.card-header {
+    background-color: #343a40;
+    color: white;
+}
+.custom-header {
+    padding-top: 0px;  /* ajuster précisément la hauteur du header */
+    padding-bottom: 0px;
+}
 
-    .form-control {
-        border: 1px solid #ced4da;
-        border-radius: 0.25rem;
-    }
 
-    .form-control:focus {
-        border-color: #80bdff;
-        outline: 0;
-        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
-    }
+.form-control {
+    border: 1px solid #ced4da;
+    border-radius: 0.25rem;
+    padding: 10px;
+    height: auto;
+}
 
-    .btn-primary {
-        background-color: #007bff;
-        border-color: #007bff;
-    }
+/* Couleurs des boutons */
+.btn-primary {
+    background-color: #007bff;
+    border-color: #007bff;
+}
 
-    .btn-primary:hover {
-        background-color: #0056b3;
-        border-color: #004085;
-    }
+.btn-primary:hover {
+    background-color: #0056b3;
+    border-color: #004085;
+}
 
-    .btn-link {
-        color: #007bff;
-        text-decoration: none;
-    }
+.btn-link:hover {
+    color: #0056b3;
+    text-decoration: underline;
+}
 
-    .btn-link:hover {
-        color: #0056b3;
-        text-decoration: underline;
-    }
+/* Pour éviter le chevauchement des libellés */
+.form-floating {
+    margin-bottom: 1.5rem;
+    position: relative;
+}
 
-    .lead {
-        font-size: 1.25rem;
-        font-weight: 300;
-    }
+.form-floating label {
+    position: absolute;
+    top: -20px;
+    left: 15px;
+    font-size: 0.875rem;
+    color: #6c757d;
+    transition: all 0.2s ease-in-out;
+}
 
-    .display-5 {
-        font-size: 3rem;
-        font-weight: 300;
-    }
+.form-floating input:focus + label,
+.form-floating input:not(:placeholder-shown) + label {
+    top: -20px;
+    font-size: 0.875rem;
+    color: #6c757d;
+}
 
-    .form-text {
-        font-size: 0.875rem;
-    }
+/* Bordures rouges pour les champs invalides */
+.is-invalid {
+    border-color: #e3342f !important;
+    box-shadow: 0 0 0 0.2rem rgba(227, 52, 47, 0.25);
+}
+
+/* Bordures vertes pour les champs valides */
+.is-valid {
+    border-color: #38c172 !important;
+    box-shadow: 0 0 0 0.2rem rgba(56, 193, 114, 0.25);
+}
+
+/* Styles pour les messages d'erreur */
+.text-danger {
+    color: #e3342f !important;
+    font-size: 0.875rem;
+    margin-top: 5px;
+}
+
+/* Styles pour les messages de succès */
+.text-success {
+    color: #38c172 !important;
+    font-size: 0.875rem;
+    margin-top: 5px;
+}
+
+/* Style pour la modal d'erreur */
+.modal-header {
+    background-color: #f8d7da;
+    color: #721c24;
+    border-bottom: 1px solid #f5c6cb;
+}
+
+.modal-body {
+    background-color: #f8d7da;
+}
+
+.modal-footer {
+    background-color: #f8d7da;
+    border-top: 1px solid #f5c6cb;
+}
+
+.modal-header .close {
+    color: #721c24;
+}
+
+#password-match-error {
+    margin-top: 10px;
+}
+
+/* Pour l'affichage correct des champs date et fichier */
+.form-floating input[type="date"],
+.form-floating input[type="file"] {
+    padding: 10px;
+    height: auto;
+}
+
+/* Styles supplémentaires pour la modale d'erreurs */
+.modal-content {
+    background-color: #fff3cd;
+    border-color: #ffeeba;
+}
+
+.modal-header {
+    background-color: #ffeeba;
+    border-bottom: 1px solid #ffeeba;
+}
+
+.modal-footer {
+    background-color: #ffeeba;
+}
+
+.modal-body ul {
+    padding-left: 20px;
+}
+
+.modal-body li {
+    color: #856404;
+}
+
+/* Positionner le bouton œil correctement et le rendre plus petit */
+/* .input-group {
+    position: relative;
+}
+
+.input-group .btn-outline-secondary {
+    position: absolute;
+    right: 10px;
+    top: 50%;
+    transform: translateY(-50%);
+    padding: 0;
+    height: 25px;  /* Ajuster la hauteur du bouton */
+    /* width: 25px;   Ajuster la largeur du bouton */
+    /* display: flex;
+    align-items: center;
+    justify-content: center;
+} */
+
+/* .input-group .btn-outline-secondary i { */
+    /* font-size: 14px;  Taille de l'icône
+} */
+
+/* Ajustement du champ input pour l'espace avec l'œil */
+/* .input-group input {
+    padding-right: 2.5rem; /* Laisser de l'espace pour le bouton œil */
+/* } */ 
+
+
+
+
+
 </style>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Gestion des labels
-        var inputs = document.querySelectorAll('input');
-        inputs.forEach(function(input) {
-            input.addEventListener('focus', function() {
-                this.previousElementSibling.style.display = 'none';
-            });
-            input.addEventListener('blur', function() {
-                if (!this.value) {
-                    this.previousElementSibling.style.display = 'block';
-                }
-            });
-        });
+   document.addEventListener('DOMContentLoaded', function() {
+    // Sélectionner les champs à valider
+    var username = document.getElementById('id_username');
+    var email = document.getElementById('id_email');
+    var phone = document.getElementById('id_phone');
+    var password1 = document.getElementById('id_password1');
+    var password2 = document.getElementById('id_password2');
+    var address = document.getElementById('id_address');
+    var postalCode = document.getElementById('id_postal_code');
+    var dob = document.getElementById('id_birth_date');
+    var city = document.getElementById('id_city');
+    var firstName = document.getElementById('id_first_name');
+    var lastName = document.getElementById('id_last_name');
 
-        // Validation du nom d'utilisateur
-        document.getElementById('id_username').addEventListener('blur', function() {
-            var username = this.value;
-            if (username) {
-                fetch(`{% url 'validate_username' %}?username=${username}`)
-                    .then(response => response.json())
-                    .then(data => {
-                        if (data.is_taken) {
-                            alert('Ce nom d\'utilisateur est déjà pris.');
-                        }
-                    });
+    // Valider le prénom en direct (min 2 caractères)
+    firstName.addEventListener('blur', function() {
+        if (this.value.trim().length < 2) {
+            displayError(this, "Le prénom doit contenir au moins 2 caractères.");
+        } else {
+            clearError(this);
+        }
+    });
+
+    // Valider le nom en direct (min 2 caractères)
+    lastName.addEventListener('blur', function() {
+        if (this.value.trim().length < 2) {
+            displayError(this, "Le nom doit contenir au moins 2 caractères.");
+        } else {
+            clearError(this);
+        }
+    });
+
+    // Valider le nom d'utilisateur en direct
+    username.addEventListener('blur', function() {
+        if (this.value.trim() === "") {
+            displayError(this, "Le nom d'utilisateur est requis.");
+        } else {
+            clearError(this);
+        }
+    });
+
+    // Valider l'email en direct
+    email.addEventListener('blur', function() {
+        var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        if (!emailRegex.test(this.value)) {
+            displayError(this, "Veuillez entrer une adresse e-mail valide.");
+        } else {
+            clearError(this);
+        }
+    });
+
+    // Valider le téléphone en direct
+    phone.addEventListener('blur', function() {
+        var phoneRegex = /^[0-9]{10}$/;
+        if (!phoneRegex.test(this.value)) {
+            displayError(this, "Le numéro de téléphone doit contenir 10 chiffres.");
+        } else {
+            clearError(this);
+        }
+    });
+
+    // Valider l'adresse en direct
+    address.addEventListener('blur', function() {
+        if (!/\d/.test(this.value)) {
+            displayError(this, "L'adresse doit contenir un numéro.");
+        } else {
+            clearError(this);
+        }
+    });
+
+    // Valider la ville en direct
+    city.addEventListener('blur', function() {
+        if (this.value.trim() === "") {
+            displayError(this, "La ville est requise.");
+        } else {
+            clearError(this);
+        }
+    });
+
+    // Valider le code postal
+    postalCode.addEventListener('blur', function() {
+        if (!/^\d{4}$/.test(this.value)) {
+            displayError(this, "Le code postal doit contenir 4 chiffres.");
+        } else {
+            clearError(this);
+        }
+    });
+
+    // Valider la date de naissance (âge < 100 ans)
+    dob.addEventListener('blur', function() {
+        var birthDate = new Date(this.value);
+        var today = new Date();
+        var age = today.getFullYear() - birthDate.getFullYear();
+        if (age > 100 || this.value === "") {
+            displayError(this, "Veuillez renseigner votre date de naissance.");
+        } else {
+            clearError(this);
+        }
+    });
+
+    // Valider le mot de passe en direct
+    function checkPasswords() {
+        if (password1.value !== password2.value) {
+            displayError(password2, "Les mots de passe ne correspondent pas.");
+        } else {
+            clearError(password2);
+        }
+
+        var passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\w\d\s]).{8,}$/;
+        if (!passwordRegex.test(password1.value)) {
+            displayError(password1, "Le mot de passe doit contenir au moins 8 caractères, une majuscule, une minuscule, un chiffre, et un caractère spécial.");
+        } else {
+            clearError(password1);
+        }
+    }
+
+    password1.addEventListener('input', checkPasswords);
+    password2.addEventListener('input', checkPasswords);
+
+    // Ajouter dynamiquement les boutons œil pour afficher/masquer le mot de passe
+    // function addTogglePasswordButton(passwordField, toggleButtonId) {
+    //     var toggleButton = document.createElement('button');
+    //     toggleButton.setAttribute('type', 'button');
+    //     toggleButton.setAttribute('id', toggleButtonId);
+    //     toggleButton.classList.add('btn', 'btn-outline-secondary');
+    //     toggleButton.innerHTML = '<i class="fa fa-eye"></i>';
+    //     toggleButton.style.position = 'absolute';
+    //     toggleButton.style.right = '10px';
+    //     toggleButton.style.top = '50%';
+    //     toggleButton.style.transform = 'translateY(-50%)';
+        
+        // Insérer le bouton à côté du champ
+        // passwordField.parentElement.style.position = 'relative';
+        // passwordField.parentElement.appendChild(toggleButton);
+
+        // Ajouter l'événement de clic pour afficher/masquer le mot de passe
+    //     toggleButton.addEventListener('click', function() {
+    //         const type = passwordField.getAttribute('type') === 'password' ? 'text' : 'password';
+    //         passwordField.setAttribute('type', type);
+    //         this.querySelector('i').classList.toggle('fa-eye');
+    //         this.querySelector('i').classList.toggle('fa-eye-slash');
+    //     });
+    // }
+
+    // Ajouter les boutons aux deux champs de mot de passe
+    addTogglePasswordButton(password1, 'togglePassword1');
+    addTogglePasswordButton(password2, 'togglePassword2');
+
+    // Fonction pour afficher les erreurs
+    function displayError(field, message) {
+        field.classList.add('is-invalid');
+        field.classList.remove('is-valid');
+        var errorDiv = field.nextElementSibling;
+        errorDiv.textContent = message;
+        errorDiv.classList.add('text-danger');
+    }
+
+    // Fonction pour effacer les erreurs
+    function clearError(field) {
+        field.classList.remove('is-invalid');
+        field.classList.add('is-valid');
+        var errorDiv = field.nextElementSibling;
+        errorDiv.textContent = "";
+        errorDiv.classList.remove('text-danger');
+    }
+
+    // Gestion de la soumission du formulaire avec des modals pour les erreurs
+    var form = document.getElementById('register-form');
+    form.addEventListener('submit', function(event) {
+        event.preventDefault();
+
+        var hasErrors = false;
+        var errorMessages = [];
+
+        // Liste des champs à valider
+        var fieldsToValidate = [username, email, phone, password1, password2, address, postalCode, dob, city, firstName, lastName];
+
+        fieldsToValidate.forEach(function(field) {
+            if (field.classList.contains('is-invalid')) {
+                hasErrors = true;
+                errorMessages.push(field.previousElementSibling.textContent + ": " + field.nextElementSibling.textContent);
             }
         });
 
-        // Validation du mot de passe
-        document.getElementById('id_password1').addEventListener('input', function() {
-            var password = this.value;
-            fetch(`{% url 'validate_password' %}?password=${password}`)
-                .then(response => response.json())
-                .then(data => {
-                    var conditions = data.conditions;
-                    var messages = [
-                        'Au moins 8 caractères.',
-                        'Au moins une lettre minuscule.',
-                        'Au moins une lettre majuscule.',
-                        'Au moins un chiffre.',
-                        'Au moins un caractère spécial.'
-                    ];
-                    var message = '';
-                    for (var i = 0; i < conditions.length; i++) {
-                        if (!conditions[i]) {
-                            message += messages[i] + '<br>';
-                        }
-                    }
-                    document.getElementById('password-validation').innerHTML = message;
-                });
-        });
-
-        // Afficher/cacher le mot de passe
-        var passwordToggle = document.getElementById('password-toggle');
-        if (passwordToggle) {
-            passwordToggle.addEventListener('click', function() {
-                var passwordFields = document.querySelectorAll('input[type="password"]');
-                passwordFields.forEach(function(passwordField) {
-                    if (passwordField.type === 'password') {
-                        passwordField.type = 'text';
-                    } else {
-                        passwordField.type = 'password';
-                    }
-                });
-            });
+        if (hasErrors) {
+            showErrorModal(errorMessages);
+        } else {
+            form.submit(); // Soumettre si tout est valide
         }
     });
+
+    // Afficher un modal avec les erreurs
+    function showErrorModal(errors) {
+        var modalBody = document.getElementById('error-modal-body');
+        modalBody.innerHTML = "<ul>" + errors.map(function(error) {
+            return "<li>" + error + "</li>";
+        }).join('') + "</ul>";
+        var errorModal = new bootstrap.Modal(document.getElementById('errorModal'));
+        errorModal.show();
+    }
+});
 </script>
 {% endblock %}
