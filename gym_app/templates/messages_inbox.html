@@ -1,23 +1,105 @@
 {% extends 'base.html' %}
 {% load i18n %}
 {% block content %}
-<div class="container my-5">
-    <h1 class="mb-4">Boîte de Réception</h1>
+<br><br>
+<div class="container">
+    <h2>Boîte de Réception</h2>
 
-    <!-- Liste des messages reçus -->
-    {% if messages %}
-        <ul class="list-group">
-            {% for message in messages %}
-            <li class="list-group-item">
-                <h5>{{ message.subject }}</h5>
-                <p><strong>De :</strong> {{ message.sender.get_full_name }} | <strong>Reçu le :</strong> {{ message.timestamp|date:"d M Y H:i" }}</p>
-                <p>{{ message.body }}</p>
-                <a href="{% url 'send_message' message.sender.id %}" class="btn btn-primary mt-2">Répondre</a>
-            </li>
-            {% endfor %}
-        </ul>
-    {% else %}
-        <p class="text-muted">Vous n'avez pas de messages pour l'instant.</p>
-    {% endif %}
+    <!-- Icône de message avec badge pour le nombre de messages non lus -->
+    <div class="d-flex align-items-center mb-3">
+        <a href="{% url 'send_message' recipient.id %}" class="nav-link">
+            <i class="fas fa-envelope text-white"></i>
+            {% if unread_messages > 0 %}
+                <span class="badge badge-danger">{{ unread_messages }}</span>
+            {% endif %}
+        </a>
+    </div>
+
+    <!-- Afficher un popup de succès si le message a bien été envoyé -->
+    <div class="modal fade" id="messageSuccessModal" tabindex="-1" aria-labelledby="messageSuccessLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="messageSuccessLabel">Succès</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    Votre message a été envoyé avec succès !
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">OK</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Script pour afficher le popup après succès -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            var successMessage = "{{ messages.success }}";
+            if (successMessage) {
+                var messageModal = new bootstrap.Modal(document.getElementById('messageSuccessModal'), {
+                    keyboard: false
+                });
+                messageModal.show();
+            }
+        });
+    </script>
+
+    <!-- Filtre des messages selon le rôle de l'utilisateur -->
+    <div class="filters mb-3">
+        <a href="{% url 'messages_inbox' %}?filter_role=all" class="btn btn-outline-primary {% if filter_role == 'all' %}active{% endif %}">Tous</a>
+        {% if request.user.role == 'member' %}
+            <a href="{% url 'messages_inbox' %}?filter_role=coach" class="btn btn-outline-warning {% if filter_role == 'coach' %}active{% endif %}">Coach</a>
+            <a href="{% url 'messages_inbox' %}?filter_role=staff" class="btn btn-outline-success {% if filter_role == 'staff' %}active{% endif %}">Staff</a> <!-- L'équipe BeFit pour les membres -->
+        {% elif request.user.role == 'coach' %}
+            <a href="{% url 'messages_inbox' %}?filter_role=member" class="btn btn-outline-primary {% if filter_role == 'member' %}active{% endif %}">Membres</a>
+            <a href="{% url 'messages_inbox' %}?filter_role=manager" class="btn btn-outline-secondary {% if filter_role == 'manager' %}active{% endif %}">Manager</a> <!-- Admin = Manager -->
+            <a href="{% url 'messages_inbox' %}?filter_role=staff" class="btn btn-outline-success {% if filter_role == 'staff' %}active{% endif %}">Staff</a> <!-- L'équipe BeFit -->
+        {% elif request.user.is_staff %}
+            <a href="{% url 'messages_inbox' %}?filter_role=coach" class="btn btn-outline-warning {% if filter_role == 'coach' %}active{% endif %}">Coach</a>
+            <a href="{% url 'messages_inbox' %}?filter_role=member" class="btn btn-outline-primary {% if filter_role == 'member' %}active{% endif %}">Membres</a>
+            <a href="{% url 'messages_inbox' %}?filter_role=manager" class="btn btn-outline-secondary {% if filter_role == 'manager' %}active{% endif %}">Manager</a> <!-- Admin = Manager -->
+        {% endif %}
+    </div>
+    
+    <!-- Bouton pour écrire un nouveau message -->
+    <a href="{% url 'send_message' recipient.id %}" class="btn btn-success mb-3">
+        <i class="fas fa-pencil-alt"></i> Nouveau message
+    </a>
+
+    <!-- Liste des messages reçus avec gestion des rôles et statuts -->
+<ul class="list-group">
+    {% for message in messages %}
+    <li class="list-group-item">
+        <strong>De :</strong> 
+        {% if message.sender.role %}
+            {% if message.sender.role == 'manager' %}
+                Manager
+            {% elif message.sender.is_staff %}
+                L'équipe BeFit
+            {% else %}
+                {{ message.sender.get_full_name }}
+            {% endif %}
+        {% else %}
+            Utilisateur inconnu
+        {% endif %}
+        <strong>Reçu le :</strong> {{ message.timestamp|date:"d M Y H:i" }}
+        <p>{{ message.subject }}</p>
+        <p>{{ message.body|truncatewords:20 }}</p>
+
+        <!-- Statut du message, on conserve uniquement l'indication avec le badge -->
+        {% if message.is_read %}
+            <span class="badge bg-success">Lu</span>
+        {% else %}
+            <span class="badge bg-danger">Non lu</span>
+        {% endif %}
+
+            <!-- Bouton pour lire le message -->
+            <a href="{% url 'read_message' message.id %}" class="btn btn-primary btn-sm">Lire le message</a>
+        </li>
+        {% endfor %}
+    </ul>
 </div>
+<br><br>
 {% endblock %}

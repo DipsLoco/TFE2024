@@ -1,10 +1,17 @@
 from django.contrib.auth import get_user_model
-from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
-from .models import User, WorkoutSchedule
-from .models import WorkoutParticipation
+from .models import User, WorkoutSchedule, WorkoutParticipation, Message
 from django import forms
 import re
+
+class MessageForm(forms.ModelForm):
+    class Meta:
+        model = Message
+        fields = ['subject', 'body']  # Les champs que l'utilisateur doit remplir
+        widgets = {
+            'subject': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Objet'}),
+            'body': forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Votre message', 'rows': 5}),
+        }
 
 class WorkoutParticipationForm(forms.ModelForm):
     class Meta:
@@ -48,10 +55,6 @@ class WorkoutScheduleForm(forms.ModelForm):
         if commit:
             schedule_instance.save()
         return schedule_instance
-
-
-
-
 
 class SignUpForm(UserCreationForm):
     email = forms.EmailField(
@@ -102,20 +105,13 @@ class SignUpForm(UserCreationForm):
         model = get_user_model()
         fields = ('username', 'first_name', 'last_name', 'email', 'birth_date', 'phone', 'address', 'postal_code', 'city', 'image', 'password1', 'password2')
 
-
-    
-
     def __init__(self, *args, **kwargs):
         super(SignUpForm, self).__init__(*args, **kwargs)
-        
         self.fields['username'].widget.attrs['class'] = 'form-control'
         self.fields['username'].widget.attrs['placeholder'] = 'Nom d\'utilisateur'
         self.fields['username'].label = 'Nom d\'utilisateur'
         self.fields['username'].help_text = 'Requis. 150 caractères ou moins. Lettres, chiffres et @/./+/-/_ uniquement.'
-        self.fields['username'].widget.attrs['placeholder'] = 'Nom d\'utilisateur'
-        self.fields['username'].label = 'Nom d\'utilisateur'
-        self.fields['username'].help_text = 'Requis. 150 caractères ou moins. Lettres, chiffres et @/./+/-/_ uniquement.'
-
+        
         self.fields['password1'].widget.attrs['class'] = 'form-control'
         self.fields['password1'].widget.attrs['placeholder'] = 'Mot de passe'
         self.fields['password1'].label = 'Mot de passe'
@@ -143,7 +139,6 @@ class SignUpForm(UserCreationForm):
         if not re.search(r'[\W_]', password1):
             raise forms.ValidationError('Votre mot de passe doit contenir au moins un caractère spécial.')
         return password1
-    
 
 class UserProfileForm(forms.ModelForm):
     class Meta:

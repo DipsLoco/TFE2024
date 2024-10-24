@@ -64,6 +64,7 @@ TEMPLATES = [
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
                 'cart.context_processors.cart',
+                'gym_app.context_processors.unread_messages_processor',
             ],
         },
     },
@@ -86,13 +87,24 @@ Q_CLUSTER = {
     'name': 'DjangoQ',
     'workers': 4,
     'recycle': 500,
-    'timeout': 60,
-    'django_redis': 'default',
-    'retry': 90,
+    'timeout': 90,  # J'ai ajusté le timeout à 90 comme dans la configuration proposée
+    'retry': 120,
     'queue_limit': 50,
     'bulk': 10,
+    'django_redis': 'default',
     'orm': 'default',  # Utiliser l'ORM pour stocker les tâches dans la base de données
 }
+
+# Tâches planifiées
+Q_CLUSTER['tasks'] = [
+    {
+        'func': 'your_app.tasks.send_workout_reminder',
+        'schedule_type': 'H',  # 'H' signifie qu'elle sera exécutée toutes les heures
+        'repeats': -1,  # Répéter indéfiniment
+        'minutes': 60   # Exécuter toutes les heures
+    },
+]
+
 
 
 AUTH_USER_MODEL = 'gym_app.User'

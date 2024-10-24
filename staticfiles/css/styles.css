@@ -378,13 +378,14 @@ select:disabled {
 [list]:not([type=date]):not([type=datetime-local]):not([type=month]):not([type=week]):not([type=time])::-webkit-calendar-picker-indicator {
   display: none !important;
 }
-
 button,
 [type=button],
 [type=reset],
 [type=submit] {
-  -webkit-appearance: button;
+  -webkit-appearance: button; /* Pour WebKit (Chrome, Safari) */
+  appearance: button; /* Standard */
 }
+
 button:not(:disabled),
 [type=button]:not(:disabled),
 [type=reset]:not(:disabled),
@@ -416,11 +417,13 @@ legend {
   font-size: calc(1.275rem + 0.3vw);
   line-height: inherit;
 }
+
 @media (min-width: 1200px) {
   legend {
     font-size: 1.5rem;
   }
 }
+
 legend + * {
   clear: left;
 }
@@ -441,7 +444,8 @@ legend + * {
 
 [type=search] {
   outline-offset: -2px;
-  -webkit-appearance: textfield;
+  -webkit-appearance: textfield; /* Pour WebKit (Chrome, Safari) */
+  appearance: textfield; /* Standard */
 }
 
 /* rtl:raw:
@@ -452,8 +456,10 @@ legend + * {
   direction: ltr;
 }
 */
+
 ::-webkit-search-decoration {
-  -webkit-appearance: none;
+  -webkit-appearance: none; /* Pour WebKit */
+  appearance: none; /* Standard */
 }
 
 ::-webkit-color-swatch-wrapper {
@@ -462,7 +468,8 @@ legend + * {
 
 ::file-selector-button {
   font: inherit;
-  -webkit-appearance: button;
+  -webkit-appearance: button; /* Pour WebKit */
+  appearance: button; /* Standard */
 }
 
 output {
@@ -477,6 +484,7 @@ summary {
   display: list-item;
   cursor: pointer;
 }
+
 
 progress {
   vertical-align: baseline;
@@ -10844,7 +10852,7 @@ textarea.form-control-lg {
 .vibrate {
   animation: vibrate 0.5s ease;
 }
-<!-- Section Nos Services -->
+/* <!-- Section Nos Services -->
 <section id="nos-services" class="services-section">
     <div class="container">
         <h2 class="section-title">Nos Services</h2>
@@ -10863,9 +10871,9 @@ textarea.form-control-lg {
             {% endfor %}
         </div>
     </div>
-</section>
+</section> */
 
-<style>
+
     .services-section {
         padding: 50px 0;
         background-color: #f9f9f9;
@@ -10902,7 +10910,7 @@ textarea.form-control-lg {
     .btn:hover {
         background-color: #0056b3;
     }
-</style>
+
 /* Styles généraux */
 .catalog-services {
   padding: 50px 20px;
@@ -11019,3 +11027,65 @@ textarea.form-control-lg {
 .progress-bar-orange {
   background-color: #fd7e14 !important;
 }
+
+    .card {
+        border: none;
+        border-radius: 10px;
+    }
+    .card-header {
+        border-bottom: none;
+        border-radius: 10px 10px 0 0;
+    }
+    .list-group-item {
+        border: none;
+        border-radius: 10px;
+        margin-bottom: 10px;
+    }
+    .btn {
+        border-radius: 5px;
+    }
+
+    .btn-coach-dashboard {
+        background-color: #ffc107;
+        color: #000;
+        font-weight: bold;
+        font-size: 1.2rem;
+        border-radius: 0.5rem;
+        padding: 0.6rem 1.5rem;
+        transition: background-color 0.3s ease;
+    }
+
+    .btn-coach-dashboard:hover {
+        background-color: #e0a800;
+        color: #000;
+    }
+
+    .text-green {
+        background-color: #28a745;
+        color: white;
+        font-weight: bold;
+        border-radius: 5px;
+        text-decoration: none;
+        padding: 0.5rem 1rem;
+        transition: background-color 0.3s ease;
+    }
+
+    .text-green:hover {
+        background-color: #1e7e34;
+        text-decoration: none;
+    }
+
+    .btn-mauve {
+      background-color: #6a0dad;
+      color: white;
+      border-radius: 0.5rem;
+      padding: 0.6rem 1.5rem;
+      transition: background-color 0.3s ease;
+  }
+  
+  .btn-mauve:hover {
+      background-color: #5e009e;
+      color: white;
+  }
+  
+  

@@ -1,7 +1,6 @@
 import stripe
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
-from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404, redirect, render
 from django.http import HttpResponseRedirect
 from django.http import HttpResponseForbidden
@@ -28,6 +27,12 @@ from django.utils.timezone import now
 from calendar import month_name
 from django.utils.dateformat import format
 from django.utils.translation import gettext as _
+from django.contrib import messages as django_messages
+from .forms import MessageForm
+from django.db.models import Q
+
+
+
 
 
 
@@ -303,56 +308,161 @@ def register_user(request):
         form = SignUpForm()
     return render(request, 'administration/register.html', {'form': form})
 
-@login_required
-def send_message(request, recipient_id):
-    recipient = get_object_or_404(User, id=recipient_id)
-    if request.method == 'POST':
-        subject = request.POST.get('subject')
-        body = request.POST.get('body')
-        Message.objects.create(
-            sender=request.user,
-            recipient=recipient,
-            subject=subject,
-            body=body
-        )
-        messages.success(request, "Votre message a été envoyé.")
-        return redirect('profile')  # Rediriger vers le profil ou une autre page
-    return render(request, 'send_message.html', {'recipient': recipient})
-
-
-@login_required
-def inbox(request):
-    messages_received = Message.objects.filter(recipient=request.user).order_by('-timestamp')
-    return render(request, 'inbox.html', {'messages': messages_received})
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render, get_object_or_404
+from .models import Message, User
 
 @login_required
 def messages_inbox(request):
     # Récupérer les messages reçus par l'utilisateur
-    messages = Message.objects.filter(recipient=request.user).order_by('-timestamp')  # Utilisation de 'timestamp' au lieu de 'date_sent'
+    messages_received = Message.objects.filter(recipient=request.user).order_by('-timestamp')
+
+    # Ajout d'un filtre par rôle
+    filter_role = request.GET.get('filter_role', 'all')
+
+    if filter_role == 'coach':
+        messages_received = messages_received.filter(sender__role='coach')
+    elif filter_role == 'manager':
+        messages_received = messages_received.filter(sender__role='manager')
+    elif filter_role == 'staff':
+        messages_received = messages_received.filter(sender__is_staff=True)
     
     # Comptabiliser les messages non lus
-    unread_messages = messages.filter(is_read=False).count()
+    unread_messages = messages_received.filter(is_read=False).count()
+
+    # Récupérer le premier utilisateur (comme exemple de destinataire pour le bouton 'Nouveau message')
+    recipient = User.objects.exclude(id=request.user.id).first()  # Assurer que recipient est défini
 
     context = {
-        'messages': messages,
+        'messages': messages_received,
         'unread_messages': unread_messages,
+        'filter_role': filter_role,
+        'recipient': recipient,  # Passer un destinataire valide
     }
-    
+
     return render(request, 'messages_inbox.html', context)
 
 
-@login_required
-def base_view(request):
-    unread_messages = Message.objects.filter(recipient=request.user, is_read=False).count()
-    return render(request, 'base.html', {'unread_messages': unread_messages})
+# @login_required
+# def send_message_default(request):
+    # Logique pour afficher la page de sélection du destinataire
+    # users = User.objects.exclude(id=request.user.id)  # Exclure l'utilisateur actuel de la liste des destinataires
+    # return render(request, 'send_message.html', {'users': users, 'subject': ''})
 
 
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib import messages
+from django.db.models import Q
+from .forms import MessageForm
+from .models import User
+
 @login_required
-def message_detail(request, message_id):
-    message = get_object_or_404(Message, id=message_id, recipient=request.user)
-    message.is_read = True
-    message.save()
-    return render(request, 'message_detail.html', {'message': message})
+def send_message(request, recipient_id=None):
+    recipient = None  # Initialiser recipient à None pour garantir un champ vide
+
+    # Gestion des utilisateurs en fonction du rôle
+    if request.user.role == 'member':
+        users = User.objects.filter(Q(role='coach') | Q(is_staff=True)).exclude(id=request.user.id)
+    elif request.user.role == 'coach':
+        users = User.objects.filter(Q(role='member') | Q(role='coach') | Q(is_staff=True)).exclude(id=request.user.id)
+    elif request.user.is_staff:
+        users = User.objects.all().exclude(id=request.user.id)
+
+    # Si recipient_id est présent, c'est une réponse à un message
+    if recipient_id:
+        recipient = get_object_or_404(User, id=recipient_id)
+    else:
+        recipient = None  # Forcer la non-sélection d'un destinataire pour un nouveau message
+
+    subject = request.GET.get('subject', '')
+
+    if request.method == 'POST':
+        form = MessageForm(request.POST)
+        if form.is_valid():
+            # Récupérer l'ID du destinataire depuis le formulaire
+            recipient_id = request.POST.get('recipient')
+            recipient = get_object_or_404(User, id=recipient_id)
+
+            # Créer et sauvegarder le message
+            message = form.save(commit=False)
+            message.sender = request.user
+            message.recipient = recipient
+            message.save()
+
+            messages.success(request, "Message envoyé avec succès.")
+            return redirect('messages_inbox')
+    else:
+        # Pour un nouveau message, recipient reste vide, donc non pré-rempli
+        form = MessageForm(initial={'subject': f"RE: {subject}" if recipient else ''})
+
+    return render(request, 'send_message.html', {
+        'form': form,
+        'users': users,
+        'subject': subject,
+        'recipient': recipient  # Transmettre uniquement si c'est une réponse
+    })
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# Vue pour lire un message et le marquer comme lu
+@login_required
+def read_message(request, message_id):
+    message = get_object_or_404(Message, id=message_id)
+
+    if message.recipient == request.user:
+        message.is_read = True  # Le statut est bien mis à jour ici
+        message.save()
+
+    return render(request, 'read_message.html', {'message': message})
+
+
+
+
+# Contact d'un coach
+@login_required
+def contact_coach(request, coach_id):
+    coach = get_object_or_404(User, id=coach_id)
+    if request.method == 'POST':
+        message_body = request.POST.get('message')
+        Message.objects.create(
+            sender=request.user,
+            recipient=coach,
+            subject=f"Nouveau message de {request.user.get_full_name()}",
+            body=message_body,
+            is_read=False  # Le message est créé avec un statut "non lu"
+        )
+        django_messages.success(request, f"Message envoyé à {coach.get_full_name()}")
+        return redirect('coach_dashboard')
+    return HttpResponseForbidden("Action non autorisée")
+
+# Contact d'un membre
+@login_required
+def contact_member(request, member_id):
+    member = get_object_or_404(User, id=member_id)
+    if request.method == 'POST':
+        message_body = request.POST.get('message')
+        Message.objects.create(
+            sender=request.user,
+            recipient=member,
+            subject=f"Message de {request.user.get_full_name()}",
+            body=message_body,
+            is_read=False  # Message non lu à la création
+        )
+        django_messages.success(request, f"Message envoyé à {member.get_full_name()}")
+        return redirect('admin_dashboard')
+    return HttpResponseForbidden("Méthode non autorisée")
 
 
 
@@ -403,10 +513,21 @@ def validate_password(request):
 @login_required
 def profile(request):
     user = request.user
-    unread_messages = Message.objects.filter(recipient=user, is_read=False).count()
+    
+    # Récupérer le staff (si disponible) uniquement si le rôle est 'member'
+    staff_id = None
+    if user.role == 'member':
+        staff_id = User.objects.filter(is_staff=True).first().id
 
-    # Récupérer le staff (si disponible)
-    staff_id = User.objects.filter(is_staff=True).first().id if user.role == 'member' else None
+    context = {
+        'user': user,
+        'staff_id': staff_id,
+    }
+
+    return render(request, 'profile.html', context)
+
+
+
 
     # Récupérer les séances passées avec ce coach (si l'utilisateur est un coach ou admin)
     # if user.is_staff or user.role == 'coach':
@@ -417,19 +538,7 @@ def profile(request):
     #     total_sessions = 0
     #     members_with_sessions = None
 
-    # Récupérer les messages de la boîte de réception
-    messages = Message.objects.filter(recipient=user).order_by('-timestamp')
-
-    context = {
-        'user': user,
-        'unread_messages': unread_messages,
-        'messages': messages,
-        'staff_id': staff_id,
-        # 'total_sessions': total_sessions,
-        # 'members_with_sessions': members_with_sessions,
-    }
-
-    return render(request, 'profile.html', context)
+   
 
 
 
@@ -667,45 +776,6 @@ def admin_dashboard(request):
     }
 
     return render(request, 'admin_dashboard.html', context)
-
-
-
-
-
-
-
-
-
-@login_required
-def contact_coach(request, coach_id):
-    coach = get_object_or_404(User, id=coach_id)
-
-    if request.method == 'POST':
-        message_body = request.POST.get('message')
-        Message.objects.create(
-            sender=request.user,
-            recipient=coach,
-            subject=f"Nouveau message de {request.user.get_full_name()}",
-            body=message_body
-        )
-        messages.success(request, f"Message envoyé à {coach.get_full_name()}")
-        return redirect('coach_dashboard')
-
-    return HttpResponseForbidden("Action non autorisée")
-
-@login_required
-def contact_member(request, member_id):
-    member = get_object_or_404(User, id=member_id)
-    if request.method == 'POST':
-        message = request.POST.get('message')
-        send_mail(
-            subject=f"Message de {request.user.get_full_name()}",
-            message=message,
-            from_email=request.user.email,
-            recipient_list=[member.email],
-            fail_silently=False,
-        )
-        return HttpResponseRedirect(reverse('admin_dashboard'))
 
 
 @login_required

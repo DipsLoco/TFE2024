@@ -34,8 +34,8 @@ class User(AbstractUser):
 User = get_user_model()
 
 class Message(models.Model):
-    sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sent_messages')
-    recipient = models.ForeignKey(User, on_delete=models.CASCADE, related_name='received_messages')
+    sender = models.ForeignKey(User, related_name='sent_messages', on_delete=models.CASCADE)
+    recipient = models.ForeignKey(User, related_name='received_messages', on_delete=models.CASCADE)
     subject = models.CharField(max_length=255)
     body = models.TextField()
     timestamp = models.DateTimeField(auto_now_add=True)
@@ -43,6 +43,22 @@ class Message(models.Model):
 
     def __str__(self):
         return f"De {self.sender} à {self.recipient} - {self.subject}"
+
+    
+@receiver(post_save, sender=User)
+def send_welcome_message(sender, instance, created, **kwargs):
+    if created:
+        # Envoyer un message de bienvenue de l'équipe BeFit
+        Message.objects.create(
+            sender=User.objects.filter(is_staff=True).first(),  # Expéditeur : un admin ou staff
+            recipient=instance,  # Nouveau membre
+            subject="Bienvenue chez BeFit",
+            body="Bienvenue chez BeFit ! Nous sommes ravis de vous accueillir. N'hésitez pas à consulter nos services et profiter de nos plans d'entraînement."
+        )
+    
+
+
+
 
 
 class Location(models.Model):
@@ -215,17 +231,17 @@ class Plan(models.Model):
 
 
 
-class Subscription(models.Model):  # Statut abonnement
+class Subscription(models.Model):
     PAYMENT_STATUS_CHOICES = [
         ('pending', 'En attente'),
         ('paid', 'En ordre de paiement'),
         ('refused', 'Paiement refusé'),
     ]
 
-    user = models.ForeignKey(User, on_delete=models.CASCADE)  # ID de l'utilisateur
-    plan = models.ForeignKey(Plan, on_delete=models.CASCADE)  # ID du plan
-    start_date = models.DateField(auto_now_add=True)  # Date de début de l'abonnement
-    payment_status = models.CharField(max_length=10, choices=PAYMENT_STATUS_CHOICES, default='pending')  # Statut du paiement
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    plan = models.ForeignKey(Plan, on_delete=models.CASCADE)
+    start_date = models.DateField(auto_now_add=True)
+    payment_status = models.CharField(max_length=10, choices=PAYMENT_STATUS_CHOICES, default='pending')
 
     def get_end_date(self):
         return self.start_date + timedelta(days=self.plan.duration)
@@ -234,6 +250,14 @@ class Subscription(models.Model):  # Statut abonnement
         if self.payment_status == 'paid':
             self.user.is_premium = True
             self.user.save()
+
+            # Envoyer un message de confirmation de souscription
+            Message.objects.create(
+                sender=User.objects.get(is_staff=True),
+                recipient=self.user,
+                subject="Confirmation de souscription",
+                body=f"Votre souscription au plan {self.plan.name} a été confirmée. Profitez de vos avantages premium !"
+            )
         super().save(*args, **kwargs)
 
 
@@ -243,7 +267,7 @@ class Review(models.Model):
     content = models.TextField()  # Contenu du commentaire utilisateur
     datetime = models.DateTimeField(default=timezone.now)  # Date et heure du commentaire
 
-from django.db import models
+
 
 class CatalogService(models.Model):
     name = models.CharField(max_length=100)

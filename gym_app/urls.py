@@ -1,7 +1,7 @@
 from django.urls import path
 from django.conf.urls.static import static
 from befit_app import settings
-from .views import (admin_dashboard, cancel_reservation, affiche_workout, coach_dashboard, inbox, message_detail, send_message, subscribe, subscription_list, validate_username, validate_password, profile, edit_profile, workout_list, subscription, coach_dashboard, contact_coach, contact_member, remind_subscription)
+from .views import (admin_dashboard, cancel_reservation, affiche_workout, coach_dashboard, send_message, messages_inbox, subscribe, subscription_list, validate_username, validate_password, profile, edit_profile, workout_list, subscription, coach_dashboard, contact_coach, contact_member, remind_subscription)
 from gym_app import views
 from django_q.tasks import schedule
 from django.conf import settings
@@ -24,12 +24,12 @@ urlpatterns = [
     path('edit_profile/', edit_profile, name='edit_profile'),
     path('coach_dashboard/', views.coach_dashboard, name='coach_dashboard'),
     path('admin_dashboard/', views.admin_dashboard, name='admin_dashboard'),
-    path('contact_coach/<int:coach_id>/', contact_coach, name='contact_coach'),  # Ajout de cette ligne
-    path('contact_member/<int:member_id>/', contact_member, name='contact_member'),  # Ajout de cette ligne
-    path('message/send/<int:recipient_id>/', send_message, name='send_message'),
+    path('contact_coach/<int:coach_id>/', contact_coach, name='contact_coach'),  
+    path('contact_member/<int:member_id>/', contact_member, name='contact_member'),  
+    # path('messages/send/', views.send_message_default, name='send_message_default'),
+    path('messages/send/<int:recipient_id>/', views.send_message, name='send_message'),
+    path('messages/read/<int:message_id>/', views.read_message, name='read_message'),
     path('messages/inbox/', views.messages_inbox, name='messages_inbox'),
-    path('inbox/', inbox, name='inbox'),
-    path('message/<int:message_id>/', message_detail, name='message_detail'),
     path('plan/<int:pk>', views.plan, name='plan'),
     path('remind_subscription/<int:user_id>/', views.remind_subscription, name='remind_subscription'),
     path('subscription/<int:pk>/', views.subscribe, name='subscription'),
@@ -56,6 +56,7 @@ urlpatterns = [
     path('create-checkout-session/<int:plan_id>/', views.create_checkout_session, name='create_checkout_session'),
 
     path('new_workoutSchedule/', views.newWorkoutSchedule , name='newWorkoutSchedule'),
+    
     
 
     

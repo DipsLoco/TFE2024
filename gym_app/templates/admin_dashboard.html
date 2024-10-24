@@ -194,8 +194,7 @@
             <td>{{ coach.user.date_joined|date:"d M Y" }}</td>
             <td>{{ coach.user.last_login|date:"d M Y H:i" }}</td>
             <td>
-                <button type="button" class="btn btn-primary" data-bs-toggle="modal"
-                    data-bs-target="#contactCoachModal{{ coach.user.id }}">
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#contactModal{{ coach.user.id }}">
                     Contacter
                 </button>
             </td>
@@ -207,8 +206,7 @@
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="contactModalLabel{{ coach.user.id }}">Contacter {{
-                            coach.user.get_full_name }}</h5>
+                        <h5 class="modal-title" id="contactModalLabel{{ coach.user.id }}">Contacter {{coach.user.get_full_name }}</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
@@ -261,8 +259,7 @@
             <td>{{ member.last_login|date:"d M Y H:i" }}</td>
             <td>{{ member.is_premium|yesno:"Oui,Non" }}</td>
             <td>
-                <button type="button" class="btn btn-primary" data-bs-toggle="modal"
-                    data-bs-target="#contactMemberModal{{ member.id }}">
+                <button type="button" class="btn btn-primary" data-bs-toggle="modal"data-bs-target="#contactMemberModal{{ member.id }}">
                     Contacter
                 </button>
             </td>
@@ -274,8 +271,7 @@
             <div class="modal-dialog">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title" id="contactMemberModalLabel{{ member.id }}">Contacter {{
-                            member.get_full_name }}</h5>
+                        <h5 class="modal-title" id="contactMemberModalLabel{{ member.id }}">Contacter {{member.get_full_name }}</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
@@ -490,7 +486,26 @@
     });
 
 </script>
-
+<style>
+    .btn-admin-dashboard {
+        font-size: 1.1rem;
+        padding: 0.5rem 1rem;
+        transition: background-color 0.3s ease;
+    }
+    .btn-admin-dashboard:hover {
+        background-color: #0056b3;
+    }
+    .modal-dialog {
+        max-width: 600px;
+    }
+    .modal-header {
+        background-color: #007bff;
+        color: white;
+    }
+    .modal-title {
+        font-weight: bold;
+    }
+    </style>
 
 
 

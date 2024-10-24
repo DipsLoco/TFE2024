@@ -33,14 +33,18 @@
                 <li class="nav-item">
                     <a class="nav-link" href="{% url 'profile' %}">Mon profil</a>
                 </li>
+                <!-- messagerie boite de reception avec chiffre si plus qu un message -->
                 <li class="nav-item">
-                    <a class="nav-link" href="{% url 'messages_inbox' %}">
+                    <a href="{% url 'messages_inbox' %}" class="nav-link">
                         <i class="fas fa-envelope text-white"></i>
-                        {% if unread_messages > 0 %}
-                            <span class="badge badge-danger">{{ unread_messages }}</span>
+                        <!-- Afficher le badge des messages non lus uniquement si supérieur à 0 -->
+                        {% if unread_messages_count > 0 %}
+                        <span class="badge badge-danger">{{ unread_messages_count }}</span>
                         {% endif %}
                     </a>
                 </li>
+                
+                
                 {% if user.is_superuser %}
                 <li class="nav-item">
                     <a class="nav-link" href="/admin">Admin</a>

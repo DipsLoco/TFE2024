@@ -11,12 +11,20 @@
 </script> -->
 
 
+
+
+
+
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
     <meta name="description" content="Be-Fit - Application de Calisthenie" />
     <meta name="author" content="Be-Fit" />
     <title>BE-FIT | CALISTHENIE</title>
+    <!-- Variable JavaScript globale pour les messages non lus -->
+<script type="text/javascript">
+    var unreadMessagesCount = "{{ unread_messages_count|default_if_none:0|escapejs }}";
+</script>
     <!-- Favicon -->
     <link rel="icon" type="image/x-icon" href="{% static 'assets/favicon.ico' %}" />
     <!-- Bootstrap icons -->
@@ -50,14 +58,10 @@
         {{ message }}
         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
     </div>
-    {% else %}
-    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-        {{ message }}
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
     {% endif %}
     {% endfor %}
     {% endif %}
+
 
     {% block content %}
     {% endblock %}
@@ -176,6 +180,7 @@
                 });
             });
         });
+        
     </script>
 
 </body>

@@ -1,19 +1,84 @@
 {% extends 'base.html' %}
-{% load i18n %}
 {% block content %}
 <div class="container my-5">
-    <h1>Envoyer un message à {{ recipient.get_full_name }}</h1>
+    <h1>Envoyer un message</h1>
+    
     <form method="POST">
         {% csrf_token %}
+        
+        <!-- Sélection du destinataire -->
+        <div class="mb-3">
+            <label for="recipient" class="form-label">Destinataire</label>
+            <select class="form-control" id="recipient" name="recipient" required>
+                <!-- Option vide forcée pour garantir qu'aucun destinataire n'est sélectionné par défaut -->
+                <option value="" disabled selected>-- Sélectionner un destinataire --</option>
+
+                {% for user in users %}
+                    <!-- Logique d'affichage basée sur le rôle de l'utilisateur connecté -->
+                    {% if request.user.role == 'member' %}
+                        {% if user.role == 'coach' or user.is_staff %}
+                            <option value="{{ user.id }}">
+                                {{ user.get_full_name }} - 
+                                {% if user.is_staff %}
+                                    Staff
+                                {% else %}
+                                    {{ user.get_role_display }}
+                                {% endif %}
+                            </option>
+                        {% endif %}
+                    {% elif request.user.role == 'coach' %}
+                        {% if user.role == 'member' or user.role == 'coach' or user.is_staff %}
+                            <option value="{{ user.id }}">
+                                {{ user.get_full_name }} - 
+                                {% if user.is_staff %}
+                                    Manager
+                                {% else %}
+                                    {{ user.get_role_display }}
+                                {% endif %}
+                            </option>
+                        {% endif %}
+                    {% elif request.user.is_staff %}
+                        <option value="{{ user.id }}">
+                            {{ user.get_full_name }} - 
+                            {% if user.is_staff %}
+                                Manager
+                            {% else %}
+                                {{ user.get_role_display }}
+                            {% endif %}
+                        </option>
+                    {% endif %}
+                {% endfor %}
+            </select>
+        </div>
+
+        <!-- Champ Objet -->
         <div class="mb-3">
             <label for="subject" class="form-label">Objet</label>
-            <input type="text" class="form-control" id="subject" name="subject" required>
+            <input type="text" class="form-control" id="subject" name="subject" value="{{ subject }}" required>
         </div>
+
+        <!-- Champ Message -->
         <div class="mb-3">
             <label for="body" class="form-label">Message</label>
             <textarea class="form-control" id="body" name="body" rows="4" required></textarea>
         </div>
+        
         <button type="submit" class="btn btn-primary">Envoyer</button>
     </form>
 </div>
+
+<!-- Script pour désactiver le bouton après le premier clic et vérifier le champ destinataire -->
+<script>
+    document.querySelector('form').addEventListener('submit', function(e) {
+        var recipientSelect = document.getElementById('recipient');
+        if (recipientSelect.value === "") {
+            e.preventDefault();  // Annuler la soumission si aucun destinataire n'est sélectionné
+            alert("Veuillez sélectionner un destinataire.");
+        } else {
+            var submitButton = e.target.querySelector('button[type="submit"]');
+            submitButton.disabled = true;  // Désactiver le bouton après le premier clic
+        }
+    });
+</script>
+
 {% endblock %}

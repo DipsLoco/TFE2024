@@ -6,6 +6,38 @@ from django.utils import timezone
 from .models import Subscription, Message, User
 from django_q.tasks import schedule
 from django.contrib.auth.decorators import login_required
+from .models import Message, User
+from .models import WorkoutSchedule, Message
+from django.contrib.auth.models import User
+
+
+def send_workout_reminder():
+    # Récupérer les séances dans les 6 heures à venir
+    now = timezone.now()
+    upcoming_schedules = WorkoutSchedule.objects.filter(
+        start_time__range=[now, now + timedelta(hours=6)]
+    )
+
+    for schedule in upcoming_schedules:
+        # Envoyer un message à chaque participant
+        for participant in schedule.participants.all():
+            Message.objects.create(
+                sender=User.objects.get(is_staff=True),  # Expéditeur : admin
+                recipient=participant,  # Participant à la séance
+                subject=f"Rappel : Séance de {schedule.workout.title}",
+                body=f"Votre séance '{schedule.workout.title}' avec {schedule.coach.get_full_name()} est prévue le {schedule.start_time.strftime('%d %b %Y à %H:%M')}. Préparez-vous bien !"
+            )
+
+
+def send_reservation_confirmation(user_id, workout_title, workout_time):
+    user = User.objects.get(id=user_id)
+    Message.objects.create(
+        sender=User.objects.get(is_staff=True),  # Expéditeur : un admin ou staff
+        recipient=user,  # Utilisateur qui a réservé
+        subject="Confirmation de réservation",
+        body=f"Votre réservation pour le cours {workout_title} le {workout_time.strftime('%d %b %Y')} a été confirmée."
+    )
+
 
 # Ajouter la gestion des relances d'abonnement ici
 @login_required
@@ -60,5 +92,13 @@ def remind_subscription(request, user_id):
         return redirect('coach_dashboard')
 
     return HttpResponseForbidden("Méthode non autorisée.")
+
+# def send_message(recipient, subject, body):
+#     Message.objects.create(
+#         sender=User.objects.get(is_staff=True),
+#         recipient=recipient,
+#         subject=subject,
+#         body=body
+#     )
 
 

@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% block content %}
+<div class="container mt-5">
+    <h2>{{ message.subject }}</h2>
+    <p><strong>De :</strong> {{ message.sender.get_full_name }}</p>
+    <p><strong>Reçu le :</strong> {{ message.timestamp|date:"d M Y H:i" }}</p>
+    <hr>
+    <p>{{ message.body }}</p>
+
+    <!-- Bouton pour répondre, toujours présent même si le message est lu -->
+    <a href="{% url 'send_message' message.sender.id %}?subject={{ message.subject }}" class="btn btn-primary btn-sm mt-2">Répondre</a>
+
+    <!-- <a href="{% url 'send_message' message.sender.id %}" class="btn btn-primary btn-sm mt-2">Répondre</a> -->
+
+    <a href="{% url 'messages_inbox' %}" class="btn btn-secondary mt-2">Retour à la boîte de réception</a>
+    <br>
+</div>
+<br><br><br><br><br><br><br><br>
+{% endblock %}
+
+<br><br><br><br><br><br><br><br>
+
+
+
+
+<!-- <br><br><br><br><br><br><br><br> -->

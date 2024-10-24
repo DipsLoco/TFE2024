@@ -4,8 +4,12 @@
 {% block content %}
 <div class="container my-5">
     <!-- En-tête du profil avec le statut Premium en haut à droite -->
+    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+        <a href="{% url 'messages_inbox' %}" class="btn btn-mauve" style="background-color: #6a0dad;"> <i class="fas fa-envelope text-white"></i> Boîte de Réception <br></a>
+    </div><br>
     <div class="d-flex justify-content-between align-items-center mb-5">
         <h1 class="text-primary" style="font-weight: bold;">Profil de {{ user.first_name }}</h1>
+        
 
         <div class="d-flex align-items-center">
             <!-- Tableau de bord Coach -->
@@ -33,47 +37,6 @@
             {% endif %}
         </div>
     </div>
-
-    <!-- Icône de message pour lire les messages reçus -->
-    <div class="d-flex align-items-center mb-3">
-        <a href="#" class="nav-link" data-bs-toggle="modal" data-bs-target="#messagesInboxModal">
-            <i class="fas fa-envelope text-white"></i>
-            <!-- Afficher le badge des messages non lus -->
-            {% if unread_messages > 0 %}
-                <span class="badge badge-danger">{{ unread_messages }}</span>
-            {% endif %}
-        </a>
-    </div>
-
-    <!-- Modal pour les messages reçus -->
-    <div class="modal fade" id="messagesInboxModal" tabindex="-1" aria-labelledby="messagesInboxLabel" aria-hidden="true">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="messagesInboxLabel">Boîte de Réception</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    {% if messages %}
-                        <ul class="list-group">
-                            {% for message in messages %}
-                            <li class="list-group-item">
-                                <h5>{{ message.subject }}</h5>
-                                <p><strong>De :</strong> {{ message.sender.get_full_name }} | <strong>Reçu le :</strong> {{ message.timestamp|date:"d M Y H:i" }}</p>
-                                <p>{{ message.body }}</p>
-                                <!-- Bouton pour répondre au message -->
-                                <a href="{% url 'send_message' message.sender.id %}" class="btn btn-primary btn-sm mt-2">Répondre</a>
-                            </li>
-                            {% endfor %}
-                        </ul>
-                    {% else %}
-                        <p class="text-muted">Aucun message reçu pour l'instant.</p>
-                    {% endif %}
-                </div>
-            </div>
-        </div>
-    </div>
-
     {% if user.is_premium %}
         <div class="alert alert-success d-flex align-items-center" role="alert" style="font-size: 1.1rem; font-weight: bold;">
             <i class="fas fa-check-circle me-2"></i>
@@ -92,6 +55,7 @@
             </a>
         </div>
     {% endif %}
+    
     
     <!-- Affichage des membres et des séances passées si coach/admin -->
     <!-- {% if members_with_sessions %}
@@ -262,72 +226,4 @@
     </div>
 </div>
 
-<style>
-    .card {
-        border: none;
-        border-radius: 10px;
-    }
-    .card-header {
-        border-bottom: none;
-        border-radius: 10px 10px 0 0;
-    }
-    .list-group-item {
-        border: none;
-        border-radius: 10px;
-        margin-bottom: 10px;
-    }
-    .btn {
-        border-radius: 5px;
-    }
-
-    .btn-coach-dashboard {
-        background-color: #ffc107;
-        color: #000;
-        font-weight: bold;
-        font-size: 1.2rem;
-        border-radius: 0.5rem;
-        padding: 0.6rem 1.5rem;
-        transition: background-color 0.3s ease;
-    }
-
-    .btn-coach-dashboard:hover {
-        background-color: #e0a800;
-        color: #000;
-    }
-
-    .text-green {
-        background-color: #28a745;
-        color: white;
-        font-weight: bold;
-        border-radius: 5px;
-        text-decoration: none;
-        padding: 0.5rem 1rem;
-        transition: background-color 0.3s ease;
-    }
-
-    .text-green:hover {
-        background-color: #1e7e34;
-        text-decoration: none;
-    }
-</style>
-
-<!-- JavaScript pour le défilement doux -->
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const smoothLinks = document.querySelectorAll('a[href^="#"]');
-        smoothLinks.forEach(link => {
-            link.addEventListener('click', function (e) {
-                e.preventDefault();
-                const targetId = this.getAttribute('href').substring(1);
-                const targetElement = document.getElementById(targetId);
-                if (targetElement) {
-                    window.scrollTo({
-                        top: targetElement.offsetTop - 100,
-                        behavior: 'smooth'
-                    });
-                }
-            });
-        });
-    });
-</script>
 {% endblock %}
