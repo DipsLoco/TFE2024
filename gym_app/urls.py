@@ -1,7 +1,7 @@
 from django.urls import path
 from django.conf.urls.static import static
 from befit_app import settings
-from .views import (admin_dashboard, cancel_reservation, affiche_workout, coach_dashboard, send_message, messages_inbox, subscribe, subscription_list, validate_username, validate_password, profile, edit_profile, workout_list, subscription, coach_dashboard, contact_coach, contact_member, remind_subscription)
+from .views import (admin_dashboard, cancel_reservation, affiche_workout, coach_dashboard, delete_message, mark_important, send_message, messages_inbox, subscribe, subscription_list, validate_username, validate_password, profile, edit_profile, workout_list, subscription, coach_dashboard, contact_coach, contact_member, remind_subscription)
 from gym_app import views
 from django_q.tasks import schedule
 from django.conf import settings
@@ -25,8 +25,14 @@ urlpatterns = [
     path('coach_dashboard/', views.coach_dashboard, name='coach_dashboard'),
     path('admin_dashboard/', views.admin_dashboard, name='admin_dashboard'),
     path('contact_coach/<int:coach_id>/', contact_coach, name='contact_coach'),  
-    path('contact_member/<int:member_id>/', contact_member, name='contact_member'),  
-    # path('messages/send/', views.send_message_default, name='send_message_default'),
+    path('contact_member/<int:member_id>/', contact_member, name='contact_member'),
+    path('message/archive/<int:message_id>/', views.archive_message, name='archive_message'),
+    path('message/unarchive/<int:message_id>/', views.unarchive_message, name='unarchive_message'),
+    path('messages/mark_important/<int:message_id>/', mark_important, name='mark_important'),
+    path('messages/drafts/', views.drafts, name='drafts'),
+    path('messages/delete-multiple/', views.delete_multiple_messages, name='delete_multiple_messages'),
+    path('messages/delete/<int:message_id>/', views.delete_message, name='delete_message'),
+    path('message/restore/<int:message_id>/', views.restore_message, name='restore_message'),
     path('messages/send/<int:recipient_id>/', views.send_message, name='send_message'),
     path('messages/read/<int:message_id>/', views.read_message, name='read_message'),
     path('messages/inbox/', views.messages_inbox, name='messages_inbox'),

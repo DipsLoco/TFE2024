@@ -2,26 +2,134 @@
 {% load i18n %}
 {% block content %}
 <div class="container mt-5">
-    <h2>{{ message.subject }}</h2>
+    <!-- Boutons en haut pour accéder aux brouillons, écrire un nouveau message, et aller sur le profil -->
+    <div class="action-buttons d-flex justify-content-between align-items-center">
+        <a href="{% url 'drafts' %}" class="btn btn-secondary btn-sm">
+            <i class="fas fa-file-alt"></i> Brouillons
+        </a>
+        <!-- Bouton pour écrire un nouveau message -->
+        <a href="{% url 'send_message' 1 %}" class="btn btn-turquoise btn-sm" style="background-color: #20c997;">
+            <i class="fas fa-pencil-alt"></i> Nouveau message
+        </a>
+        <a href="{% url 'profile' %}" class="btn btn-info btn-sm">
+            <i class="fas fa-user"></i> Mon Profil
+        </a>
+        <a href="{% url 'home' %}" class="btn btn-warning btn-sm">
+            <i class="fas fa-home"></i> Retourner à la page d'accueil
+        </a>
+    </div>
+
+    <hr class="my-4">
+
+    <h2><strong>Objet :{{ message.subject }}</h2>
     <p><strong>De :</strong> {{ message.sender.get_full_name }}</p>
     <p><strong>Reçu le :</strong> {{ message.timestamp|date:"d M Y H:i" }}</p>
     <hr>
     <p>{{ message.body }}</p>
 
-    <!-- Bouton pour répondre, toujours présent même si le message est lu -->
-    <a href="{% url 'send_message' message.sender.id %}?subject={{ message.subject }}" class="btn btn-primary btn-sm mt-2">Répondre</a>
+    <div class="action-buttons d-flex justify-content-start mt-3">
+        <!-- Bouton pour marquer comme important avec icône d'étoile dorée -->
+        <form method="POST" action="{% url 'mark_important' message.id %}" class="me-3">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-light">
+                {% if message.is_important %}
+                    <i class="fas fa-star text-warning"></i> <span style="color:black;">Marqué important</span>
+                {% else %}
+                    <i class="far fa-star text-muted"></i> <span style="color:black;">Marquer comme important</span>
+                {% endif %}
+            </button>
+        </form>
 
-    <!-- <a href="{% url 'send_message' message.sender.id %}" class="btn btn-primary btn-sm mt-2">Répondre</a> -->
+        <!-- Bouton pour supprimer le message avec icône de poubelle -->
+        <form method="POST" action="{% url 'delete_message' message.id %}" class="me-3">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger">
+                <i class="fas fa-trash"></i> Supprimer
+            </button>
+        </form>
 
-    <a href="{% url 'messages_inbox' %}" class="btn btn-secondary mt-2">Retour à la boîte de réception</a>
-    <br>
+        <!-- Bouton pour répondre -->
+        {% if message.sender and message.sender.id %}
+            <a href="{% url 'send_message' message.sender.id %}?subject={{ message.subject }}" class="btn btn-primary btn-sm">
+                <i class="fas fa-reply"></i> Répondre
+            </a>
+        {% else %}
+            <p class="text-muted">Impossible de répondre à cet expéditeur.</p>
+        {% endif %}
+
+        <!-- Bouton pour retourner à la boîte de réception -->
+        <a href="{% url 'messages_inbox' %}" class="btn btn-secondary btn-sm ms-3">
+            <i class="fas fa-inbox"></i> Retour à la boîte de réception
+        </a>
+    </div>
+
+    <!-- Section pour afficher les messages du même expéditeur dans un fil de discussion -->
+    <div class="container mt-5">
+        <h2>Fil de Discussion</h2>
+        <div class="chat-window">
+            {% for msg in thread_messages %}
+                <div class="chat-bubble {% if msg.sender == request.user %}sent{% else %}received{% endif %}">
+                    <p><strong>{{ msg.sender.get_full_name }} :</strong> {{ msg.body }}</p>
+                    <p class="text-muted">{{ msg.timestamp|date:"d/m/Y H:i" }}</p>
+                    {% if msg.is_important %}
+                        <i class="fas fa-star text-warning"></i> <!-- Petite étoile dorée pour les messages marqués importants -->
+                    {% endif %}
+                </div>
+            {% empty %}
+                <p>Aucun autre message dans cette discussion.</p>
+            {% endfor %}
+        </div>
+        <br><br>
+    </div>
+
+    <!-- Styles pour la fenêtre de chat et les boutons -->
+    <style>
+        .chat-window {
+            border: 1px solid #ddd;
+            padding: 10px;
+            max-height: 400px;
+            overflow-y: scroll;
+            background-color: #f9f9f9;
+            margin-top: 20px;
+        }
+        .chat-bubble {
+            border-radius: 15px;
+            padding: 10px;
+            margin-bottom: 10px;
+            background-color: #e6e6e6;
+        }
+        .chat-bubble.sent {
+            background-color: #cfe9ff;
+            text-align: right;
+        }
+        .chat-bubble.received {
+            background-color: #d1f5d3;
+            text-align: left;
+        }
+
+        /* Style des boutons avec icônes */
+        .action-buttons .btn {
+            display: flex;
+            align-items: center;
+            padding: 8px 12px;
+        }
+        .action-buttons .btn i {
+            margin-right: 5px;
+        }
+        .btn-light:hover {
+            background-color: #f8f9fa;
+            border: 1px solid #ddd;
+        }
+
+        /* Bouton supprimer devient rouge par défaut, bleu au survol */
+        .btn-danger {
+            background-color: #dc3545;
+            border: none;
+        }
+        .btn-danger:hover {
+            background-color: #007bff;
+        }
+    </style>
 </div>
-<br><br><br><br><br><br><br><br>
+
 {% endblock %}
-
-<br><br><br><br><br><br><br><br>
-
-
-
-
-<!-- <br><br><br><br><br><br><br><br> -->

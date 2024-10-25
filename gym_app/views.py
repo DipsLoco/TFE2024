@@ -313,34 +313,187 @@ from django.shortcuts import render, get_object_or_404
 from .models import Message, User
 
 @login_required
-def messages_inbox(request):
-    # Récupérer les messages reçus par l'utilisateur
+def read_message(request, message_id):
+    # Récupérer le message spécifique
+    message = get_object_or_404(Message, id=message_id, recipient=request.user)
+
+    # Marquer le message comme lu
+    if not message.is_read:
+        message.is_read = True
+        message.save()
+
+    # Récupérer tous les messages de la discussion entre l'utilisateur et l'expéditeur
+    thread_messages = Message.objects.filter(
+        Q(sender=message.sender, recipient=request.user) |
+        Q(sender=request.user, recipient=message.sender)
+    ).order_by('timestamp')
+
+    # Récupérer un destinataire valide pour "Nouveau message"
+    recipient = User.objects.exclude(id=request.user.id).first()
+
+    # Récupérer les messages reçus par l'utilisateur connecté
     messages_received = Message.objects.filter(recipient=request.user).order_by('-timestamp')
 
-    # Ajout d'un filtre par rôle
+    # Filtre par rôle
     filter_role = request.GET.get('filter_role', 'all')
 
-    if filter_role == 'coach':
-        messages_received = messages_received.filter(sender__role='coach')
-    elif filter_role == 'manager':
-        messages_received = messages_received.filter(sender__role='manager')
-    elif filter_role == 'staff':
-        messages_received = messages_received.filter(sender__is_staff=True)
-    
-    # Comptabiliser les messages non lus
     unread_messages = messages_received.filter(is_read=False).count()
 
-    # Récupérer le premier utilisateur (comme exemple de destinataire pour le bouton 'Nouveau message')
-    recipient = User.objects.exclude(id=request.user.id).first()  # Assurer que recipient est défini
+    context = {
+        'message': message,
+        'recipient': recipient,
+        'messages': messages_received,
+        'filter_role': filter_role,
+        'unread_messages': unread_messages,
+        'thread_messages': thread_messages
+    }
+
+    return render(request, 'read_message.html', context)
+
+from django.shortcuts import get_object_or_404, redirect
+from django.contrib.auth.decorators import login_required
+from .models import Message
+
+@login_required
+def archive_message(request, message_id):
+    # Récupérer le message spécifique
+    message = get_object_or_404(Message, id=message_id, recipient=request.user)
+
+    # Marquer le message comme archivé
+    message.is_archived = True
+    message.save()
+
+    return redirect('messages_inbox')
+
+def unarchive_message(request, message_id):
+    message = get_object_or_404(Message, id=message_id, recipient=request.user)
+    if message.is_archived:
+        message.is_archived = False
+        message.save()
+        messages.success(request, "Le message a été désarchivé avec succès.")
+    else:
+        messages.error(request, "Le message n'est pas archivé.")
+    
+    return redirect('messages_inbox')
+
+@login_required
+def mark_important(request, message_id):
+    message = get_object_or_404(Message, id=message_id, recipient=request.user)
+
+    # Inverser l'état du drapeau important
+    message.is_important = not message.is_important
+    message.save()
+
+    return redirect('read_message', message_id=message.id)
+
+@login_required
+def drafts(request):
+    # Récupérer tous les brouillons pour l'utilisateur connecté
+    drafts = Message.objects.filter(sender=request.user, is_draft=True).order_by('-timestamp')
 
     context = {
-        'messages': messages_received,
+        'drafts': drafts
+    }
+
+    return render(request, 'drafts.html', context)
+
+def restore_message(request, message_id):
+    message = get_object_or_404(Message, id=message_id, recipient=request.user)
+    if message.is_deleted:
+        message.is_deleted = False  # Supposons que tu utilises un champ `is_deleted` pour la corbeille
+        message.save()
+        messages.success(request, "Le message a été restauré avec succès.")
+    else:
+        messages.error(request, "Le message n'est pas dans la corbeille.")
+    
+    return redirect('messages_inbox')
+
+
+@login_required
+def delete_message(request, message_id):
+    message = get_object_or_404(Message, id=message_id, recipient=request.user)
+
+    # Marquer le message comme supprimé au lieu de le supprimer définitivement
+    message.is_deleted = True
+    message.save()
+
+    return redirect('messages_inbox')
+
+
+    return redirect('messages_inbox')
+from django.shortcuts import redirect
+
+@login_required
+def delete_multiple_messages(request):
+    if request.method == 'POST':
+        # Récupérer la liste des messages sélectionnés
+        message_ids = request.POST.getlist('selected_messages')
+
+        # Supprimer les messages correspondant aux IDs récupérés
+        for message_id in message_ids:
+            try:
+                message = Message.objects.get(id=message_id, recipient=request.user)
+                # Marquer le message comme supprimé au lieu de le supprimer définitivement
+                message.is_deleted = True
+            except Message.DoesNotExist:
+                # Optionnel : ajouter un message d'erreur si le message n'existe pas
+                pass
+
+    # Rediriger vers la boîte de réception après suppression
+    return redirect('messages_inbox')
+
+
+
+from django.shortcuts import render, get_object_or_404
+from .models import Message
+from django.contrib.auth.decorators import login_required
+
+@login_required
+def messages_inbox(request):
+    # Récupérer la catégorie depuis l'URL
+    category = request.GET.get('category', 'received')
+
+    # Filtrer les messages en fonction de la catégorie sélectionnée
+    if category == 'received':
+        messages = Message.objects.filter(recipient=request.user)
+    elif category == 'sent':
+        messages = Message.objects.filter(sender=request.user)
+    elif category == 'drafts':
+        messages = Message.objects.filter(sender=request.user, is_draft=True)
+    elif category == 'important':
+        messages = Message.objects.filter(recipient=request.user, is_important=True)
+    elif category == 'trash':
+        messages = Message.objects.filter(recipient=request.user, is_deleted=True)
+    elif category == 'archived':
+        messages = Message.objects.filter(recipient=request.user, is_archived=True)
+    else:
+        messages = Message.objects.filter(recipient=request.user)
+
+    # Compter les messages dans chaque catégorie
+    unread_messages = messages.filter(is_read=False).count()
+    draft_messages_count = Message.objects.filter(sender=request.user, is_draft=True).count()
+    sent_messages_count = Message.objects.filter(sender=request.user).count()
+    trash_messages_count = Message.objects.filter(recipient=request.user, is_deleted=True).count()
+    important_messages_count = Message.objects.filter(recipient=request.user, is_important=True).count()
+    archived_messages_count = Message.objects.filter(recipient=request.user, is_archived=True).count()
+
+    context = {
+        'messages': messages,
+        'category': category,
         'unread_messages': unread_messages,
-        'filter_role': filter_role,
-        'recipient': recipient,  # Passer un destinataire valide
+        'draft_messages_count': draft_messages_count,
+        'sent_messages_count': sent_messages_count,
+        'trash_messages_count': trash_messages_count,
+        'important_messages_count': important_messages_count,
+        'archived_messages_count': archived_messages_count,
     }
 
     return render(request, 'messages_inbox.html', context)
+
+
+
+
+
 
 
 # @login_required
@@ -359,7 +512,8 @@ from .models import User
 
 @login_required
 def send_message(request, recipient_id=None):
-    recipient = None  # Initialiser recipient à None pour garantir un champ vide
+    # Initialiser recipient à None pour les nouveaux messages
+    recipient = None
 
     # Gestion des utilisateurs en fonction du rôle
     if request.user.role == 'member':
@@ -372,8 +526,6 @@ def send_message(request, recipient_id=None):
     # Si recipient_id est présent, c'est une réponse à un message
     if recipient_id:
         recipient = get_object_or_404(User, id=recipient_id)
-    else:
-        recipient = None  # Forcer la non-sélection d'un destinataire pour un nouveau message
 
     subject = request.GET.get('subject', '')
 
@@ -393,39 +545,33 @@ def send_message(request, recipient_id=None):
             messages.success(request, "Message envoyé avec succès.")
             return redirect('messages_inbox')
     else:
-        # Pour un nouveau message, recipient reste vide, donc non pré-rempli
-        form = MessageForm(initial={'subject': f"RE: {subject}" if recipient else ''})
+        # Si c'est un nouveau message, ne pré-remplir aucune donnée
+        initial_data = {'subject': f"RE: {subject}" if recipient else ''}
+        if recipient:
+            initial_data['recipient'] = recipient.id  # Pour une réponse, pré-remplir
+
+        form = MessageForm(initial=initial_data)
 
     return render(request, 'send_message.html', {
         'form': form,
         'users': users,
         'subject': subject,
-        'recipient': recipient  # Transmettre uniquement si c'est une réponse
+        'recipient': recipient  # Transmettre seulement pour les réponses
     })
 
 
 
 
-
-
-
-
-
-
-
-
-
-
 # Vue pour lire un message et le marquer comme lu
-@login_required
-def read_message(request, message_id):
-    message = get_object_or_404(Message, id=message_id)
+# @login_required
+# def read_message(request, message_id):
+#     message = get_object_or_404(Message, id=message_id)
 
-    if message.recipient == request.user:
-        message.is_read = True  # Le statut est bien mis à jour ici
-        message.save()
+#     if message.recipient == request.user:
+#         message.is_read = True  # Le statut est bien mis à jour ici
+#         message.save()
 
-    return render(request, 'read_message.html', {'message': message})
+#     return render(request, 'read_message.html', {'message': message})
 
 
 

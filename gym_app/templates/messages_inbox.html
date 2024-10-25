@@ -1,105 +1,217 @@
 {% extends 'base.html' %}
 {% load i18n %}
 {% block content %}
-<br><br>
-<div class="container">
-    <h2>Boîte de Réception</h2>
-
-    <!-- Icône de message avec badge pour le nombre de messages non lus -->
-    <div class="d-flex align-items-center mb-3">
-        <a href="{% url 'send_message' recipient.id %}" class="nav-link">
-            <i class="fas fa-envelope text-white"></i>
-            {% if unread_messages > 0 %}
-                <span class="badge badge-danger">{{ unread_messages }}</span>
-            {% endif %}
+<div class="container mt-5">
+    <div class="action-buttons d-flex justify-content-between align-items-center mb-4">
+        <!-- Bouton pour écrire un nouveau message -->
+        <a href="{% url 'send_message' 1 %}" class="btn btn-turquoise btn-sm">
+            <i class="fas fa-pencil-alt"></i> Nouveau message
+        </a>
+        <a href="{% url 'profile' %}" class="btn btn-info btn-sm" style="margin:auto;">
+            <i class="fas fa-user"></i> Mon Profil
+        </a>
+        <a href="{% url 'home' %}" class="btn btn-warning btn-sm">
+            <i class="fas fa-home"></i> Retour à la page d'accueil
         </a>
     </div>
 
-    <!-- Afficher un popup de succès si le message a bien été envoyé -->
-    <div class="modal fade" id="messageSuccessModal" tabindex="-1" aria-labelledby="messageSuccessLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="messageSuccessLabel">Succès</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    Votre message a été envoyé avec succès !
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">OK</button>
-                </div>
-            </div>
-        </div>
-    </div>
+    <hr class="my-4">
 
-    <!-- Script pour afficher le popup après succès -->
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            var successMessage = "{{ messages.success }}";
-            if (successMessage) {
-                var messageModal = new bootstrap.Modal(document.getElementById('messageSuccessModal'), {
-                    keyboard: false
-                });
-                messageModal.show();
-            }
-        });
-    </script>
+    <h2>Boîte de Réception</h2>
 
-    <!-- Filtre des messages selon le rôle de l'utilisateur -->
+    <!-- Filtres pour afficher les différentes catégories de messages -->
     <div class="filters mb-3">
-        <a href="{% url 'messages_inbox' %}?filter_role=all" class="btn btn-outline-primary {% if filter_role == 'all' %}active{% endif %}">Tous</a>
-        {% if request.user.role == 'member' %}
-            <a href="{% url 'messages_inbox' %}?filter_role=coach" class="btn btn-outline-warning {% if filter_role == 'coach' %}active{% endif %}">Coach</a>
-            <a href="{% url 'messages_inbox' %}?filter_role=staff" class="btn btn-outline-success {% if filter_role == 'staff' %}active{% endif %}">Staff</a> <!-- L'équipe BeFit pour les membres -->
-        {% elif request.user.role == 'coach' %}
-            <a href="{% url 'messages_inbox' %}?filter_role=member" class="btn btn-outline-primary {% if filter_role == 'member' %}active{% endif %}">Membres</a>
-            <a href="{% url 'messages_inbox' %}?filter_role=manager" class="btn btn-outline-secondary {% if filter_role == 'manager' %}active{% endif %}">Manager</a> <!-- Admin = Manager -->
-            <a href="{% url 'messages_inbox' %}?filter_role=staff" class="btn btn-outline-success {% if filter_role == 'staff' %}active{% endif %}">Staff</a> <!-- L'équipe BeFit -->
-        {% elif request.user.is_staff %}
-            <a href="{% url 'messages_inbox' %}?filter_role=coach" class="btn btn-outline-warning {% if filter_role == 'coach' %}active{% endif %}">Coach</a>
-            <a href="{% url 'messages_inbox' %}?filter_role=member" class="btn btn-outline-primary {% if filter_role == 'member' %}active{% endif %}">Membres</a>
-            <a href="{% url 'messages_inbox' %}?filter_role=manager" class="btn btn-outline-secondary {% if filter_role == 'manager' %}active{% endif %}">Manager</a> <!-- Admin = Manager -->
-        {% endif %}
+        <a href="{% url 'messages_inbox' %}?category=received" class="btn btn-outline-primary {% if category == 'received' %}active{% endif %}">
+            <i class="fas fa-inbox"></i> Réception ({{ unread_messages }})
+        </a>
+        <a href="{% url 'messages_inbox' %}?category=drafts" class="btn btn-outline-secondary {% if category == 'drafts' %}active{% endif %}">
+            <i class="fas fa-file-alt"></i> Brouillons ({{ draft_messages_count }})
+        </a>
+        <a href="{% url 'messages_inbox' %}?category=sent" class="btn btn-outline-success {% if category == 'sent' %}active{% endif %}">
+            <i class="fas fa-paper-plane"></i> Envoyés ({{ sent_messages_count }})
+        </a>
+        <a href="{% url 'messages_inbox' %}?category=trash" class="btn btn-outline-danger {% if category == 'trash' %}active{% endif %}">
+            <i class="fas fa-trash"></i> Corbeille ({{ trash_messages_count }})
+        </a>
+        <a href="{% url 'messages_inbox' %}?category=important" class="btn btn-outline-warning {% if category == 'important' %}active{% endif %}">
+            <i class="fas fa-star"></i> Importants ({{ important_messages_count }})
+        </a>
+        <a href="{% url 'messages_inbox' %}?category=archived" class="btn btn-outline-dark {% if category == 'archived' %}active{% endif %}">
+            <i class="fas fa-archive"></i> Archivés ({{ archived_messages_count }})
+        </a>
+        <button type="submit" class="btn btn-danger mt-3" style="float: right;">Supprimer sélection</button>
     </div>
-    
-    <!-- Bouton pour écrire un nouveau message -->
-    <a href="{% url 'send_message' recipient.id %}" class="btn btn-success mb-3">
-        <i class="fas fa-pencil-alt"></i> Nouveau message
-    </a>
 
-    <!-- Liste des messages reçus avec gestion des rôles et statuts -->
-<ul class="list-group">
-    {% for message in messages %}
-    <li class="list-group-item">
-        <strong>De :</strong> 
-        {% if message.sender.role %}
-            {% if message.sender.role == 'manager' %}
-                Manager
-            {% elif message.sender.is_staff %}
-                L'équipe BeFit
-            {% else %}
-                {{ message.sender.get_full_name }}
-            {% endif %}
-        {% else %}
-            Utilisateur inconnu
-        {% endif %}
-        <strong>Reçu le :</strong> {{ message.timestamp|date:"d M Y H:i" }}
-        <p>{{ message.subject }}</p>
-        <p>{{ message.body|truncatewords:20 }}</p>
+    <!-- Filtres des rôles : Tous, Coach, Staff -->
+    <div class="filters mb-3">
+        <a href="{% url 'messages_inbox' %}?filter_role=all" class="btn btn-outline-primary">
+            <i class="fas fa-users"></i> Tous
+        </a>
+        <a href="{% url 'messages_inbox' %}?filter_role=coach" class="btn btn-outline-warning">
+            <i class="fas fa-chalkboard-teacher"></i> Coach
+        </a>
+        <a href="{% url 'messages_inbox' %}?filter_role=staff" class="btn btn-outline-success">
+            <i class="fas fa-user-tie"></i> Staff
+        </a>
+    </div>
 
-        <!-- Statut du message, on conserve uniquement l'indication avec le badge -->
-        {% if message.is_read %}
-            <span class="badge bg-success">Lu</span>
-        {% else %}
-            <span class="badge bg-danger">Non lu</span>
-        {% endif %}
+    <!-- Liste des messages filtrés -->
+    <form method="POST" action="{% url 'delete_multiple_messages' %}">
+        {% csrf_token %}
+        <ul class="list-group mt-3">
+            {% for msg in messages %}
+                <li class="list-group-item">
+                    <div class="d-flex justify-content-between">
+                        <div>
+                            <input type="checkbox" name="selected_messages" value="{{ msg.id }}">
+                            <strong>Objet :</strong> {{ msg.subject }}<br>
+                            <strong>De :</strong> {{ msg.sender.get_full_name }} 
+                            <strong>{% if msg.is_sent %}Envoyé{% else %}Reçu{% endif %} le :</strong> {{ msg.timestamp|date:"d M Y H:i" }}
+                            <!-- Ajout des icônes pour important et archivé -->
+                            {% if msg.is_important %}
+                                <i class="fas fa-star text-warning"></i>
+                            {% endif %}
+                            {% if msg.is_archived %}
+                                <i class="fas fa-archive text-dark"></i>
+                            {% endif %}
+                        </div>
+                        <div>
+                            {% if msg.is_read %}
+                                <span class="badge bg-success">Lu</span>
+                            {% else %}
+                                <span class="badge bg-danger">Non lu</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    <p class="text-muted">{{ msg.body|truncatewords:20 }}</p>
 
-            <!-- Bouton pour lire le message -->
-            <a href="{% url 'read_message' message.id %}" class="btn btn-primary btn-sm">Lire le message</a>
-        </li>
-        {% endfor %}
-    </ul>
+                    <!-- Actions sur les messages -->
+                    <a href="{% url 'read_message' msg.id %}" class="btn btn-primary btn-sm">
+                        <i class="fas fa-envelope-open"></i> Lire
+                    </a>
+                    <a href="{% url 'mark_important' msg.id %}" class="btn btn-warning btn-sm">
+                        {% if msg.is_important %}
+                            <i class="fas fa-star"></i> Retirer des importants
+                        {% else %}
+                            <i class="far fa-star"></i> Marquer comme important
+                        {% endif %}
+                    </a>
+                    {% if msg.is_archived %}
+                        <a href="{% url 'unarchive_message' msg.id %}" class="btn btn-dark btn-sm">
+                            <i class="fas fa-archive"></i> Désarchiver
+                        </a>
+                    {% else %}
+                        <a href="{% url 'archive_message' msg.id %}" class="btn btn-dark btn-sm">
+                            <i class="fas fa-archive"></i> Archiver
+                        </a>
+                    {% endif %}
+                    <button type="button" class="btn btn-danger btn-sm" onclick="confirmDelete('{{ msg.id }}')">
+                        <i class="fas fa-trash"></i> Supprimer
+                    </button>
+                </li>
+                {% if msg.is_deleted %}
+                    <a href="{% url 'restore_message' msg.id %}" class="btn btn-brown btn-sm">
+                        <i class="fas fa-trash-restore"></i> Restaurer Message
+                    </a>
+                {% endif %}
+            {% endfor %}
+        </ul>
+    </form>
 </div>
-<br><br>
+<br>
+<!-- Popup pour la suppression -->
+<div id="delete-confirmation-popup" class="popup" style="display:none;">
+    <div class="popup-content">
+        <h4>Êtes-vous sûr de vouloir supprimer ce message ?</h4>
+        <button id="confirm-delete-btn" class="btn btn-success">Confirmer</button>
+        <button id="cancel-delete-btn" class="btn btn-danger">Annuler</button>
+    </div>
+</div>
+
+<script>
+    // Fonction pour afficher le popup de confirmation de suppression
+    function confirmDelete(messageId) {
+        document.getElementById('delete-confirmation-popup').style.display = 'block';
+        document.getElementById('confirm-delete-btn').onclick = function() {
+            window.location.href = "{% url 'delete_message' 0 %}".replace("0", messageId);
+        };
+    }
+
+    // Fonction pour cacher le popup de confirmation
+    document.getElementById('cancel-delete-btn').onclick = function() {
+        document.getElementById('delete-confirmation-popup').style.display = 'none';
+    };
+</script>
+
+<style>
+    .message-select {
+        margin-left: 10px;
+    }
+
+    .popup {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background-color: white;
+        padding: 20px;
+        border: 1px solid #ddd;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        z-index: 9999;
+    }
+
+    .popup-content {
+        text-align: center;
+    }
+
+    .popup-content h4 {
+        margin-bottom: 20px;
+    }
+
+    .list-group-item {
+        border-radius: 10px;
+        background-color: #f8f9fa;
+        padding: 15px;
+        margin-bottom: 10px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+    .filters .btn {
+        margin-right: 10px;
+    }
+    .btn-primary {
+        background-color: #007bff;
+        border-color: #007bff;
+    }
+    .btn-primary:hover {
+        background-color: #0056b3;
+    }
+    .btn-warning {
+        background-color: #e7b306;
+        border-color: #ffc107;
+    }
+    .btn-warning:hover {
+        background-color: #e0a800;
+    }
+    .btn-danger {
+        background-color: #dc3545;
+        border-color: #dc3545;
+    }
+    .btn-danger:hover {
+        background-color: #c82333;
+    }
+    .btn-brown {
+        background-color: #10ac349d;
+        border-color: #079a1f9c;
+    }
+    .btn-dark:hover {
+        background-color: #23272b;
+    }
+    .btn-info {
+        background-color: #031cffba;
+        border-color: #06241b;
+    }
+    .btn-info:hover {
+        background-color: #17a586;
+    }
+</style>
 {% endblock %}

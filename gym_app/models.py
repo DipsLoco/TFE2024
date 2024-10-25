@@ -34,15 +34,20 @@ class User(AbstractUser):
 User = get_user_model()
 
 class Message(models.Model):
-    sender = models.ForeignKey(User, related_name='sent_messages', on_delete=models.CASCADE)
-    recipient = models.ForeignKey(User, related_name='received_messages', on_delete=models.CASCADE)
+    sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sent_messages')
+    recipient = models.ForeignKey(User, on_delete=models.CASCADE, related_name='received_messages')
     subject = models.CharField(max_length=255)
     body = models.TextField()
     timestamp = models.DateTimeField(auto_now_add=True)
     is_read = models.BooleanField(default=False)
+    is_important = models.BooleanField(default=False)  # Pour marquer les messages importants
+    is_deleted = models.BooleanField(default=False)  # Nouveau champ pour la corbeille
+    is_archived = models.BooleanField(default=False)  # Pour gérer l'archivage
+    is_draft = models.BooleanField(default=False)  # Pour gérer les brouillons
 
     def __str__(self):
         return f"De {self.sender} à {self.recipient} - {self.subject}"
+
 
     
 @receiver(post_save, sender=User)

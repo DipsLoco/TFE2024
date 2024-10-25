@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-5">
+    <h2>Brouillons</h2>
+
+    {% if drafts %}
+        <ul class="list-group">
+            {% for draft in drafts %}
+                <li class="list-group-item">
+                    <strong>Sujet :</strong> {{ draft.subject }}<br>
+                    <strong>Créé le :</strong> {{ draft.timestamp|date:"d M Y H:i" }}<br>
+                    <a href="{% url 'send_message' draft.id %}" class="btn btn-primary btn-sm mt-2">
+                        <i class="fas fa-pencil-alt"></i> Modifier le brouillon
+                    </a>
+                </li>
+            {% endfor %}
+        </ul>
+    {% else %}
+        <p>Vous n'avez pas de brouillons.</p>
+    {% endif %}
+</div>
+{% endblock %}
