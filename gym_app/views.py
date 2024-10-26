@@ -1,3 +1,4 @@
+from urllib import request
 import stripe
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
@@ -356,35 +357,20 @@ from .models import Message
 
 @login_required
 def archive_message(request, message_id):
-    # Récupérer le message spécifique
     message = get_object_or_404(Message, id=message_id, recipient=request.user)
-
-    # Marquer le message comme archivé
-    message.is_archived = True
+    message.is_archived = not message.is_archived  # Basculer l'état d'archivage
     message.save()
-
-    return redirect('messages_inbox')
-
-def unarchive_message(request, message_id):
-    message = get_object_or_404(Message, id=message_id, recipient=request.user)
-    if message.is_archived:
-        message.is_archived = False
-        message.save()
-        messages.success(request, "Le message a été désarchivé avec succès.")
-    else:
-        messages.error(request, "Le message n'est pas archivé.")
     
-    return redirect('messages_inbox')
+    return JsonResponse({'success': True, 'is_archived': message.is_archived})
 
 @login_required
 def mark_important(request, message_id):
     message = get_object_or_404(Message, id=message_id, recipient=request.user)
-
-    # Inverser l'état du drapeau important
-    message.is_important = not message.is_important
+    message.is_important = not message.is_important  # Basculer l'état important
     message.save()
 
-    return redirect('read_message', message_id=message.id)
+    return JsonResponse({'success': True, 'is_important': message.is_important})
+
 
 @login_required
 def drafts(request):
@@ -448,14 +434,14 @@ from django.shortcuts import render, get_object_or_404
 from .models import Message
 from django.contrib.auth.decorators import login_required
 
-@login_required
 def messages_inbox(request):
     # Récupérer la catégorie depuis l'URL
     category = request.GET.get('category', 'received')
+    filter_role = request.GET.get('filter_role', 'all')
 
     # Filtrer les messages en fonction de la catégorie sélectionnée
     if category == 'received':
-        messages = Message.objects.filter(recipient=request.user)
+        messages = Message.objects.filter(recipient=request.user, is_deleted=False)
     elif category == 'sent':
         messages = Message.objects.filter(sender=request.user)
     elif category == 'drafts':
@@ -466,29 +452,44 @@ def messages_inbox(request):
         messages = Message.objects.filter(recipient=request.user, is_deleted=True)
     elif category == 'archived':
         messages = Message.objects.filter(recipient=request.user, is_archived=True)
+    elif category == 'unread':
+        messages = Message.objects.filter(recipient=request.user, is_read=False, is_deleted=False)
     else:
-        messages = Message.objects.filter(recipient=request.user)
+        messages = Message.objects.filter(recipient=request.user, is_deleted=False)
+
+    # Appliquer les filtres de rôle
+    if filter_role == 'all':
+        messages = messages
+    elif filter_role == 'coach':
+        messages = messages.filter(sender__role='coach')
+    elif filter_role == 'staff':
+        messages = messages.filter(sender__is_staff=True)
 
     # Compter les messages dans chaque catégorie
-    unread_messages = messages.filter(is_read=False).count()
+    unread_messages = Message.objects.filter(recipient=request.user, is_read=False, is_deleted=False).count()
     draft_messages_count = Message.objects.filter(sender=request.user, is_draft=True).count()
     sent_messages_count = Message.objects.filter(sender=request.user).count()
     trash_messages_count = Message.objects.filter(recipient=request.user, is_deleted=True).count()
     important_messages_count = Message.objects.filter(recipient=request.user, is_important=True).count()
     archived_messages_count = Message.objects.filter(recipient=request.user, is_archived=True).count()
+    total_messages_count = Message.objects.filter(recipient=request.user, is_deleted=False).count()
 
     context = {
         'messages': messages,
         'category': category,
+        'filter_role': filter_role,
         'unread_messages': unread_messages,
         'draft_messages_count': draft_messages_count,
         'sent_messages_count': sent_messages_count,
         'trash_messages_count': trash_messages_count,
         'important_messages_count': important_messages_count,
         'archived_messages_count': archived_messages_count,
+        'total_messages_count': total_messages_count,
     }
 
     return render(request, 'messages_inbox.html', context)
+
+
 
 
 

@@ -1,124 +1,139 @@
 {% extends 'base.html' %}
+{% load static %}
 {% load i18n %}
 {% block content %}
 <div class="container mt-5">
     <div class="action-buttons d-flex justify-content-between align-items-center mb-4">
-        <!-- Bouton pour écrire un nouveau message -->
+        <!-- Bouton Nouveau message aligné à gauche -->
         <a href="{% url 'send_message' 1 %}" class="btn btn-turquoise btn-sm">
             <i class="fas fa-pencil-alt"></i> Nouveau message
         </a>
-        <a href="{% url 'profile' %}" class="btn btn-info btn-sm" style="margin:auto;">
-            <i class="fas fa-user"></i> Mon Profil
-        </a>
-        <a href="{% url 'home' %}" class="btn btn-warning btn-sm">
-            <i class="fas fa-home"></i> Retour à la page d'accueil
-        </a>
+        <!-- Titre Boîte de Réception centré avec ombre -->
+        <h1 class="text-center text-capitalize" style="font-family: 'Brush Script MT', cursive; font-size: 50px; color: #007bff; text-shadow: 2px 2px #ccc;">
+            Boîte de Réception
+        </h1>
+        <!-- Boutons Mon Profil et Retour Accueil alignés à droite -->
+        <div>
+            <a href="{% url 'profile' %}" class="btn btn-info btn-sm mr-2">
+                <i class="fas fa-user"></i> Mon Profil
+            </a>
+            <a href="{% url 'home' %}" class="btn btn-warning btn-sm">
+                <i class="fas fa-home"></i> Retour Accueil
+            </a>
+        </div>
     </div>
 
     <hr class="my-4">
 
-    <h2>Boîte de Réception</h2>
-
     <!-- Filtres pour afficher les différentes catégories de messages -->
-    <div class="filters mb-3">
-        <a href="{% url 'messages_inbox' %}?category=received" class="btn btn-outline-primary {% if category == 'received' %}active{% endif %}">
-            <i class="fas fa-inbox"></i> Réception ({{ unread_messages }})
-        </a>
-        <a href="{% url 'messages_inbox' %}?category=drafts" class="btn btn-outline-secondary {% if category == 'drafts' %}active{% endif %}">
-            <i class="fas fa-file-alt"></i> Brouillons ({{ draft_messages_count }})
-        </a>
-        <a href="{% url 'messages_inbox' %}?category=sent" class="btn btn-outline-success {% if category == 'sent' %}active{% endif %}">
-            <i class="fas fa-paper-plane"></i> Envoyés ({{ sent_messages_count }})
-        </a>
-        <a href="{% url 'messages_inbox' %}?category=trash" class="btn btn-outline-danger {% if category == 'trash' %}active{% endif %}">
-            <i class="fas fa-trash"></i> Corbeille ({{ trash_messages_count }})
-        </a>
-        <a href="{% url 'messages_inbox' %}?category=important" class="btn btn-outline-warning {% if category == 'important' %}active{% endif %}">
-            <i class="fas fa-star"></i> Importants ({{ important_messages_count }})
-        </a>
-        <a href="{% url 'messages_inbox' %}?category=archived" class="btn btn-outline-dark {% if category == 'archived' %}active{% endif %}">
-            <i class="fas fa-archive"></i> Archivés ({{ archived_messages_count }})
-        </a>
-        <button type="submit" class="btn btn-danger mt-3" style="float: right;">Supprimer sélection</button>
+    <div class="filters d-flex justify-content-between mb-3">
+        <div>
+            <a href="{% url 'messages_inbox' %}?category=received" class="btn btn-outline-primary {% if category == 'received' %}active{% endif %}">
+                <i class="fas fa-inbox"></i> Réception ({{ total_messages_count }})
+            </a>
+            <a href="{% url 'messages_inbox' %}?category=unread" class="btn btn-outline-info {% if category == 'unread' %}active{% endif %}">
+                <i class="fas fa-envelope-open"></i> Non Lu ({{ unread_messages }})
+            </a>
+            <a href="{% url 'messages_inbox' %}?category=drafts" class="btn btn-outline-secondary {% if category == 'drafts' %}active{% endif %}">
+                <i class="fas fa-file-alt"></i> Brouillons ({{ draft_messages_count }})
+            </a>
+            <a href="{% url 'messages_inbox' %}?category=sent" class="btn btn-outline-success {% if category == 'sent' %}active{% endif %}">
+                <i class="fas fa-paper-plane"></i> Envoyés ({{ sent_messages_count }})
+            </a>
+            <a href="{% url 'messages_inbox' %}?category=trash" class="btn btn-outline-danger {% if category == 'trash' %}active{% endif %}">
+                <i class="fas fa-trash"></i> Corbeille ({{ trash_messages_count }})
+            </a>
+            <a href="{% url 'messages_inbox' %}?category=important" class="btn btn-outline-warning {% if category == 'important' %}active{% endif %}">
+                <i class="fas fa-star"></i> Importants ({{ important_messages_count }})
+            </a>
+            <a href="{% url 'messages_inbox' %}?category=archived" class="btn btn-outline-dark {% if category == 'archived' %}active{% endif %}">
+                <i class="fas fa-archive"></i> Archivés ({{ archived_messages_count }})
+            </a>
+        </div>
     </div>
+
+    <!-- Embellissement du titre "Filtrer" -->
+    <h3 class="styled-title">
+        <i class="fas fa-filter"></i> Filtrer
+    </h3>
+    
 
     <!-- Filtres des rôles : Tous, Coach, Staff -->
-    <div class="filters mb-3">
-        <a href="{% url 'messages_inbox' %}?filter_role=all" class="btn btn-outline-primary">
-            <i class="fas fa-users"></i> Tous
-        </a>
-        <a href="{% url 'messages_inbox' %}?filter_role=coach" class="btn btn-outline-warning">
-            <i class="fas fa-chalkboard-teacher"></i> Coach
-        </a>
-        <a href="{% url 'messages_inbox' %}?filter_role=staff" class="btn btn-outline-success">
-            <i class="fas fa-user-tie"></i> Staff
-        </a>
-    </div>
+<div class="filters mb-3 d-flex justify-content-start">
+    <a href="{% url 'messages_inbox' %}?filter_role=all" class="btn btn-outline-primary btn-custom-small mr-2">
+        <i class="fas fa-users"></i> Tous
+    </a>
+    <a href="{% url 'messages_inbox' %}?filter_role=coach" class="btn btn-outline-warning btn-custom-small mr-2">
+        <i class="fas fa-chalkboard-teacher"></i> Coach
+    </a>
+    <a href="{% url 'messages_inbox' %}?filter_role=staff" class="btn btn-outline-success btn-custom-small mr-2">
+        <i class="fas fa-user-tie"></i> Staff
+    </a>
+    <!-- Bouton supprimer bien aligné à droite -->
+    <button type="submit" class="btn btn-danger btn-sm ml-auto" onclick="confirmDeleteSelected();">
+        <i class="fas fa-trash-alt"></i> Supprimer sélection
+    </button>
+</div>
+
 
     <!-- Liste des messages filtrés -->
     <form method="POST" action="{% url 'delete_multiple_messages' %}">
         {% csrf_token %}
         <ul class="list-group mt-3">
             {% for msg in messages %}
-                <li class="list-group-item">
-                    <div class="d-flex justify-content-between">
-                        <div>
-                            <input type="checkbox" name="selected_messages" value="{{ msg.id }}">
-                            <strong>Objet :</strong> {{ msg.subject }}<br>
-                            <strong>De :</strong> {{ msg.sender.get_full_name }} 
-                            <strong>{% if msg.is_sent %}Envoyé{% else %}Reçu{% endif %} le :</strong> {{ msg.timestamp|date:"d M Y H:i" }}
-                            <!-- Ajout des icônes pour important et archivé -->
-                            {% if msg.is_important %}
-                                <i class="fas fa-star text-warning"></i>
-                            {% endif %}
-                            {% if msg.is_archived %}
-                                <i class="fas fa-archive text-dark"></i>
-                            {% endif %}
-                        </div>
-                        <div>
-                            {% if msg.is_read %}
-                                <span class="badge bg-success">Lu</span>
-                            {% else %}
-                                <span class="badge bg-danger">Non lu</span>
-                            {% endif %}
-                        </div>
-                    </div>
-                    <p class="text-muted">{{ msg.body|truncatewords:20 }}</p>
-
-                    <!-- Actions sur les messages -->
-                    <a href="{% url 'read_message' msg.id %}" class="btn btn-primary btn-sm">
-                        <i class="fas fa-envelope-open"></i> Lire
-                    </a>
-                    <a href="{% url 'mark_important' msg.id %}" class="btn btn-warning btn-sm">
-                        {% if msg.is_important %}
-                            <i class="fas fa-star"></i> Retirer des importants
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <!-- Affichage de l'image de l'expéditeur -->
+                    <div class="sender-info d-flex align-items-center mr-3">
+                        {% if msg.sender.image %}
+                            <img src="{{ msg.sender.image.url }}" alt="Photo de {{ msg.sender.first_name }}" class="sender-image rounded-circle" style="width: 70px; height: 70px; object-fit: cover;">
                         {% else %}
-                            <i class="far fa-star"></i> Marquer comme important
+                            <img src="{% static 'default_profile.png' %}" alt="Photo par défaut" class="sender-image rounded-circle" style="width: 70px; height: 70px; object-fit: cover;">
                         {% endif %}
-                    </a>
-                    {% if msg.is_archived %}
-                        <a href="{% url 'unarchive_message' msg.id %}" class="btn btn-dark btn-sm">
-                            <i class="fas fa-archive"></i> Désarchiver
-                        </a>
-                    {% else %}
-                        <a href="{% url 'archive_message' msg.id %}" class="btn btn-dark btn-sm">
-                            <i class="fas fa-archive"></i> Archiver
-                        </a>
-                    {% endif %}
-                    <button type="button" class="btn btn-danger btn-sm" onclick="confirmDelete('{{ msg.id }}')">
-                        <i class="fas fa-trash"></i> Supprimer
-                    </button>
+                    </div>
+                    <div class="message-info">
+                        <strong>Objet :</strong> {{ msg.subject }}<br>
+                        <strong>{% if category == 'sent' %}À{% else %}De{% endif %} :</strong> 
+                        {% if category == 'sent' %} {{ msg.recipient.get_full_name }} {% else %} {{ msg.sender.get_full_name }} {% endif %}
+                        <strong>{% if category == 'sent' %}Envoyé{% else %}Reçu{% endif %} le :</strong> {{ msg.timestamp|date:"d M Y H:i" }}
+                        <p style="font-style: italic; color: #555;">{{ msg.body|truncatewords:7 }}</p>
+                        {% if msg.is_important %} <i class="fas fa-star text-warning"></i> {% endif %}
+                        {% if msg.is_archived %} <i class="fas fa-archive text-dark"></i> {% endif %}
+                    </div>
+                    <div class="message-actions d-flex align-items-center">
+                        <input type="checkbox" name="selected_messages" value="{{ msg.id }}" class="message-select mr-2">
+                        <div class="mr-2">
+                            {% if msg.is_read %} <span class="badge bg-success">Lu</span> {% else %} <span class="badge bg-danger">Non lu</span> {% endif %}
+                        </div>
+                        <a href="{% url 'read_message' msg.id %}" class="btn btn-primary btn-sm mx-1"><i class="fas fa-envelope-open"></i> Lire</a>
+                        <a href="javascript:void(0);" class="btn btn-warning btn-sm mx-1" data-id="{{ msg.id }}" onclick="toggleImportant(this);">
+                            {% if msg.is_important %} 
+                                <i class="fas fa-star"></i> Retirer des importants 
+                            {% else %} 
+                                <i class="far fa-star"></i> Marquer comme important 
+                            {% endif %}
+                        </a>                        
+                        
+                        {% if msg.is_archived %}
+                            <a href="javascript:void(0);" class="btn btn-dark btn-sm mx-1" data-id="{{ msg.id }}" onclick="toggleArchive(this);">
+                                <i class="fas fa-archive"></i> Désarchiver
+                            </a>
+                        {% else %}
+                            <a href="javascript:void(0);" class="btn btn-dark btn-sm mx-1" data-id="{{ msg.id }}" onclick="toggleArchive(this);">
+                                <i class="fas fa-archive"></i> Archiver
+                            </a>
+                        {% endif %}
+                        
+                        <button type="button" class="btn btn-danger btn-sm mx-1" onclick="confirmDelete('{{ msg.id }}')"><i class="fas fa-trash"></i> Supprimer</button>
+                    </div>
                 </li>
-                {% if msg.is_deleted %}
-                    <a href="{% url 'restore_message' msg.id %}" class="btn btn-brown btn-sm">
-                        <i class="fas fa-trash-restore"></i> Restaurer Message
-                    </a>
+                {% if category == 'trash' and msg.is_deleted %}
+                    <a href="{% url 'restore_message' msg.id %}" class="btn btn-dark btn-sm mt-2"><i class="fas fa-trash-restore"></i> Restaurer Message</a>
                 {% endif %}
             {% endfor %}
         </ul>
     </form>
 </div>
-<br>
+
 <!-- Popup pour la suppression -->
 <div id="delete-confirmation-popup" class="popup" style="display:none;">
     <div class="popup-content">
@@ -141,11 +156,87 @@
     document.getElementById('cancel-delete-btn').onclick = function() {
         document.getElementById('delete-confirmation-popup').style.display = 'none';
     };
+
+    // Toggle important status via AJAX
+    function toggleImportant(element) {
+    const messageId = element.getAttribute('data-id');
+    fetch(`/messages/mark_important/${messageId}/`, {
+        method: "POST",
+        headers: { "X-CSRFToken": "{{ csrf_token }}" }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            element.innerHTML = data.is_important ? '<i class="fas fa-star"></i> Retirer des importants' : '<i class="far fa-star"></i> Marquer comme important';
+        } else {
+            console.error("Erreur lors du marquage comme important :", data.error);
+        }
+    })
+    .catch(error => {
+        console.error("Erreur dans la requête AJAX:", error);
+    });
+}
+
+
+
+    // Toggle archive status via AJAX
+    function toggleArchive(element) {
+    const messageId = element.getAttribute('data-id');
+    fetch(`/archive_message/${messageId}/`, {
+        method: "POST",
+        headers: { "X-CSRFToken": "{{ csrf_token }}" }
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            element.innerHTML = data.is_archived ? '<i class="fas fa-archive"></i> Désarchiver' : '<i class="fas fa-archive"></i> Archiver';
+        } else {
+            console.error("Erreur lors de l'archivage/désarchivage :", data.error);
+        }
+    })
+    .catch(error => {
+        console.error("Erreur dans la requête AJAX:", error);
+    });
+}
+
+
+
+    // Fonction de confirmation pour la suppression multiple
+    function confirmDeleteSelected() {
+        let selected = document.querySelectorAll('.message-select:checked');
+        if (selected.length === 0) {
+            alert('Sélectionnez d’abord au moins un message à supprimer.');
+            return;
+        }
+        if (confirm("Voulez-vous vraiment supprimer les messages sélectionnés ?")) {
+            document.querySelector("form").submit();
+        }
+    }
 </script>
 
 <style>
+    .message-info {
+        flex: 1;
+        padding-right: 10px;
+    }
+
+    .message-actions {
+        display: flex;
+        align-items: center;
+    }
+
     .message-select {
         margin-left: 10px;
+        margin-right: 10px;
+    }
+
+    .filters {
+        display: flex;
+        justify-content: space-between;
+    }
+
+    .btn-danger {
+        margin-left: 5px; /* Ajustement de l'espacement entre les boutons */
     }
 
     .popup {
@@ -175,43 +266,75 @@
         margin-bottom: 10px;
         box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
     }
+
     .filters .btn {
         margin-right: 10px;
     }
+
     .btn-primary {
         background-color: #007bff;
         border-color: #007bff;
     }
+
     .btn-primary:hover {
         background-color: #0056b3;
     }
+
     .btn-warning {
-        background-color: #e7b306;
+        background-color: #48485bb0;
         border-color: #ffc107;
     }
+
     .btn-warning:hover {
         background-color: #e0a800;
     }
+
     .btn-danger {
         background-color: #dc3545;
         border-color: #dc3545;
     }
+
     .btn-danger:hover {
         background-color: #c82333;
     }
-    .btn-brown {
-        background-color: #10ac349d;
-        border-color: #079a1f9c;
-    }
+
     .btn-dark:hover {
         background-color: #23272b;
     }
+
     .btn-info {
         background-color: #031cffba;
         border-color: #06241b;
     }
+
     .btn-info:hover {
         background-color: #17a586;
     }
+
+    .message-info p {
+        font-style: italic;
+    }
+    .btn-custom-small {
+        padding: 0.6rem 1rem; /* Ajuste le padding */
+        font-size: 1rem; /* Réduit la taille de la police */
+    }
+     /* Police personnalisée, par exemple Dancing Script de Google Fonts */
+     @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&display=swap');
+
+.styled-title {
+    font-family: 'Dancing Script', cursive; /* Utilise la police de calligraphie */
+    font-size: 1rem; /* Taille plus petite */
+    font-weight: bold;
+    color: #343a40;
+    text-decoration: underline;
+    display: flex;
+    align-items: center;
+}
+
+.styled-title i {
+    margin-right: 8px; /* Espace entre l'icône et le texte */
+    font-size: 1.25rem; /* Taille de l'icône alignée avec le texte */
+    color: #000000; /* Couleur du logo */
+}
 </style>
 {% endblock %}
