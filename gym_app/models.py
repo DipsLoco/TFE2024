@@ -48,6 +48,10 @@ class Message(models.Model):
     def __str__(self):
         return f"De {self.sender} à {self.recipient} - {self.subject}"
 
+from django_q.tasks import async_task
+
+def send_message_task(sender_id, recipient_id, subject, body):
+    async_task('gym_app.tasks.send_welcome_message', sender_id, recipient_id, subject, body)
 
     
 @receiver(post_save, sender=User)

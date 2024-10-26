@@ -61,19 +61,7 @@ urlpatterns = [
     path('create-checkout-session/<int:plan_id>/', views.create_checkout_session, name='create_checkout_session'),
 
     path('new_workoutSchedule/', views.newWorkoutSchedule , name='newWorkoutSchedule'),
-    
-    
-
-    
-
-    
-
-
-
-    
 ] 
-
-
 
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

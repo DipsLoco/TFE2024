@@ -70,15 +70,19 @@
         <i class="fas fa-user-tie"></i> Staff
     </a>
     <!-- Bouton supprimer bien aligné à droite -->
-    <button type="submit" class="btn btn-danger btn-sm ml-auto" onclick="confirmDeleteSelected();">
+    <!-- <button type="submit" class="btn btn-danger btn-sm ml-auto" onclick="confirmDeleteSelected();">
         <i class="fas fa-trash-alt"></i> Supprimer sélection
-    </button>
+    </button> -->
 </div>
 
 
     <!-- Liste des messages filtrés -->
     <form method="POST" action="{% url 'delete_multiple_messages' %}">
+        <!-- print("IDs sélectionnés pour suppression :", message_ids) -->
+
         {% csrf_token %}
+        <!-- print("IDs sélectionnés pour suppression :", message_ids) -->
+
         <ul class="list-group mt-3">
             {% for msg in messages %}
                 <li class="list-group-item d-flex justify-content-between align-items-center">
@@ -100,7 +104,7 @@
                         {% if msg.is_archived %} <i class="fas fa-archive text-dark"></i> {% endif %}
                     </div>
                     <div class="message-actions d-flex align-items-center">
-                        <input type="checkbox" name="selected_messages" value="{{ msg.id }}" class="message-select mr-2">
+                        <!-- <input type="checkbox" name="selected_messages" value="{{ msg.id }}" class="message-select mr-2">petit carre avec flesches bleu pour bouton Supprimer selection -->
                         <div class="mr-2">
                             {% if msg.is_read %} <span class="badge bg-success">Lu</span> {% else %} <span class="badge bg-danger">Non lu</span> {% endif %}
                         </div>
@@ -132,6 +136,7 @@
             {% endfor %}
         </ul>
     </form>
+    <br>
 </div>
 
 <!-- Popup pour la suppression -->
@@ -203,15 +208,20 @@
 
     // Fonction de confirmation pour la suppression multiple
     function confirmDeleteSelected() {
-        let selected = document.querySelectorAll('.message-select:checked');
-        if (selected.length === 0) {
-            alert('Sélectionnez d’abord au moins un message à supprimer.');
-            return;
-        }
-        if (confirm("Voulez-vous vraiment supprimer les messages sélectionnés ?")) {
-            document.querySelector("form").submit();
-        }
+    console.log("Fonction confirmDeleteSelected appelée");
+    let selected = document.querySelectorAll('.message-select:checked');
+    console.log("Messages sélectionnés :", selected);
+    if (selected.length === 0) {
+        alert('Sélectionnez d’abord au moins un message à supprimer.');
+        return;
     }
+    if (confirm("Voulez-vous vraiment supprimer les messages sélectionnés ?")) {
+        console.log("Confirmation de suppression acceptée.");
+        document.querySelector("form").submit();
+    }
+}
+
+
 </script>
 
 <style>
@@ -318,6 +328,10 @@
         padding: 0.6rem 1rem; /* Ajuste le padding */
         font-size: 1rem; /* Réduit la taille de la police */
     }
+    .sender-info {
+    margin-right: 20px; /* Photo expediteur pour plus ou moins d'espace */
+}
+
      /* Police personnalisée, par exemple Dancing Script de Google Fonts */
      @import url('https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&display=swap');
 

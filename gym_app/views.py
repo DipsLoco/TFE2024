@@ -22,8 +22,7 @@ from datetime import timedelta
 from django.urls import path
 from django.db.models import Count, Avg, F, Q
 from django.db.models.functions import TruncMonth, ExtractHour
-from django_q.tasks import schedule
-from django_q.tasks import async_task
+from django_q.tasks import schedule, async_task
 from django.utils.timezone import now
 from calendar import month_name
 from django.utils.dateformat import format
@@ -31,6 +30,8 @@ from django.utils.translation import gettext as _
 from django.contrib import messages as django_messages
 from .forms import MessageForm
 from django.db.models import Q
+
+
 
 
 
@@ -309,10 +310,6 @@ def register_user(request):
         form = SignUpForm()
     return render(request, 'administration/register.html', {'form': form})
 
-from django.contrib.auth.decorators import login_required
-from django.shortcuts import render, get_object_or_404
-from .models import Message, User
-
 @login_required
 def read_message(request, message_id):
     # Récupérer le message spécifique
@@ -357,19 +354,22 @@ from .models import Message
 
 @login_required
 def archive_message(request, message_id):
-    message = get_object_or_404(Message, id=message_id, recipient=request.user)
-    message.is_archived = not message.is_archived  # Basculer l'état d'archivage
-    message.save()
-    
-    return JsonResponse({'success': True, 'is_archived': message.is_archived})
+    message = get_object_or_404(Message, id=message_id)
+    if message.sender == request.user or message.recipient == request.user:
+        message.is_archived = not message.is_archived  # Basculer l'état d'archivage
+        message.save()
+        return JsonResponse({'success': True, 'is_archived': message.is_archived})
+    return HttpResponseForbidden("Vous n'avez pas l'autorisation d'archiver ce message.")
 
 @login_required
 def mark_important(request, message_id):
-    message = get_object_or_404(Message, id=message_id, recipient=request.user)
-    message.is_important = not message.is_important  # Basculer l'état important
-    message.save()
+    message = get_object_or_404(Message, id=message_id)
+    if message.sender == request.user or message.recipient == request.user:
+        message.is_important = not message.is_important  # Basculer l'état important
+        message.save()
+        return JsonResponse({'success': True, 'is_important': message.is_important})
+    return HttpResponseForbidden("Vous n'avez pas l'autorisation de marquer ce message comme important.")
 
-    return JsonResponse({'success': True, 'is_important': message.is_important})
 
 
 @login_required
@@ -421,12 +421,14 @@ def delete_multiple_messages(request):
                 message = Message.objects.get(id=message_id, recipient=request.user)
                 # Marquer le message comme supprimé au lieu de le supprimer définitivement
                 message.is_deleted = True
+                message.save()  # Enregistrer le changement dans la base de données
             except Message.DoesNotExist:
-                # Optionnel : ajouter un message d'erreur si le message n'existe pas
-                pass
+                pass  # Si le message n'existe pas, ignorer l'erreur
 
     # Rediriger vers la boîte de réception après suppression
     return redirect('messages_inbox')
+
+
 
 
 
@@ -673,6 +675,29 @@ def profile(request):
 
     return render(request, 'profile.html', context)
 
+@login_required
+def profile(request):
+    user = request.user
+    
+    # Récupérer le staff (si disponible) uniquement si le rôle est 'member'
+    staff_id = None
+    if user.role == 'member':
+        staff_id = User.objects.filter(is_staff=True).first().id
+
+    # Récupérer les abonnements actuels et passés
+    current_subscription = Subscription.objects.filter(user=user, payment_status='paid').first()
+    # workout_schedules = WorkoutSchedule.objects.filter(participants=user)
+
+    # Préparer les données pour le template
+    context = {
+        'user': user,  # S'assurer que l'utilisateur est bien passé au template
+        'staff_id': staff_id,
+        'current_subscription': current_subscription,
+        'is_premium': user.is_premium  # Optionnel, car user.is_premium est déjà disponible
+        # 'workout_schedules': workout_schedules,  # Remplacement de bookings par workout_schedules
+    }
+
+    return render(request, 'profile.html', context)
 
 
 

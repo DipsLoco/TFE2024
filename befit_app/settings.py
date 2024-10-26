@@ -82,23 +82,26 @@ DATABASES = {
         'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
-
 Q_CLUSTER = {
     'name': 'DjangoQ',
-    'workers': 4,
+    'workers': 2,
     'recycle': 500,
-    'timeout': 90,  # J'ai ajusté le timeout à 90 comme dans la configuration proposée
+    'timeout': 90,
     'retry': 120,
     'queue_limit': 50,
     'bulk': 10,
     'django_redis': 'default',
     'orm': 'default',  # Utiliser l'ORM pour stocker les tâches dans la base de données
+    'log_level': 'DEBUG',  # Active les logs détaillés
+    
 }
+
+
 
 # Tâches planifiées
 Q_CLUSTER['tasks'] = [
     {
-        'func': 'your_app.tasks.send_workout_reminder',
+        'func': 'gym_app.tasks.send_workout_reminder',
         'schedule_type': 'H',  # 'H' signifie qu'elle sera exécutée toutes les heures
         'repeats': -1,  # Répéter indéfiniment
         'minutes': 60   # Exécuter toutes les heures
