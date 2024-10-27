@@ -185,8 +185,12 @@ class ReviewAdmin(admin.ModelAdmin):
     list_display = ['id', 'user', 'workout', 'content']
 
 
+# Administration pour le modèle Message
 class MessageAdmin(admin.ModelAdmin):
     list_display = ('sender', 'recipient', 'subject', 'timestamp', 'is_read')
+    list_filter = ('is_read', 'timestamp', 'sender', 'recipient')  # Ajouter des filtres pour faciliter la recherche
+    search_fields = ('subject', 'sender__username', 'recipient__username', 'body')  # Permettre la recherche par sujet, expéditeur et destinataire
+
 
 # admin.site.register(Booking, BookingAdmin)
 admin.site.register(User, CustomUserAdmin)
@@ -198,7 +202,7 @@ admin.site.register(Plan, PlanAdmin)
 admin.site.register(Subscription, SubscriptionAdmin)
 admin.site.register(Review, ReviewAdmin)
 admin.site.register(WorkoutSchedule, WorkoutScheduleAdmin,)
-admin.site.register(Message)
+admin.site.register(Message, MessageAdmin)
 admin.site.register(CatalogService)
 admin.site.register(PersonalizedCoaching)
 admin.site.register(GymAccessory)

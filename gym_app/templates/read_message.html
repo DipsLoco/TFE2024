@@ -1,88 +1,136 @@
 {% extends 'base.html' %}
+{% load static %}
 {% load i18n %}
 {% block content %}
 <div class="container mt-5">
-    <!-- Boutons en haut pour accéder aux brouillons, écrire un nouveau message, et aller sur le profil -->
-    <div class="action-buttons d-flex justify-content-between align-items-center">
-        <a href="{% url 'drafts' %}" class="btn btn-secondary btn-sm">
-            <i class="fas fa-file-alt"></i> Brouillons
-        </a>
-        <!-- Bouton pour écrire un nouveau message -->
-        <a href="{% url 'send_message' 1 %}" class="btn btn-turquoise btn-sm" style="background-color: #20c997;">
-            <i class="fas fa-pencil-alt"></i> Nouveau message
-        </a>
-        <a href="{% url 'profile' %}" class="btn btn-info btn-sm">
-            <i class="fas fa-user"></i> Mon Profil
-        </a>
-        <a href="{% url 'home' %}" class="btn btn-warning btn-sm">
-            <i class="fas fa-home"></i> Retourner à la page d'accueil
-        </a>
+    <div class="action-buttons d-flex justify-content-between align-items-center mb-4">
+        <!-- Boutons Brouillons, Importants, Archivés et Nouveau Message alignés à gauche -->
+        <div class="d-flex">
+            <a href="{% url 'drafts' %}" class="btn btn-secondary btn-sm mr-2">
+                <i class="fas fa-file-alt"></i> Brouillons
+            </a>
+            <a href="{% url 'messages_inbox' %}?category=important" class="btn btn-outline-warning btn-sm mx-1">
+                <i class="fas fa-star"></i> Importants ({{ important_messages_count }})
+            </a>
+            <a href="{% url 'messages_inbox' %}?category=archived" class="btn btn-outline-dark btn-sm mx-1">
+                <i class="fas fa-archive"></i> Archivés ({{ archived_messages_count }})
+            </a>
+            <a href="{% url 'send_message' 1 %}" class="btn btn-turquoise btn-sm">
+                <i class="fas fa-pencil-alt"></i> Nouveau message
+            </a>
+        </div>
+        <!-- Titre Lecture du Message centré avec ombre -->
+        <h1 class="text-center text-capitalize" style="font-family: 'Brush Script MT', cursive; font-size: 50px; color: #007bff; text-shadow: 2px 2px #ccc;">
+            Lecture Du Message
+        </h1>
+        <!-- Boutons Mon Profil et Retour Accueil alignés à droite -->
+        <div class="d-flex">
+            <a href="{% url 'profile' %}" class="btn btn-info btn-sm mr-2">
+                <i class="fas fa-user"></i> Mon Profil
+            </a>
+            <a href="{% url 'home' %}" class="btn btn-warning btn-sm ml-2">
+                <i class="fas fa-home"></i> Retour Accueil
+            </a>
+        </div>
     </div>
 
     <hr class="my-4">
 
-    <h2><strong>Objet :{{ message.subject }}</h2>
-    <p><strong>De :</strong> {{ message.sender.get_full_name }}</p>
-    <p><strong>Reçu le :</strong> {{ message.timestamp|date:"d M Y H:i" }}</p>
+    <!-- Détails du message avec mise en page améliorée -->
+    <div class="message-details">
+        <h2 class="text-primary" style="font-family: Arial, sans-serif; font-weight: bold;">
+            <i class="fas fa-envelope"></i> Objet : {{ message.subject }}
+        </h2>
+        <div class="d-flex align-items-center mb-3">
+            <strong class="text-muted mr-3">Reçu le : </strong> <span>{{ message.timestamp|date:"d M Y H:i" }}</span>
+        </div>
+        <div class="sender-info mb-3">
+            {% if message.sender.image %}
+                <img src="{{ message.sender.image.url }}" alt="Photo de {{ message.sender.first_name }}" class="rounded-circle" style="width: 70px; height: 70px; object-fit: cover;">
+            {% else %}
+                <img src="{% static 'default_profile.png' %}" alt="Photo par défaut" class="rounded-circle" style="width: 70px; height: 70px; object-fit: cover;">
+            {% endif %}
+            <strong class="text-muted">De :</strong>
+            <span>{{ message.sender.get_full_name }}</span>
+        </div>
+        
+        {% if message.recipient %}
+        <div class="recipient-info mb-3">
+            {% if message.recipient.image %}
+                <img src="{{ message.recipient.image.url }}" alt="Photo de {{ message.recipient.first_name }}" class="rounded-circle" style="width: 70px; height: 70px; object-fit: cover;">
+            {% else %}
+                <img src="{% static 'default_profile.png' %}" alt="Photo par défaut" class="rounded-circle" style="width: 70px; height: 70px; object-fit: cover;">
+            {% endif %}
+            <strong class="text-muted">À :</strong>
+            <span>{{ message.recipient.get_full_name }}</span>
+        </div>
+        
+        {% endif %}
+    </div>
+
     <hr>
-    <p>{{ message.body }}</p>
 
+   <!-- Corps du message avec mise en forme améliorée -->
+<div class="message-body mb-4" style="background-color: #f5e8e8; padding: 20px; border-radius: 8px; border: 1px solid #b4c6e0; box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);">
+    <p style="font-weight: bold; font-size: 1.1rem; font-style: italic; color: #15007c; text-align: justify; line-height: 1.6;">
+        {{ message.body }}
+    </p>
+</div>
+
+    <!-- Boutons d'action avec le même style que message_inbox -->
     <div class="action-buttons d-flex justify-content-start mt-3">
-        <!-- Bouton pour marquer comme important avec icône d'étoile dorée -->
-        <form method="POST" action="{% url 'mark_important' message.id %}" class="me-3">
-            {% csrf_token %}
-            <button type="submit" class="btn btn-light">
-                {% if message.is_important %}
-                    <i class="fas fa-star text-warning"></i> <span style="color:black;">Marqué important</span>
-                {% else %}
-                    <i class="far fa-star text-muted"></i> <span style="color:black;">Marquer comme important</span>
-                {% endif %}
-            </button>
-        </form>
+        <button type="button" class="btn btn-warning btn-sm mx-1" onclick="toggleImportant('{{ message.id }}')">
+            {% if message.is_important %}
+                <i class="fas fa-star"></i> Retirer des importants
+            {% else %}
+                <i class="far fa-star"></i> Marquer comme important
+            {% endif %}
+        </button>
 
-        <!-- Bouton pour supprimer le message avec icône de poubelle -->
-        <form method="POST" action="{% url 'delete_message' message.id %}" class="me-3">
-            {% csrf_token %}
-            <button type="submit" class="btn btn-danger">
-                <i class="fas fa-trash"></i> Supprimer
-            </button>
-        </form>
+        <button type="button" class="btn btn-dark btn-sm mx-1" onclick="toggleArchive('{{ message.id }}')">
+            {% if message.is_archived %}
+                <i class="fas fa-archive"></i> Désarchiver
+            {% else %}
+                <i class="fas fa-archive"></i> Archiver
+            {% endif %}
+        </button>
 
-        <!-- Bouton pour répondre -->
+        <button type="button" class="btn btn-danger btn-sm mx-1" onclick="confirmDelete('{{ message.id }}')">
+            <i class="fas fa-trash"></i> Supprimer
+        </button>
+
         {% if message.sender and message.sender.id %}
-            <a href="{% url 'send_message' message.sender.id %}?subject={{ message.subject }}" class="btn btn-primary btn-sm">
+            <a href="{% url 'send_message' message.sender.id %}?subject={{ message.subject }}" class="btn btn-primary btn-sm mx-1">
                 <i class="fas fa-reply"></i> Répondre
             </a>
         {% else %}
             <p class="text-muted">Impossible de répondre à cet expéditeur.</p>
         {% endif %}
 
-        <!-- Bouton pour retourner à la boîte de réception -->
-        <a href="{% url 'messages_inbox' %}" class="btn btn-secondary btn-sm ms-3">
+        <a href="{% url 'messages_inbox' %}" class="btn btn-secondary btn-sm mx-3">
             <i class="fas fa-inbox"></i> Retour à la boîte de réception
         </a>
     </div>
 
-    <!-- Section pour afficher les messages du même expéditeur dans un fil de discussion -->
     <div class="container mt-5">
-        <h2>Fil de Discussion</h2>
+        <h2 style="font-family: 'Dancing Script', cursive; font-size: 1.5rem; color: #007bff;">Fil de Discussion</h2>
         <div class="chat-window">
             {% for msg in thread_messages %}
                 <div class="chat-bubble {% if msg.sender == request.user %}sent{% else %}received{% endif %}">
                     <p><strong>{{ msg.sender.get_full_name }} :</strong> {{ msg.body }}</p>
                     <p class="text-muted">{{ msg.timestamp|date:"d/m/Y H:i" }}</p>
                     {% if msg.is_important %}
-                        <i class="fas fa-star text-warning"></i> <!-- Petite étoile dorée pour les messages marqués importants -->
+                        <i class="fas fa-star text-warning"></i>
                     {% endif %}
                 </div>
             {% empty %}
                 <p>Aucun autre message dans cette discussion.</p>
             {% endfor %}
         </div>
-        <br><br>
     </div>
+    <br>
 
-    <!-- Styles pour la fenêtre de chat et les boutons -->
+    <!-- Styles -->
     <style>
         .chat-window {
             border: 1px solid #ddd;
@@ -106,8 +154,17 @@
             background-color: #d1f5d3;
             text-align: left;
         }
-
-        /* Style des boutons avec icônes */
+        .popup {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            padding: 20px;
+            border: 1px solid #ddd;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            z-index: 9999;
+        }
         .action-buttons .btn {
             display: flex;
             align-items: center;
@@ -116,20 +173,119 @@
         .action-buttons .btn i {
             margin-right: 5px;
         }
-        .btn-light:hover {
-            background-color: #f8f9fa;
-            border: 1px solid #ddd;
+        .popup-content {
+            text-align: center;
         }
-
-        /* Bouton supprimer devient rouge par défaut, bleu au survol */
-        .btn-danger {
-            background-color: #dc3545;
-            border: none;
+        .popup-content h4 {
+            margin-bottom: 20px;
+        }
+        .btn-warning {
+            background-color: #48485bb0;
+            border-color: #ffc107;
+        }
+        .btn-warning:hover {
+            background-color: #e0a800;
+        }
+        .btn-dark:hover {
+            background-color: #23272b;
         }
         .btn-danger:hover {
-            background-color: #007bff;
+            background-color: #c82333;
+        }
+        /* .recipient-info {
+            margin-right: 20px;
+        }
+        .sender-info {
+            margin-right: 20px;
+        } */
+        .sender-info,
+.recipient-info {
+    display: flex;
+    align-items: center;
+    margin-bottom: 15px; /* Espace en dessous de chaque ligne pour plus de lisibilité */
+}
+
+.sender-info img,
+.recipient-info img {
+    margin-right: 15px; /* Espace horizontal entre la photo et le texte */
+}
+
+.sender-info span,
+.recipient-info span {
+    margin-left: 10px; /* Ajustez cet espace pour qu'il soit bien visible */
+}
+
+        .btn-warning {
+            background-color: #48485bb0;
+            border-color: #ffc107;
+        }
+        .btn-warning:hover {
+            background-color: #e0a800;
+        }
+        .btn-dark:hover {
+            background-color: #23272b;
+        }
+        .btn-danger:hover {
+            background-color: #c82333;
+        }
+        .btn-danger {
+        background-color: #dc3545;
+        border-color: #dc3545;
+        }
+        .btn-primary:hover {
+        background-color: #0056b3;
+        }
+        .btn-info {
+        background-color: #031cffba;
+        border-color: #06241b;
+        }
+        .filters .btn {
+        margin-right: 10px;
+        /* }
+        .btn-custom-small {
+        padding: 0.6rem 1rem; /* Ajuste le padding */
+        font-size: 1rem; /* Réduit la taille de la police */
+        } */
+        .message-info p {
+        font-style: italic;
         }
     </style>
 </div>
+
+<div id="delete-confirmation-popup" class="popup" style="display:none;">
+    <div class="popup-content">
+        <h4>Êtes-vous sûr de vouloir supprimer ce message ?</h4>
+        <button id="confirm-delete-btn" class="btn btn-success">Confirmer</button>
+        <button id="cancel-delete-btn" class="btn btn-danger">Annuler</button>
+    </div>
+</div>
+
+<script>
+    function confirmDelete(messageId) {
+        document.getElementById('delete-confirmation-popup').style.display = 'block';
+        document.getElementById('confirm-delete-btn').onclick = function() {
+            window.location.href = "{% url 'delete_message' 0 %}".replace("0", messageId);
+        };
+    }
+
+    document.getElementById('cancel-delete-btn').onclick = function() {
+        document.getElementById('delete-confirmation-popup').style.display = 'none';
+    };
+
+    function toggleImportant(messageId) {
+        fetch("{% url 'mark_important' 0 %}".replace("0", messageId), {
+            method: "POST",
+            headers: { "X-CSRFToken": "{{ csrf_token }}" }
+        }).then(response => location.reload());
+    }
+
+    function toggleArchive(messageId) {
+        fetch("{% url 'archive_message' 0 %}".replace("0", messageId), {
+            method: "POST",
+            headers: { "X-CSRFToken": "{{ csrf_token }}" }
+        }).then(response => location.reload());
+    }
+</script>
+
 
 {% endblock %}

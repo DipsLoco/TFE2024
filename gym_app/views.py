@@ -310,10 +310,55 @@ def register_user(request):
         form = SignUpForm()
     return render(request, 'administration/register.html', {'form': form})
 
+# @login_required
+# def read_message(request, message_id):
+#     # Récupérer le message spécifique
+#     message = get_object_or_404(Message, id=message_id, recipient=request.user)
+
+#     # Marquer le message comme lu
+#     if not message.is_read:
+#         message.is_read = True
+#         message.save()
+
+#     # Récupérer tous les messages de la discussion entre l'utilisateur et l'expéditeur
+#     thread_messages = Message.objects.filter(
+#         Q(sender=message.sender, recipient=request.user) |
+#         Q(sender=request.user, recipient=message.sender)
+#     ).order_by('timestamp')
+
+#     # Récupérer un destinataire valide pour "Nouveau message"
+#     recipient = User.objects.exclude(id=request.user.id).first()
+
+#     # Récupérer les messages reçus par l'utilisateur connecté
+#     messages_received = Message.objects.filter(recipient=request.user).order_by('-timestamp')
+
+#     # Filtre par rôle
+#     filter_role = request.GET.get('filter_role', 'all')
+
+#     unread_messages = messages_received.filter(is_read=False).count()
+
+#     context = {
+#         'message': message,
+#         'recipient': recipient,
+#         'messages': messages_received,
+#         'filter_role': filter_role,
+#         'unread_messages': unread_messages,
+#         'thread_messages': thread_messages
+#     }
+
+#     return render(request, 'read_message.html', context)
+
+from django.shortcuts import get_object_or_404
+from django.db.models import Q
+
 @login_required
 def read_message(request, message_id):
-    # Récupérer le message spécifique
-    message = get_object_or_404(Message, id=message_id, recipient=request.user)
+    # Récupérer le message spécifique en utilisant Q pour vérifier l'expéditeur ou le destinataire
+    message = get_object_or_404(
+        Message,
+        Q(sender=request.user) | Q(recipient=request.user),
+        id=message_id
+    )
 
     # Marquer le message comme lu
     if not message.is_read:
@@ -329,24 +374,21 @@ def read_message(request, message_id):
     # Récupérer un destinataire valide pour "Nouveau message"
     recipient = User.objects.exclude(id=request.user.id).first()
 
-    # Récupérer les messages reçus par l'utilisateur connecté
-    messages_received = Message.objects.filter(recipient=request.user).order_by('-timestamp')
-
-    # Filtre par rôle
-    filter_role = request.GET.get('filter_role', 'all')
-
-    unread_messages = messages_received.filter(is_read=False).count()
+    # Compteur pour les messages importants et archivés
+    important_messages_count = Message.objects.filter(recipient=request.user, is_important=True).count()
+    archived_messages_count = Message.objects.filter(recipient=request.user, is_archived=True).count()
 
     context = {
         'message': message,
         'recipient': recipient,
-        'messages': messages_received,
-        'filter_role': filter_role,
-        'unread_messages': unread_messages,
-        'thread_messages': thread_messages
+        'thread_messages': thread_messages,
+        'important_messages_count': important_messages_count,
+        'archived_messages_count': archived_messages_count,
     }
 
     return render(request, 'read_message.html', context)
+
+
 
 from django.shortcuts import get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
@@ -374,6 +416,25 @@ def mark_important(request, message_id):
 
 @login_required
 def drafts(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        subject = data.get('subject')
+        body = data.get('body')
+        recipient_id = data.get('recipient_id')
+
+        # Créer ou mettre à jour un brouillon
+        draft, created = Message.objects.update_or_create(
+            sender=request.user,
+            recipient_id=recipient_id,
+            defaults={
+                'subject': subject,
+                'body': body,
+                'is_draft': True
+            }
+        )
+
+        return JsonResponse({'success': True})
+
     # Récupérer tous les brouillons pour l'utilisateur connecté
     drafts = Message.objects.filter(sender=request.user, is_draft=True).order_by('-timestamp')
 
@@ -382,6 +443,13 @@ def drafts(request):
     }
 
     return render(request, 'drafts.html', context)
+
+@login_required
+def delete_draft(request, draft_id):
+    draft = get_object_or_404(Message, id=draft_id, sender=request.user, is_draft=True)
+    draft.delete()
+    return redirect('drafts')  # Redirige vers la page des brouillons
+
 
 def restore_message(request, message_id):
     message = get_object_or_404(Message, id=message_id, recipient=request.user)
@@ -445,7 +513,7 @@ def messages_inbox(request):
     if category == 'received':
         messages = Message.objects.filter(recipient=request.user, is_deleted=False)
     elif category == 'sent':
-        messages = Message.objects.filter(sender=request.user)
+        messages = Message.objects.filter(sender=request.user).order_by('-timestamp')
     elif category == 'drafts':
         messages = Message.objects.filter(sender=request.user, is_draft=True)
     elif category == 'important':
@@ -659,21 +727,48 @@ def validate_password(request):
     return JsonResponse({'conditions': conditions})
 
 
-@login_required
-def profile(request):
-    user = request.user
+# @login_required
+# def profile(request):
+#     user = request.user
     
-    # Récupérer le staff (si disponible) uniquement si le rôle est 'member'
-    staff_id = None
-    if user.role == 'member':
-        staff_id = User.objects.filter(is_staff=True).first().id
+#     # Récupérer le staff (si disponible) uniquement si le rôle est 'member'
+#     staff_id = None
+#     if user.role == 'member':
+#         staff_id = User.objects.filter(is_staff=True).first().id
 
-    context = {
-        'user': user,
-        'staff_id': staff_id,
-    }
+#     context = {
+#         'user': user,
+#         'staff_id': staff_id,
+#     }
 
-    return render(request, 'profile.html', context)
+#     return render(request, 'profile.html', context)
+
+# @login_required
+# def profile(request):
+#     user = request.user
+    
+#     # Récupérer le staff (si disponible) uniquement si le rôle est 'member'
+#     staff_id = None
+#     if user.role == 'member':
+#         staff_id = User.objects.filter(is_staff=True).first().id
+
+#     # Récupérer les abonnements actuels et passés
+#     current_subscription = Subscription.objects.filter(user=user, payment_status='paid').first()
+#     # workout_schedules = WorkoutSchedule.objects.filter(participants=user)
+
+#     # Préparer les données pour le template
+#     context = {
+#         'user': user,  # S'assurer que l'utilisateur est bien passé au template
+#         'staff_id': staff_id,
+#         'current_subscription': current_subscription,
+#         'is_premium': user.is_premium  # Optionnel, car user.is_premium est déjà disponible
+#         # 'workout_schedules': workout_schedules,  # Remplacement de bookings par workout_schedules
+#     }
+
+#     return render(request, 'profile.html', context)
+# views.py
+
+from django.utils import timezone
 
 @login_required
 def profile(request):
@@ -686,19 +781,22 @@ def profile(request):
 
     # Récupérer les abonnements actuels et passés
     current_subscription = Subscription.objects.filter(user=user, payment_status='paid').first()
-    # workout_schedules = WorkoutSchedule.objects.filter(participants=user)
+
+    # Si l'utilisateur n'a pas de souscription active, afficher le popup
+    show_subscription_popup = current_subscription is None or current_subscription.get_end_date() < timezone.now()
 
     # Préparer les données pour le template
     context = {
-        'user': user,  # S'assurer que l'utilisateur est bien passé au template
+        'user': user,  
         'staff_id': staff_id,
         'current_subscription': current_subscription,
-        'is_premium': user.is_premium  # Optionnel, car user.is_premium est déjà disponible
-        # 'workout_schedules': workout_schedules,  # Remplacement de bookings par workout_schedules
+        'is_premium': user.is_premium, 
+        'show_subscription_popup': show_subscription_popup,  # Pour déclencher le popup
     }
 
     return render(request, 'profile.html', context)
 
+    
 
 
     # Récupérer les séances passées avec ce coach (si l'utilisateur est un coach ou admin)

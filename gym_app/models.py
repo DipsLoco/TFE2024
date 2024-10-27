@@ -44,7 +44,7 @@ class Message(models.Model):
     is_deleted = models.BooleanField(default=False)  # Nouveau champ pour la corbeille
     is_archived = models.BooleanField(default=False)  # Pour gérer l'archivage
     is_draft = models.BooleanField(default=False)  # Pour gérer les brouillons
-
+    
     def __str__(self):
         return f"De {self.sender} à {self.recipient} - {self.subject}"
 

@@ -1,7 +1,7 @@
 from django.urls import path
 from django.conf.urls.static import static
 from befit_app import settings
-from .views import (admin_dashboard, cancel_reservation, affiche_workout, coach_dashboard, delete_message, mark_important, send_message, messages_inbox, subscribe, subscription_list, validate_username, validate_password, profile, edit_profile, workout_list, subscription, coach_dashboard, contact_coach, contact_member, remind_subscription)
+from .views import (admin_dashboard, cancel_reservation, affiche_workout, coach_dashboard, delete_draft, delete_message, mark_important, send_message, messages_inbox, subscribe, subscription_list, validate_username, validate_password, profile, edit_profile, workout_list, subscription, coach_dashboard, contact_coach, contact_member, remind_subscription)
 from gym_app import views
 from django_q.tasks import schedule
 from django.conf import settings
@@ -29,6 +29,7 @@ urlpatterns = [
     path('archive_message/<int:message_id>/', views.archive_message, name='archive_message'),
     path('messages/mark_important/<int:message_id>/', views.mark_important, name='mark_important'),
     path('messages/drafts/', views.drafts, name='drafts'),
+    path('delete_draft/<int:draft_id>/', delete_draft, name='delete_draft'),
     path('messages/delete-multiple/', views.delete_multiple_messages, name='delete_multiple_messages'),
     path('messages/delete/<int:message_id>/', views.delete_message, name='delete_message'),
     path('message/restore/<int:message_id>/', views.restore_message, name='restore_message'),

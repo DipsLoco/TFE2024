@@ -1,22 +1,129 @@
 {% extends 'base.html' %}
+{% load static %}
 {% block content %}
 <div class="container mt-5">
-    <h2>Brouillons</h2>
+    <h2 class="text-center" style="font-family: 'Dancing Script', cursive; color: #007bff;">Brouillons</h2>
+    
+    <hr class="my-4">
+
+    <div class="mb-3 text-center">
+        <a href="{% url 'messages_inbox' %}" class="btn btn-secondary btn-sm mx-2">
+            <i class="fas fa-inbox"></i> Boîte de Réception
+        </a>
+        <a href="{% url 'home' %}" class="btn btn-warning btn-sm mx-2">
+            <i class="fas fa-home"></i> Retour Accueil
+        </a>
+    </div>
 
     {% if drafts %}
         <ul class="list-group">
             {% for draft in drafts %}
-                <li class="list-group-item">
-                    <strong>Sujet :</strong> {{ draft.subject }}<br>
-                    <strong>Créé le :</strong> {{ draft.timestamp|date:"d M Y H:i" }}<br>
-                    <a href="{% url 'send_message' draft.id %}" class="btn btn-primary btn-sm mt-2">
-                        <i class="fas fa-pencil-alt"></i> Modifier le brouillon
-                    </a>
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <div>
+                        <strong>Sujet :</strong> {{ draft.subject }}<br>
+                        <strong>Créé le :</strong> {{ draft.timestamp|date:"d M Y H:i" }}<br>
+                    </div>
+                    <div>
+                        <a href="{% url 'send_message' draft.id %}" class="btn btn-primary btn-sm mt-2">
+                            <i class="fas fa-pencil-alt"></i> Modifier
+                        </a>
+                        <button type="button" class="btn btn-danger btn-sm mt-2" onclick="confirmDelete('{{ draft.id }}')">
+                            <i class="fas fa-trash"></i> Supprimer
+                        </button>
+                    </div>
                 </li>
             {% endfor %}
         </ul>
     {% else %}
-        <p>Vous n'avez pas de brouillons.</p>
+        <div class="alert alert-info text-center" role="alert">
+            Vous n'avez pas de brouillons.
+        </div>
     {% endif %}
 </div>
+
+<!-- Popup de confirmation de suppression -->
+<div id="delete-confirmation-popup" class="popup" style="display:none;">
+    <div class="popup-content">
+        <h4>Êtes-vous sûr de vouloir supprimer ce brouillon ?</h4>
+        <button id="confirm-delete-btn" class="btn btn-success">Confirmer</button>
+        <button id="cancel-delete-btn" class="btn btn-danger">Annuler</button>
+    </div>
+</div>
+
+<script>
+    // Fonction pour afficher le popup de confirmation de suppression
+    function confirmDelete(draftId) {
+        document.getElementById('delete-confirmation-popup').style.display = 'block';
+        document.getElementById('confirm-delete-btn').onclick = function() {
+            window.location.href = "{% url 'delete_draft' 0 %}".replace("0", draftId);
+        };
+    }
+
+    // Fonction pour cacher le popup de confirmation
+    document.getElementById('cancel-delete-btn').onclick = function() {
+        document.getElementById('delete-confirmation-popup').style.display = 'none';
+    };
+</script>
+
+<style>
+    .list-group-item {
+        border-radius: 10px;
+        background-color: #f8f9fa;
+        padding: 15px;
+        margin-bottom: 10px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+    .popup {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background-color: white;
+        padding: 20px;
+        border: 1px solid #ddd;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        z-index: 9999;
+    }
+
+    .popup-content {
+        text-align: center;
+    }
+
+    .popup-content h4 {
+        margin-bottom: 20px;
+    }
+
+    .btn-secondary, .btn-warning, .btn-primary, .btn-danger {
+        padding: 8px 12px; /* Ajuste le padding */
+        font-size: 0.875rem; /* Réduit la taille de la police */
+    }
+
+    .btn-warning {
+        background-color: #ffc107; /* Couleur de fond */
+        border-color: #ffc107; /* Couleur de bord */
+    }
+    
+    .btn-warning:hover {
+        background-color: #e0a800; /* Couleur au survol */
+    }
+
+    .btn-danger {
+        background-color: #dc3545; /* Couleur de fond */
+        border-color: #dc3545; /* Couleur de bord */
+    }
+
+    .btn-danger:hover {
+        background-color: #c82333; /* Couleur au survol */
+    }
+
+    .btn-primary {
+        background-color: #007bff; /* Couleur de fond */
+        border-color: #007bff; /* Couleur de bord */
+    }
+
+    .btn-primary:hover {
+        background-color: #0056b3; /* Couleur au survol */
+    }
+</style>
 {% endblock %}

@@ -161,6 +161,7 @@
     document.getElementById('cancel-delete-btn').onclick = function() {
         document.getElementById('delete-confirmation-popup').style.display = 'none';
     };
+    
 
     // Toggle important status via AJAX
     function toggleImportant(element) {
@@ -173,15 +174,9 @@
     .then(data => {
         if (data.success) {
             element.innerHTML = data.is_important ? '<i class="fas fa-star"></i> Retirer des importants' : '<i class="far fa-star"></i> Marquer comme important';
-        } else {
-            console.error("Erreur lors du marquage comme important :", data.error);
-        }
-    })
-    .catch(error => {
-        console.error("Erreur dans la requête AJAX:", error);
-    });
-}
-
+        } 
+        }).then(response => location.reload());
+        } 
 
 
     // Toggle archive status via AJAX
@@ -195,14 +190,10 @@
     .then(data => {
         if (data.success) {
             element.innerHTML = data.is_archived ? '<i class="fas fa-archive"></i> Désarchiver' : '<i class="fas fa-archive"></i> Archiver';
-        } else {
-            console.error("Erreur lors de l'archivage/désarchivage :", data.error);
+        } 
+        }).then(response => location.reload());
         }
-    })
-    .catch(error => {
-        console.error("Erreur dans la requête AJAX:", error);
-    });
-}
+
 
 
 
@@ -351,4 +342,5 @@
     color: #000000; /* Couleur du logo */
 }
 </style>
+
 {% endblock %}
