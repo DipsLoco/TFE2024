@@ -210,5 +210,29 @@ document.addEventListener("DOMContentLoaded", function() {
     });
 });
 
+// Script pour désactiver définitivement la bannière rouge
+document.addEventListener('DOMContentLoaded', function() {
+    const messageItems = document.querySelectorAll('.list-group-item');
+
+    messageItems.forEach(item => {
+        const isReadBadge = item.querySelector('.badge.bg-success');
+        if (isReadBadge) {
+            // Supprime complètement la classe de bannière "non lu"
+            item.classList.remove('list-group-item-warning');
+        }
+    });
+});
+
+// Gestion des filtres de messages et de boutons actifs
+document.addEventListener('DOMContentLoaded', function() {
+    const filterButtons = document.querySelectorAll('.filters a');
+
+    filterButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            filterButtons.forEach(btn => btn.classList.remove('btn-primary'));
+            this.classList.add('btn-primary');  // Activer le bouton sélectionné
+        });
+    });
+});
 
 

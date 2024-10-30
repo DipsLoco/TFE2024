@@ -20,7 +20,7 @@
     <table class="table table-striped">
         <thead>
             <tr>
-                <th>Nom du plan</th>
+                <th>Nom du plan ou service</th>
                 <th>Prix</th>
                 <th>Durée</th>
                 <th>Date de début</th>
@@ -38,11 +38,28 @@
                     <td>{{ plan.subscription.start_date|date:"d M Y" }}</td>
                     <td>{{ plan.subscription.get_end_date|date:"d M Y" }}</td>
                     <td>
-                        <a href="{% url 'cart_delete' plan.id %}" class="btn btn-danger">Supprimer</a>
+                        <a href="{% url 'cart:cart_delete' plan.id %}" class="btn btn-danger">Supprimer</a>
                     </td>
                 </tr>
                 {% endfor %}
-            {% else %}
+            {% endif %}
+            
+            {% if cart_services %}
+                {% for service in cart_services %}
+                <tr>
+                    <td>{{ service.name }}</td>
+                    <td>{{ service.price }} €</td>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td>N/A</td>
+                    <td>
+                        <a href="{% url 'cart:cart_delete' service.id %}" class="btn btn-danger">Supprimer</a>
+                    </td>
+                </tr>
+                {% endfor %}
+            {% endif %}
+            
+            {% if not cart_plans and not cart_services %}
                 <tr>
                     <td colspan="6" class="text-center">Votre panier est vide.</td>
                 </tr>
@@ -84,7 +101,7 @@
               </dl>
             </div>
             <div class="modal-footer">
-                <button type="button" class="btn btn-primary" id="confirmPayerBtn">PAYER</button>  {# Lien vers la vue de paiement #}
+                <button type="button" class="btn btn-primary" id="confirmPayerBtn">PAYER</button>
             </div>
         </div>
     </div>
@@ -92,12 +109,8 @@
 
 <script>
     document.getElementById('confirmPayerBtn').addEventListener('click', function() {
-        window.location.href = "{% url 'checkout_session' %}"; 
-    });
-  </script>
+        window.location.href = "{% url 'cart:checkout_session' %}"; 
+    });
+</script>
 
 {% endblock %}
-<!-- <a href="{% url 'create_checkout_session' plan.id %}" class="btn btn-primary" id="confirmPayerBtn">Confirmer et Payer</a> -->
-
-
-

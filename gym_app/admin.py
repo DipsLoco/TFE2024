@@ -6,7 +6,7 @@ from django.contrib import admin
 from django import forms
 from django.db.models.signals import m2m_changed
 from django.dispatch import receiver
-from .models import User, Workout, Coach, Location, Plan, Subscription, Review, WorkoutImage, WorkoutParticipation, WorkoutSchedule, Message, CatalogService, PersonalizedCoaching, GymAccessory, DietPlan
+from .models import User, Workout, Coach, Location, Plan, Subscription, Review, WorkoutImage, WorkoutParticipation, WorkoutSchedule, ServiceImage, Message, CatalogService, PersonalizedCoaching, GymAccessory, DietPlan
 from django.contrib.admin import AdminSite
 from django.urls import path
 from django.utils.html import format_html
@@ -161,16 +161,16 @@ class MyAdminSite(AdminSite):
 # Activer la personnalisation dans admin
 admin_site = MyAdminSite(name='myadmin')
 
-
-
-
-
-
-
 class CoachAdmin(admin.ModelAdmin):
-    list_display = ['id', 'username', 'user', 'available', 'exp']
+    list_display = ['id', 'username', 'user', 'birth_date', 'available', 'exp', 'about',]
     filter_horizontal = ['specialties']
     search_fields = ['username', 'user__username']
+
+    def birth_date(self, obj):
+        return obj.user.birth_date
+    birth_date.admin_order_field = 'user__birth_date'  #  tri par date de naissance
+    birth_date.short_description = 'Date de naissance'  
+
 
 class LocationAdmin(admin.ModelAdmin):
     list_display = ['id', 'name', 'address', 'city', 'state', 'postal_code']
@@ -190,6 +190,14 @@ class MessageAdmin(admin.ModelAdmin):
     list_display = ('sender', 'recipient', 'subject', 'timestamp', 'is_read')
     list_filter = ('is_read', 'timestamp', 'sender', 'recipient')  # Ajouter des filtres pour faciliter la recherche
     search_fields = ('subject', 'sender__username', 'recipient__username', 'body')  # Permettre la recherche par sujet, expéditeur et destinataire
+ 
+
+class ServiceImageInline(admin.TabularInline):
+    model = ServiceImage
+    extra = 1  # Nombre d'images supplémentaires à afficher
+
+
+admin.site.register(ServiceImage)  # En option, pour voir les images séparément
 
 
 # admin.site.register(Booking, BookingAdmin)

@@ -54,7 +54,7 @@
                     <a class="nav-link" href="{% url 'logout' %}">Se déconnecter</a>
                 </li>
                 <li class="nav-item">
-                    <a href="{% url 'cart_summary' %}" class="btn btn-outline-light btn-sm" type="submit" style="padding: 5px 8px;">
+                    <a href="{% url 'cart:cart_summary' %}" class="btn btn-outline-light btn-sm" type="submit" style="padding: 5px 8px;">
                         <i class="bi-cart-fill me-1"></i> Cart
                         <span class="badge bg-white text-dark ms-1 rounded-pill" id="cart_quantity">{{ cart | length }}</span>
                     </a>                    

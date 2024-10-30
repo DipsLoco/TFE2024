@@ -41,6 +41,7 @@ urlpatterns = [
     path('subscription/<int:pk>/', views.subscribe, name='subscription'),
     path('subscriptions/', subscription_list, name='subscription_list'),
     path('subscribe/<int:pk>/', subscribe, name='subscribe'),
+    path('service/<int:catalog_service_id>/', views.service_detail, name='service_detail'),
     path('register/', views.register_user, name='register'),
     path('workout/<int:pk>/', views.workout_detail, name='workout_detail'),
     path('validate_username/', validate_username, name='validate_username'),

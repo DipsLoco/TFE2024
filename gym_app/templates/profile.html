@@ -301,7 +301,7 @@
 {% block extra_js %}
 <script>
     // Vérifier si on doit montrer le popup de souscription
-    const showSubscriptionPopup = {{ show_subscription_popup|yesno:"true,false"|lower }};
+    const showSubscriptionPopup = {'{ show_subscription_popup|yesno:"true,false"|lower }'};
 
     if (showSubscriptionPopup) {
         setTimeout(() => {

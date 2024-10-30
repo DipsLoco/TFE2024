@@ -224,6 +224,7 @@ class Coach(models.Model):
     available = models.BooleanField(default=False)  # Disponibilités du coach
     image = models.ImageField(upload_to='coach_images/', blank=True, null=True)  # Image du coach
     exp = models.PositiveIntegerField(default=0)  # Expérience du coach en années
+    about = models.TextField(null=True, blank=True)  # A propos de moi
 
     def __str__(self):
         return self.username
@@ -289,15 +290,26 @@ class CatalogService(models.Model):
     def __str__(self):
         return self.name
 
+class ServiceImage(models.Model):
+    catalog_service = models.ForeignKey(CatalogService, related_name='images', on_delete=models.CASCADE)
+    image = models.ImageField(upload_to='service_images/')
+    price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)  # Prix spécifique à chaque image
+    description = models.TextField(null=True, blank=True)  # Description spécifique à chaque image
+
+    def __str__(self):
+        return f"{self.catalog_service.name} - Image"
+
+
+
 class PersonalizedCoaching(models.Model):
     catalog_service = models.ForeignKey(CatalogService, on_delete=models.CASCADE)
-    coach = models.ForeignKey('User', on_delete=models.CASCADE, limit_choices_to={'role': 'Coach'})
+    coach = models.ForeignKey('User', on_delete=models.CASCADE, limit_choices_to={'role': 'coach'})
     duration = models.IntegerField()
 
 class GymAccessory(models.Model):
     catalog_service = models.ForeignKey(CatalogService, on_delete=models.CASCADE)
     stock = models.IntegerField()
-    
+
 class DietPlan(models.Model):
     catalog_service = models.ForeignKey(CatalogService, on_delete=models.CASCADE)
     partner_company = models.CharField(max_length=255)

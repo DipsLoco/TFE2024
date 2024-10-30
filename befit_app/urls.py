@@ -14,5 +14,5 @@ urlpatterns = [
 # URLs avec le préfixe de langue
 urlpatterns += i18n_patterns(
     path('', include('gym_app.urls')),  # Application principale
-    path('cart/', include('cart.urls')),  # Application du panier
+    path('cart/', include('cart.urls', namespace='cart')),  # Inclut les URLs de l'application cart avec le namespace 'cart'  # Application du panier
 )

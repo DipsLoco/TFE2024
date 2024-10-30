@@ -5,20 +5,22 @@
 {% block content %}
 
 <header class="bg-dark py-5"
-    style="background-image: url('/media/background_images/background.jpg'); background-size: cover; background-repeat: no-repeat; background-position: center;">
+style="height: 100vh; background-image: url('/media/background_images/background.jpg'); background-size: 100% auto; background-repeat: no-repeat; background-position: center;">
     <div class="container px-5">
         <div class="row gx-5 justify-content-center">
             <div class="col-lg-10 text-center my-5"
-                style="background-color: rgba(0, 0, 0, 0.6); padding: 20px; border-radius: 10px;">
-                <h1 class="display-4 fw-bold text-white mb-2">BE-FIT</h1>
+                style="background-color: rgba(0, 0, 0, 0.6); padding: 5px; border-radius: 10px;">
+                <!-- <h1 class="display-4 fw-bold text-white mb-2">BE-FIT</h1> -->
+                
                 <p class="lead text-white-50 mb-4">{% trans "Restez en forme" %}</p>
                 <p class="card-text text-white h4 mb-4">Repoussez vos limites, devenez la meilleure version de vous-même
                     avec BeFit. Votre transformation commence ici maintenant.</p>
-                <a class="btn btn-outline-warning btn-lg px-4" href="#nos-offres">Nos Formules</a>
+                <a class="btn btn-outline-warning btn-lg px-1" href="#nos-offres">Nos Formules</a>
             </div>
         </div>
     </div>
 </header>
+
 
 <!-- Nos Workouts Section -->
 <section id="workouts" class="py-5 bg-light">
@@ -80,6 +82,7 @@
                         </p>
                         <p class="card-text"><strong>Disponibile :</strong> {{ coach.available|yesno:"Oui,Non" }}</p> <!-- Affichage de "Oui" ou "Non" -->
                         <p class="card-text"><strong>Expérience :</strong> {{ coach.exp }} ans</p> <!-- Affichage de l'expérience -->
+                        <p class="card-text"><strong>Mon parcours :</strong> {{ coach.about }}</p> <!-- Affichage de "Mon parcours" -->
                     </div>
                 </div>
             </div>
@@ -87,34 +90,6 @@
         </div>
     </div>
 </section>
-<!-- Section Nos Services
-<section id="services" class="py-5 bg-light">
-    <div class="container">
-        <h2 class="text-center mb-4">Nos Services</h2>
-        <div class="row">
-            {% for service in services %}
-                <div class="col-lg-4 col-md-6 mb-4">
-                    <div class="card shadow-sm">
-                        {% if service.image %}
-                            <img src="{{ service.image.url }}" class="card-img-top" alt="{{ service.name }}">
-                        {% else %}
-                            <img src="{% static 'images/default_service.jpg' %}" class="card-img-top" alt="Service Image">
-                        {% endif %}
-                        <div class="card-body">
-                            <h5 class="card-title">{{ service.name }}</h5>
-                            <p class="card-text">{{ service.description }}</p>
-                            <p class="card-text"><strong>Prix:</strong> {{ service.price }} €</p>
-                            <p class="card-text"><strong>Durée:</strong> {{ service.duration }} jours</p>
-                            <a href="{% url 'subscribe_service' service.id %}" class="btn btn-primary">Souscrire</a>
-                        </div>
-                    </div>
-                </div>
-            {% endfor %}
-        </div>
-    </div>
-</section> -->
-
-
 
 <!-- Nos Offres Section -->
 <section id="nos-offres" class="py-5 bg-light">
@@ -151,6 +126,108 @@
         </div>
     </div>
 </section>
+
+
+<!-- Catalog services -->
+<section id="catalog-services" class="services-section">
+    <div class="container px-5 my-5">
+        <div class="text-center mb-5">
+            <h2 class="display-5 fw-bold text-dark">Nos Services</h2>
+            <br>
+        </div>
+        <div class="row">
+            {% for item in all_services %}
+                <div class="col-md-4 mb-4">
+                    <div class="card h-100 shadow-sm">
+                        {% if item.service.image %}
+                            <img src="{{ item.service.image.url }}" alt="Image de {{ item.service.name }}" class="card-img-top" style="height: 300px; object-fit: contain; border-radius: 12px 12px 0 0; width: 100%;">
+                        {% else %}
+                            <img src="{% static 'default/image/path.jpg' %}" alt="Image par défaut" class="card-img-top" style="height: 300px; object-fit: contain; border-radius: 12px 12px 0 0; width: 100%;">
+                        {% endif %}
+                        <div class="card-body text-center">
+                            <h4 class="card-title">{{ item.service.name }}</h4>
+                            <p class="card-text">
+                                {{ item.service.description|truncatechars:40 }}
+                            </p>
+                            <p><strong>Prix :</strong> {{ item.service.price }}€</p>
+                            
+                            <!-- Afficher la durée si elle est disponible et si ce n'est pas un accessoire de gym -->
+                            {% if item.type != 'gym_accessory' and item.service.duration %}
+                                <p><strong>Durée :</strong> {{ item.service.duration }} jours</p>
+                            {% endif %}
+                            
+                            <!-- Attributs spécifiques -->
+                            {% if item.type == 'personalized_coaching' and item.coach %}
+                                <p><strong>Coach :</strong> {{ item.coach.username }}</p>
+                            {% elif item.type == 'gym_accessory' and item.stock %}
+                                <p><strong>Stock :</strong> {{ item.stock }}</p>
+                            {% elif item.type == 'diet_plan' and item.partner_company %}
+                                <p><strong>Partenaire :</strong> <a href="{{ item.partner_company }}" target="_blank">{{ item.partner_company }}</a></p>
+                            {% endif %}
+                            
+                            <div class="d-grid">
+                                <a href="{% url 'service_detail' item.service.id %}" class="btn btn-primary">En savoir plus</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+
+
+
+<style>
+    #catalog-services {
+        background-color: #f9f9f9;
+        padding: 50px 0;
+    }
+    
+    #catalog-services .card {
+        border-radius: 10px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s, box-shadow 0.3s;
+    }
+    
+    #catalog-services .card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+    }
+    
+    #catalog-services .card-img-top {
+        border-radius: 10px 10px 0 0;
+        height: 200px;
+        object-fit: cover;
+    }
+    
+    #catalog-services .card-body {
+        text-align: center;
+    }
+    
+    #catalog-services .card-title {
+        font-size: 1.25rem;
+        font-weight: bold;
+    }
+    
+    #catalog-services .btn-primary {
+        background-color: #007bff;
+        color: white;
+        padding: 10px 20px;
+        border-radius: 5px;
+        text-decoration: none;
+        transition: background-color 0.3s, transform 0.3s;
+    }
+    
+    #catalog-services .btn-primary:hover {
+        background-color: #0056b3;
+        transform: scale(1.05);
+    }
+</style>
+
+
+
 
 <!-- Section commentaires -->
 <section class="py-5 border-bottom">
@@ -192,135 +269,6 @@
         </div>
     </div>
 </section>
-<!-- Section Nos Services -->
-<section id="nos-services" class="services-section">
-    <div class="container">
-        <h2 class="section-title">Nos Services</h2>
-        <div class="services-grid">
-            {% for service in services %}
-                <div class="service-card">
-                    <img src="{{ service.image.url }}" alt="{{ service.name }}" class="service-image">
-                    <div class="service-content">
-                        <h3>{{ service.name }}</h3>
-                        <p>{{ service.description }}</p>
-                        <p><strong>Prix:</strong> {{ service.price }} €</p>
-                        <p><strong>Durée:</strong> {{ service.duration }} jours</p>
-                        <a href="#" class="btn btn-primary">Souscrire</a>
-                    </div>
-                </div>
-            {% endfor %}
-        </div>
-    </div>
-</section>
-
-<style>
-    .services-section {
-        padding: 50px 0;
-        background-color: #f9f9f9;
-    }
-    .services-grid {
-        display: flex;
-        gap: 20px;
-        flex-wrap: wrap;
-        justify-content: space-around;
-    }
-    .service-card {
-        background: white;
-        border-radius: 10px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        padding: 20px;
-        max-width: 300px;
-        text-align: center;
-    }
-    .service-image {
-        width: 100%;
-        height: auto;
-        border-radius: 10px;
-    }
-    .service-content {
-        margin-top: 15px;
-    }
-    .btn {
-        background-color: #007bff;
-        color: white;
-        padding: 10px 20px;
-        border-radius: 5px;
-        text-decoration: none;
-    }
-    .btn:hover {
-        background-color: #0056b3;
-    }
-</style>
-
-<!-- Section Nos Services -->
-<section class="catalog-services">
-    <h2>Nos Services</h2>
-
-    <!-- Coaching Personnalisé -->
-    <div class="service-section">
-        <h3>Coaching Personnalisé</h3>
-        <div class="service-items">
-            {% for coaching in personalized_coaching %}
-                <div class="service-item">
-                    <h4>{{ coaching.catalog_service.name }}</h4>
-                    <p>{{ coaching.catalog_service.description }}</p>
-                    <p><strong>Durée : </strong>{{ coaching.duration }} jours</p>
-                    <p><strong>Prix : </strong>{{ coaching.catalog_service.price }}€</p>
-                    {% if coaching.catalog_service.image %}
-                        <div class="service-image">
-                            <img src="{{ coaching.catalog_service.image.url }}" alt="{{ coaching.catalog_service.name }}">
-                        </div>
-                    {% endif %}
-                    <a href="#" class="btn">Souscrire</a>
-                </div>
-            {% endfor %}
-        </div>
-    </div>
-
-    <!-- Plan Diététique -->
-    <div class="service-section">
-        <h3>Plans Diététiques</h3>
-        <div class="service-items">
-            {% for plan in diet_plans %}
-                <div class="service-item">
-                    <h4>{{ plan.catalog_service.name }}</h4>
-                    <p>{{ plan.catalog_service.description }}</p>
-                    <p><strong>Prix : </strong>{{ plan.catalog_service.price }}€</p>
-                    <p><strong>Partenaire : </strong>{{ plan.partner_company }}</p>
-                    {% if plan.catalog_service.image %}
-                        <div class="service-image">
-                            <img src="{{ plan.catalog_service.image.url }}" alt="{{ plan.catalog_service.name }}">
-                        </div>
-                    {% endif %}
-                    <a href="#" class="btn">Souscrire</a>
-                </div>
-            {% endfor %}
-        </div>
-    </div>
-
-    <!-- Accessoires de Gym -->
-    <div class="service-section">
-        <h3>Accessoires de Gym</h3>
-        <div class="service-items">
-            {% for accessory in gym_accessories %}
-                <div class="service-item">
-                    <h4>{{ accessory.catalog_service.name }}</h4>
-                    <p>{{ accessory.catalog_service.description }}</p>
-                    <p><strong>Prix : </strong>{{ accessory.catalog_service.price }}€</p>
-                    <p><strong>Stock : </strong>{{ accessory.stock }}</p>
-                    {% if accessory.catalog_service.image %}
-                        <div class="service-image">
-                            <img src="{{ accessory.catalog_service.image.url }}" alt="{{ accessory.catalog_service.name }}">
-                        </div>
-                    {% endif %}
-                    <a href="#" class="btn">Souscrire</a>
-                </div>
-            {% endfor %}
-        </div>
-    </div>
-
-</section>
-
 
 
      <!-- Contact Section -->

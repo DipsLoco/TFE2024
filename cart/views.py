@@ -3,7 +3,7 @@ from django.shortcuts import redirect, render, get_object_or_404
 from django.views import View
 from .cart import Cart
 from django.contrib.auth.decorators import login_required
-from gym_app.models import Plan, Subscription
+from gym_app.models import CatalogService, Plan, Subscription
 from django.http import JsonResponse
 from django.contrib import messages
 from django.urls import reverse
@@ -12,89 +12,71 @@ from django.conf import settings
 
 def cart_summary(request):
     cart = Cart(request)
-    # Appel correct de la méthode get_prods() avec des parenthèses
-    cart_plans = cart.get_prods()
-    totaltvac, plans = cart.cart_total()
-    return render(request, 'cart_summary.html', {"cart_plans": cart_plans, 'totaltvac': totaltvac, 'plans': plans})
+    cart_plans = cart.get_plans()
+    cart_services = cart.get_services()
+    totaltvac = cart.cart_total()
+    return render(request, 'cart_summary.html', {
+        "cart_plans": cart_plans,
+        "cart_services": cart_services,
+        "totaltvac": totaltvac,
+    })
 
-
-def cart_add(request):
-    cart = Cart(request)
-
-    if request.POST.get('action') == 'post':
-        plan_id = int(request.POST.get('plan_id'))
-        plan = get_object_or_404(Plan, id=plan_id)  # Plan avec majuscule
-
-        cart.add(plan=plan)
-
-        # Utiliser len(cart) pour obtenir la taille du panier
-        cart_quantity = len(cart)
-        response = JsonResponse({'qty': cart_quantity})
-        messages.success(request, "Abonnement ajouté à votre sélection...")
-        return response
-
-
-def cart_delete(request, plan_id):
-    """
-    Supprime un élément du panier.
-    """
+def cart_add_plan(request, plan_id):
     cart = Cart(request)
     plan = get_object_or_404(Plan, id=plan_id)
-    cart.delete(plan_id)
-    messages.success(request, "Plan supprimé du panier.")
-    return redirect('cart_summary')
+    cart.add_plan(plan=plan)
+    return JsonResponse({'qty': len(cart)})
 
+def cart_add_service(request, service_id):
+    cart = Cart(request)
+    service = get_object_or_404(CatalogService, id=service_id)
+    cart.add_service(service=service)
+    return JsonResponse({'qty': len(cart)})
+
+def cart_delete(request, item_id):
+    cart = Cart(request)
+    cart.delete(item_id)
+    messages.success(request, "Élément supprimé du panier.")
+    return redirect('cart:cart_summary')
 
 def cart_update(request):
     pass
 
-
 @login_required
-def create_checkout_session(request, plan_id):
-    plan = get_object_or_404(Plan, id=plan_id)
-
-    # Créer une session de paiement Stripe
+def create_checkout_session(request):
+    cart = Cart(request)
+    total_amount = int(cart.cart_total() * 100)
+    
     checkout_session = stripe.checkout.Session.create(
         payment_method_types=['card'],
         line_items=[{
             'price_data': {
                 'currency': 'eur',
                 'product_data': {
-                    'name': plan.name,
+                    'name': "Votre panier BE-FIT",
                 },
-                'unit_amount': plan.price * 100,  # Prix en centimes
+                'unit_amount': total_amount,
             },
             'quantity': 1,
         }],
         mode='payment',
-        success_url=request.build_absolute_uri(
-            '/payment/success/') + '?session_id={CHECKOUT_SESSION_ID}',
-        cancel_url=request.build_absolute_uri('/payment/cancel/'),
+        success_url=request.build_absolute_uri(reverse('cart:payment_success')),
+        cancel_url=request.build_absolute_uri(reverse('cart:payment_cancelled')),
     )
-
-    # Sauvegarder le plan dans la session pour l'utilisateur
-    request.session['plan_id'] = plan.id
 
     return JsonResponse({
         'id': checkout_session.id
     })
 
-
-def checkout(request, plan_id):
+def checkout(request):
     return render(request, 'checkout.html')
-
 
 class CheckoutSessionView(View):
     def get(self, request, *args, **kwargs):
         cart = Cart(request)
-        # plan_id = kwargs.get('plan_id')
-        # plan = get_object_or_404(Plan, pk=plan_id)
-        #  Calcul du montant total de l'acompte (10%) pour toutes les voitures du panier
-        totaltvac, plans = cart.cart_total()
-
+        total_amount = int(cart.cart_total() * 100)
         YOUR_DOMAIN = 'http://127.0.0.1:8000'
-        montant = int(totaltvac * 100)
-
+        
         session = stripe.checkout.Session.create(
             payment_method_types=['card'],
             line_items=[
@@ -102,48 +84,31 @@ class CheckoutSessionView(View):
                     'price_data': {
                         'currency': 'eur',
                         'product_data': {
-                            'name': f"Votre plan",
+                            'name': "Votre panier BE-FIT",
                         },
-                        'unit_amount': montant,
+                        'unit_amount': total_amount,
                     },
                     'quantity': 1,
                 },
             ],
             mode='payment',
-            success_url=YOUR_DOMAIN + '/cart/payment_success',  # URL de succès
-            cancel_url=YOUR_DOMAIN + '/payment_cancelled/',  # Redirection en cas d'annulation
+            success_url=YOUR_DOMAIN + '/cart/payment_success',
+            cancel_url=YOUR_DOMAIN + '/cart/payment_cancelled/',
         )
         return redirect(session.url, code=303)
 
-
 def payment_success(request):
     cart = Cart(request)
-    cart.clear()  # Vider le panier après paiement réussi
-
-    
-
-
-    plan_id = request.session.get('plan_id')
-    plan = get_object_or_404(Plan, id=2)
-
-    subscription = Subscription.objects.create(
-        user=request.user,
-        plan=plan,
-        payment_status='paid',
-    )
-
-    # Mettre à jour l'utilisateur en premium
-    request.user.is_premium = True
-    request.user.save()
+    cart.clear()
     return render(request, 'payment_success.html')
-
 
 def payment_cancelled(request):
     return render(request, 'payment_cancelled.html')
 
-
 def payment_failed(request):
     return render(request, 'payment_failed.html')
+
+
 
 
 # # Gestion du succès du paiement

@@ -1,14 +1,17 @@
 from django.urls import path
 from cart import views
 
+app_name = 'cart'
+
 urlpatterns = [
-    path('', views.cart_summary, name='cart_summary'), 
-    path('add/', views.cart_add, name='cart_add'), 
-    path('delete/<int:plan_id>/', views.cart_delete, name='cart_delete'),  # Ajout de l'ID du plan
-    path('update/', views.cart_update, name='cart_update'), 
+    path('', views.cart_summary, name='cart_summary'),
+    path('add_plan/<int:plan_id>/', views.cart_add_plan, name='add_plan_to_cart'),  # Pour ajouter un plan
+    path('add_service/<int:service_id>/', views.cart_add_service, name='add_service_to_cart'),  # Pour ajouter un service
+    path('delete/<int:plan_id>/', views.cart_delete, name='cart_delete'),
+    path('update/', views.cart_update, name='cart_update'),
     path('checkout_session/', views.CheckoutSessionView.as_view(), name='checkout_session'),
+    path('checkout/<int:plan_id>/', views.checkout, name='checkout'),
     path('payment_success/', views.payment_success, name='payment_success'),
-    path('payment_failed/', views.payment_failed, name='payment_failed'),  # Paiement échoué
-    path('payment_cancelled/', views.payment_cancelled, name='payment_cancelled'),  # Paiement annulé
-    # path('payment_success/<int:subscription_id>/', views.payment_success, name='payment_success'),
+    path('payment_failed/', views.payment_failed, name='payment_failed'),
+    path('payment_cancelled/', views.payment_cancelled, name='payment_cancelled'),
 ]

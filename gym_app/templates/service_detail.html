@@ -1,0 +1,142 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row mb-5">
+        <div class="col-md-6">
+            <!-- Galerie d'images avec prix et description dans le style e-commerce -->
+            {% if service_data.images %}
+            <div id="mainImageCarousel" class="carousel slide" data-bs-ride="carousel">
+                <div class="carousel-inner">
+                    {% for image in service_data.images %}
+                    <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                        <img src="{{ image.image.url }}" alt="Image de {{ service_data.service.name }}" class="d-block w-100 rounded shadow" style="height: 400px; object-fit: contain;">
+                        
+                        <!-- Overlay pour la description et le prix -->
+                        <div class="carousel-caption d-md-block bg-dark bg-opacity-75 text-light p-3 rounded" style="bottom: 15px; left: 15px; right: 15px;">
+                            {% if image.description %}
+                                <p class="description-text mb-1">{{ image.description }}</p>
+                            {% endif %}
+                            {% if image.price %}
+                                <p class="price-text fw-bold text-end" style="font-size: 1.2em;">Prix : {{ image.price }}€</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                <button class="carousel-control-prev" type="button" data-bs-target="#mainImageCarousel" data-bs-slide="prev">
+                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">Précédent</span>
+                </button>
+                <button class="carousel-control-next" type="button" data-bs-target="#mainImageCarousel" data-bs-slide="next">
+                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">Suivant</span>
+                </button>
+            </div>
+            {% else %}
+            <!-- Image par défaut -->
+            <img src="{% static 'default/image/path.jpg' %}" alt="Image par défaut" class="d-block w-100 rounded shadow" style="height: 400px; object-fit: contain;">
+            {% endif %}
+        </div>
+        
+        <div class="col-md-6">
+            <!-- Informations sur le service -->
+            <h1 class="display-5 fw-bold">{{ service_data.service.name }}</h1>
+            <p class="lead">{{ service_data.service.description }}</p>
+            <p><strong>Prix :</strong> <span class="text-primary">{{ service_data.service.price }}€</span></p>
+            
+            <!-- Afficher la durée si ce n'est pas un accessoire de gym -->
+            {% if service_data.type != 'gym_accessory' and service_data.service.duration %}
+                <p><strong>Durée :</strong> {{ service_data.service.duration }} jours</p>
+            {% endif %}
+            
+            <!-- Attributs spécifiques -->
+            {% if service_data.type == 'diet_plan' %}
+                <p><strong>Partenaire :</strong> <a href="{{ service_data.partner_company }}" target="_blank" class="text-decoration-none">{{ service_data.partner_company }}</a></p>
+            {% elif service_data.type == 'gym_accessory' %}
+                {% if request.user.is_staff %}
+                    <p><strong>Stock :</strong> {{ service_data.stock }}</p>
+                {% endif %}
+            {% elif service_data.type == 'personalized_coaching' %}
+                <p><strong>Coach :</strong> {{ service_data.coach.username }}</p>
+            {% endif %}
+            
+            <!-- Bouton d'ajout au panier ou d'achat -->
+            <a href="{% url 'cart:add_service_to_cart' service_data.service.id %}" class="btn btn-lg btn-primary mt-4 px-4 py-2">Ajouter au panier</a>
+            <a href="{% url 'cart:checkout' service_data.service.id %}" class="btn btn-lg btn-outline-secondary mt-3 px-4 py-2">Acheter maintenant</a>
+        </div>
+    </div>
+</div>
+
+<!-- Styles pour le carousel et l'affichage des informations produit -->
+<style>
+    .carousel-inner img {
+        height: 400px;
+        object-fit: cover;
+        border-radius: 12px;
+    }
+    .carousel-caption {
+        max-width: 80%;
+        background-color: rgba(0, 0, 0, 0.6);
+        color: white;
+        border-radius: 8px;
+        padding: 15px;
+    }
+    .description-text {
+        font-size: 1em;
+        text-align: left;
+    }
+    .price-text {
+        font-size: 1.2em;
+        text-align: right;
+    }
+    .display-5 {
+        font-size: 2.5rem;
+        margin-top: 20px;
+    }
+    .lead {
+        font-size: 1.25rem;
+        color: #555;
+    }
+    .btn-primary {
+        background-color: #007bff;
+        border-color: #007bff;
+    }
+    .btn-primary:hover {
+        background-color: #0056b3;
+        border-color: #0056b3;
+    }
+    .btn-outline-secondary {
+        color: #007bff;
+        border-color: #007bff;
+    }
+    .btn-outline-secondary:hover {
+        color: white;
+        background-color: #007bff;
+        border-color: #007bff;
+    }
+</style>
+<script>
+
+// JavaScript à inclure dans `service_detail.html`
+document.querySelector('.btn-ajouter-panier').addEventListener('click', function(event) {
+    event.preventDefault();
+    const url = this.href;
+    
+    fetch(url, {
+        method: 'GET',
+        headers: {
+            'X-Requested-With': 'XMLHttpRequest'
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        alert('Article ajouté au panier ! Nombre total d\'articles : ' + data.qty);
+        // Mettre à jour visuellement le nombre d'articles dans le panier
+    });
+});
+
+
+</script>
+{% endblock %}

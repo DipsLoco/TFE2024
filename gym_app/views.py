@@ -1,3 +1,4 @@
+import json
 from urllib import request
 import stripe
 from django.conf import settings
@@ -51,32 +52,149 @@ def about(request):
 # Vue pour la page d'accueil
 
 
+# views.py
+
+from django.shortcuts import render, get_object_or_404
+from .models import (Plan, ServiceImage, Workout, Coach, Review, WorkoutSchedule, CatalogService,
+                     PersonalizedCoaching, GymAccessory, DietPlan)
+from django.utils.translation import gettext as _
+
 def home(request):
-    plans = Plan.objects.filter(is_available=True)
-    workouts = Workout.objects.filter(available=True)
-    coachs = Coach.objects.all()
-    reviews = Review.objects.all()
-    message = _("Restez en forme")
-    workoutschedules = WorkoutSchedule.objects.select_related('coach', 'location').all()
+    context = {
+        'plans': Plan.objects.filter(is_available=True),
+        'workouts': Workout.objects.filter(available=True),
+        'coachs': Coach.objects.all(),
+        'reviews': Review.objects.all(),
+        'workoutschedules': WorkoutSchedule.objects.select_related('coach', 'location').all(),
+        'message': _("Restez en forme"),
+    }
+    
+    # Charger les services uniques
+    context.update(load_services())
+    
+    return render(request, 'home.html', context)
 
-    # Ajouter les services du catalogue
-    catalog_services = CatalogService.objects.filter(is_available=True)
-    personalized_coaching = PersonalizedCoaching.objects.all()
-    gym_accessories = GymAccessory.objects.all()
-    diet_plans = DietPlan.objects.all()
 
-    return render(request, 'home.html', {
-        'plans': plans,
-        'workouts': workouts,
-        'coachs': coachs,
-        'reviews': reviews,
-        'workoutschedules': workoutschedules,
-        'catalog_services': catalog_services,
-        'personalized_coaching': personalized_coaching,
-        'gym_accessories': gym_accessories,
-        'diet_plans': diet_plans,
-        'message': message,
-    })
+
+def load_services():
+    # Services disponibles
+    catalog_services = CatalogService.objects.filter(is_available=True).distinct()
+    personalized_coaching = PersonalizedCoaching.objects.select_related('catalog_service', 'coach').all()
+    gym_accessories = GymAccessory.objects.select_related('catalog_service').all()
+    diet_plans = DietPlan.objects.select_related('catalog_service').all()
+
+    # Initialisation d'un dictionnaire pour éviter les doublons
+    all_services_dict = {}
+
+    for service in catalog_services:
+        all_services_dict[service.id] = {
+            'service': service,
+            'type': 'catalog',
+            'coach': None,
+            'stock': None,
+            'partner_company': None
+        }
+
+    for coaching in personalized_coaching:
+        all_services_dict[coaching.catalog_service.id] = {
+            'service': coaching.catalog_service,
+            'type': 'personalized_coaching',
+            'coach': coaching.coach,
+            'stock': None,
+            'partner_company': None
+        }
+
+    for accessory in gym_accessories:
+        all_services_dict[accessory.catalog_service.id] = {
+            'service': accessory.catalog_service,
+            'type': 'gym_accessory',
+            'coach': None,
+            'stock': accessory.stock,
+            'partner_company': None
+        }
+
+    for diet in diet_plans:
+        all_services_dict[diet.catalog_service.id] = {
+            'service': diet.catalog_service,
+            'type': 'diet_plan',
+            'coach': None,
+            'stock': None,
+            'partner_company': diet.partner_company
+        }
+
+    # Convertir le dictionnaire en liste pour le template
+    all_services = list(all_services_dict.values())
+
+    return {'all_services': all_services}
+
+
+def service_detail(request, catalog_service_id):
+    # Charger les données spécifiques du service via load_single_service
+    service_data = load_single_service(catalog_service_id)
+
+    # Rendre le template avec les données du service
+    return render(request, 'service_detail.html', {'service_data': service_data})
+
+
+
+
+def load_single_service(catalog_service_id):
+    # Récupérer le service principal
+    catalog_service = get_object_or_404(CatalogService, id=catalog_service_id)
+
+    # Récupérer les objets ServiceImage directement pour garder les instances complètes
+    images = ServiceImage.objects.filter(catalog_service=catalog_service)
+
+    # Initialisation du dictionnaire de données pour le service
+    service_data = {
+        'service': catalog_service,
+        'images': images,  # On passe les objets complets
+        'type': 'catalog',
+        'coach': None,
+        'stock': None,
+        'partner_company': None
+    }
+
+    # Détecter le type de service et charger les attributs spécifiques en utilisant try-except
+    try:
+        diet_plan = DietPlan.objects.get(catalog_service=catalog_service)
+        service_data.update({
+            'type': 'diet_plan',
+            'partner_company': diet_plan.partner_company,
+        })
+    except DietPlan.DoesNotExist:
+        try:
+            gym_accessory = GymAccessory.objects.get(catalog_service=catalog_service)
+            service_data.update({
+                'type': 'gym_accessory',
+                'stock': gym_accessory.stock,
+            })
+        except GymAccessory.DoesNotExist:
+            try:
+                personalized_coaching = PersonalizedCoaching.objects.get(catalog_service=catalog_service)
+                service_data.update({
+                    'type': 'personalized_coaching',
+                    'coach': personalized_coaching.coach,
+                })
+            except PersonalizedCoaching.DoesNotExist:
+                pass
+
+    return service_data
+
+
+
+
+
+def service_detail(request, catalog_service_id):
+    service_data = load_single_service(catalog_service_id)
+    print("Service Data:", service_data)  # Debug: Afficher les données dans la console
+    return render(request, 'service_detail.html', {'service_data': service_data})
+
+
+
+
+
+
 
 # Vue pour la page FAQ
 
@@ -840,6 +958,7 @@ def create_coach_profile(sender, instance, created, **kwargs):
     if not created:  # Si l'utilisateur existe déjà
         if instance.role == 'coach':
             Coach.objects.get_or_create(user=instance)
+
 @login_required
 def coach_dashboard(request):
     # Vérifier si l'utilisateur est un coach ou un administrateur (is_staff)

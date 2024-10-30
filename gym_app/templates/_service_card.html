@@ -1,0 +1,55 @@
+{% load static %}
+
+<div class="card h-100 shadow-sm">
+    {% if service.image %}
+        <img src="{{ service.image.url }}" alt="Image de {{ service.name }}" class="card-img-top"
+             style="height: 300px; object-fit: contain; border-radius: 12px 12px 0 0; width: 100%;">
+    {% else %}
+        <img src="{% static 'default/image/path.jpg' %}" alt="Image par défaut" class="card-img-top"
+             style="height: 300px; object-fit: contain; border-radius: 12px 12px 0 0; width: 100%;">
+    {% endif %}
+
+    <div class="card-body text-center">
+        <h4 class="card-title">{{ service.name }}</h4>
+        <p class="card-text">{{ service.description|truncatechars:40 }}</p>
+        <p><strong>Prix :</strong> {{ service.price }}€</p>
+        {% if service.duration %}
+            <p><strong>Durée :</strong> {{ service.duration }} jours</p>
+        {% endif %}
+        <div class="d-grid">
+            <a href="{% url 'service_detail' service.id %}" class="btn btn-primary">En savoir plus</a>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+
+
+
+<!-- <div class="card">
+    {% if service.image %}
+        <img src="{{ service.image.url }}" class="card-img-top" alt="{{ service.name }}">
+    {% endif %}
+    <div class="card-body">
+        <h5 class="card-title">{{ service.name }}</h5>
+        <p class="card-text">{{ service.description }}</p>
+        <p class="card-text"><strong>Price:</strong> {{ service.price }}€</p>
+        {% if service.duration %}
+            <p class="card-text"><strong>Duration:</strong> {{ service.duration }} days</p>
+        {% endif %}
+        {% if service.partner_company %}
+            <p class="card-text"><strong>Partner Company:</strong> {{ service.partner_company }}</p>
+        {% endif %}
+        {% if service.coach %}
+            <p class="card-text"><strong>Coach:</strong> {{ service.coach.username }}</p>
+        {% endif %}
+        {% if service.stock %}
+            <p class="card-text"><strong>Stock:</strong> {{ service.stock }}</p>
+        {% endif %}
+        <a href="#" class="btn btn-primary">Learn More</a>
+    </div>
+</div> -->

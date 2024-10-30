@@ -1,0 +1,9 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+    <h1>Checkout</h1>
+    <p>Montant total : {{ total }} €</p>
+    <a href="{% url 'cart:checkout_session' %}" class="btn btn-primary">Procéder au paiement</a>
+</div>
+{% endblock %}
