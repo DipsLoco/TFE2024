@@ -14,69 +14,94 @@
     </div>
 </header>
 
-<!-- Affichage du panier -->
 <div class="container mt-5">
     <h2>Votre panier</h2>
-    <table class="table table-striped">
-        <thead>
-            <tr>
-                <th>Nom du plan ou service</th>
-                <th>Prix</th>
-                <th>Durée</th>
-                <th>Date de début</th>
-                <th>Date d'échéance</th>
-                <th>Action</th>
-            </tr>
-        </thead>
-        <tbody>
-            {% if cart_plans %}
-                {% for plan in cart_plans %}
+    <form id="cartForm" method="post" action="{% url 'cart:delete_selected_items' %}">
+        {% csrf_token %}
+        <table class="table table-striped">
+            <thead>
                 <tr>
-                    <td>{{ plan.name }}</td>
-                    <td>{{ plan.price }} €</td>
-                    <td>{{ plan.duration }} mois</td>
-                    <td>{{ plan.subscription.start_date|date:"d M Y" }}</td>
-                    <td>{{ plan.subscription.get_end_date|date:"d M Y" }}</td>
-                    <td>
-                        <a href="{% url 'cart:cart_delete' plan.id %}" class="btn btn-danger">Supprimer</a>
-                    </td>
+                    <th></th> <!-- Colonne pour la case à cocher -->
+                    <th>Nom du plan ou service</th>
+                    <th>Image</th>
+                    <th>Prix</th>
+                    <th>Durée</th>
+                    <th>Date de début</th>
+                    <th>Date d'échéance</th>
+                    <th>Action</th>
                 </tr>
-                {% endfor %}
-            {% endif %}
-            
-            {% if cart_services %}
-                {% for service in cart_services %}
-                <tr>
-                    <td>{{ service.name }}</td>
-                    <td>{{ service.price }} €</td>
-                    <td>N/A</td>
-                    <td>N/A</td>
-                    <td>N/A</td>
-                    <td>
-                        <a href="{% url 'cart:cart_delete' service.id %}" class="btn btn-danger">Supprimer</a>
-                    </td>
-                </tr>
-                {% endfor %}
-            {% endif %}
-            
-            {% if not cart_plans and not cart_services %}
-                <tr>
-                    <td colspan="6" class="text-center">Votre panier est vide.</td>
-                </tr>
-            {% endif %}
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+                {% if cart_plans %}
+                    {% for plan in cart_plans %}
+                    <tr>
+                        <td><input type="checkbox" name="selected_items" value="plan-{{ plan.id }}"></td>
+                        <td>{{ plan.name }}</td>
+                        <td>N/A</td>
+                        <td>{{ plan.price }} €</td>
+                        <td>{{ plan.duration|default:"N/A" }} jours</td>
+                        <td>{{ plan.subscription.start_date|date:"d M Y"|default:"N/A" }}</td>
+                        <td>{{ plan.subscription.get_end_date|date:"d M Y"|default:"N/A" }}</td>
+                        <td>
+                            <a href="{% url 'cart:cart_delete' 'plan' plan.id %}" class="btn btn-danger btn-sm">Supprimer</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                {% endif %}
+                
+                {% if cart_services %}
+                    {% for service in cart_services %}
+                    <tr>
+                        <td><input type="checkbox" name="selected_items" value="service-{{ service.id }}"></td>
+                        <td>{{ service.name }}</td>
+                        <td>
+                            {% if service.image_id %}
+                                <img src="{{ service.image_url }}" alt="Image de {{ service.name }}" style="width: 50px; height: 50px;">
+                            {% else %}
+                                N/A
+                            {% endif %}
+                        </td>
+                        <td>{{ service.prix }} €</td>
+                        <td>N/A</td>
+                        <td>N/A</td>
+                        <td>N/A</td>
+                        <td>
+                            {% if service.image_id %}
+                                <a href="{% url 'cart:cart_delete' 'service' service.image_id %}" class="btn btn-danger btn-sm">Supprimer</a>
+                            {% else %}
+                                <a href="{% url 'cart:cart_delete' 'service' service.id %}" class="btn btn-danger btn-sm">Supprimer</a>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                {% endif %}
+                
+                {% if not cart_plans and not cart_services %}
+                    <tr>
+                        <td colspan="8" class="text-center">Votre panier est vide.</td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
 
-    <!-- Aligner le bouton à droite -->
-    <div class="text-end">
-        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#paiementModal">
-            Confirmer et Payer
-        </button>
-    </div>
+        <div class="d-flex justify-content-between">
+            <!-- Bouton pour vider le panier avec un fond rouge et texte noir -->
+            <a href="{% url 'cart:cart_clear' %}" class="btn" style="background-color: rgb(241, 35, 45); color: black; border: none;">
+                <i class="bi bi-trash"></i> Vider le panier
+            </a>
+            <!-- Bouton pour supprimer la sélection avec un fond orange et texte noir -->
+            <button type="submit" class="btn" style="background-color: orange; color: black; border: none;">
+                Supprimer la sélection
+            </button>
+            <!-- Bouton pour confirmer et payer avec un fond vert et texte noir -->
+            <button type="button" class="btn" data-bs-toggle="modal" data-bs-target="#paiementModal" style="background-color: rgb(40, 255, 40); color: black; border: none;">
+                Confirmer et Payer
+            </button>
+        </div>                
+    </form>
     <br>
 </div>
 
-<!-- Modal de paiement -->
 <div class="modal fade" id="paiementModal" tabindex="-1" aria-labelledby="paiementModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
@@ -85,20 +110,20 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
-              <dl class="row">
-                  <dt class="col-sm-3">Montant total :</dt>
-                  <dd class="col-sm-9">{{ totaltvac }} €</dd>
-              </dl>
-              <hr>
-              <dl class="row">
-                  <div class="col-sm-12">
-                      <dd style="background-color: rgba(37, 24, 157, 0.735); padding: 10px; border-radius: 5px;">
-                          <small style="font-style: italic; font-size: smaller;">
-                              Dès réception de votre paiement, vous pourrez profiter pleinement de nos services.
-                          </small>
-                      </dd>
-                  </div>
-              </dl>
+                <dl class="row">
+                    <dt class="col-sm-3">Montant total :</dt>
+                    <dd class="col-sm-9">{{ totaltvac }} €</dd>
+                </dl>
+                <hr>
+                <dl class="row">
+                    <div class="col-sm-12">
+                        <dd style="background-color: rgba(101, 255, 152, 0.735); padding: 10px; border-radius: 5px;">
+                            <small style="font-style: italic; font-size: smaller;">
+                                Dès réception de votre paiement, vous pourrez profiter pleinement de nos services.
+                            </small>
+                        </dd>
+                    </div>
+                </dl>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-primary" id="confirmPayerBtn">PAYER</button>

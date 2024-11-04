@@ -21,8 +21,9 @@
                     <a class="nav-link" href="{% url 'home' %}#contact">{{ _('Contact') }}</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#!">{{ _('Services') }}</a>
+                    <a class="nav-link" href="{% url 'home' %}#catalog-services">{{ _('Services') }}</a>
                 </li>
+                
                 <li class="nav-item">
                     <a class="nav-link" href="{% url 'faq' %}">{{ _('Faq') }}</a>
                 </li>
@@ -43,23 +44,31 @@
                         {% endif %}
                     </a>
                 </li>
+                        {% if user.is_superuser %}
+                        <li class="nav-item">
+                        <a class="nav-link" href="/admin">Admin</a>
+                        </li>
+                        {% endif %}
+                        <li class="nav-item">
+                        <a class="nav-link" href="{% url 'logout' %}">Se déconnecter</a>
+                        </li>
+                        <li class="nav-item">
+                        <a href="{% url 'cart:cart_summary' %}" class="btn btn-outline-light btn-sm" type="submit" style="padding: 5px 8px;">
+                        <i class="bi-cart-fill me-1"></i> Cart
+                        <span class="badge bg-white text-dark ms-1 rounded-pill" id="cart-count">{{ cart|length }}</span>
+                        </a>                    
+                        </li>
+                 {% endif %}
+
+                <!-- fonctionnais bien  -->
                 
-                
-                {% if user.is_superuser %}
-                <li class="nav-item">
-                    <a class="nav-link" href="/admin">Admin</a>
-                </li>
-                {% endif %}
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'logout' %}">Se déconnecter</a>
-                </li>
-                <li class="nav-item">
+                <!-- <li class="nav-item">
                     <a href="{% url 'cart:cart_summary' %}" class="btn btn-outline-light btn-sm" type="submit" style="padding: 5px 8px;">
                         <i class="bi-cart-fill me-1"></i> Cart
                         <span class="badge bg-white text-dark ms-1 rounded-pill" id="cart_quantity">{{ cart | length }}</span>
-                    </a>                    
-                </li>
-                {% endif %}
+                    </a>                     -->
+              
+               
                 
                 <!-- Sélecteur de langue visible pour tous les utilisateurs -->
                 <form action="{% url 'set_language' %}" method="post" id="languageForm" class="d-inline-block language-form">

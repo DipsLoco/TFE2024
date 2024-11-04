@@ -31,17 +31,28 @@ from django.utils.translation import gettext as _
 from django.contrib import messages as django_messages
 from .forms import MessageForm
 from django.db.models import Q
+from django.shortcuts import render, get_object_or_404
+from .models import Message
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render, get_object_or_404, redirect
+from django.contrib import messages
+from django.db.models import Q
+from .forms import MessageForm
+from .models import User
+from django.shortcuts import render, get_object_or_404
+from .models import (Plan, PurchaseHistory, ServiceImage, Workout, Coach, Review, WorkoutSchedule, CatalogService,
+                     PersonalizedCoaching, GymAccessory, DietPlan)
+from django.utils.translation import gettext as _
+from django.http import HttpResponse
+from reportlab.pdfgen import canvas
+from datetime import datetime
+from reportlab.lib.pagesizes import A4
+from reportlab.lib import colors
+from reportlab.lib.units import cm
+from decimal import Decimal
+from django.db import transaction
 
-
-
-
-
-
-
-
-
-
-User = get_user_model()
 
 # Vue pour la page à propos
 
@@ -49,15 +60,7 @@ User = get_user_model()
 def about(request):
     return render(request, 'about.html')
 
-# Vue pour la page d'accueil
 
-
-# views.py
-
-from django.shortcuts import render, get_object_or_404
-from .models import (Plan, ServiceImage, Workout, Coach, Review, WorkoutSchedule, CatalogService,
-                     PersonalizedCoaching, GymAccessory, DietPlan)
-from django.utils.translation import gettext as _
 
 def home(request):
     context = {
@@ -128,15 +131,6 @@ def load_services():
     return {'all_services': all_services}
 
 
-def service_detail(request, catalog_service_id):
-    # Charger les données spécifiques du service via load_single_service
-    service_data = load_single_service(catalog_service_id)
-
-    # Rendre le template avec les données du service
-    return render(request, 'service_detail.html', {'service_data': service_data})
-
-
-
 
 def load_single_service(catalog_service_id):
     # Récupérer le service principal
@@ -196,6 +190,10 @@ def service_detail(request, catalog_service_id):
 
 
 
+
+
+
+
 # Vue pour la page FAQ
 
 
@@ -210,7 +208,7 @@ def faq(request):
 def remind_subscription(request, user_id):
     if request.method == 'POST':
         user = get_object_or_404(User, id=user_id)
-        subscription = get_object_or_404(Subscription, user=user, payment_status='pending')
+        Subscription = get_object_or_404(Subscription, user=user, payment_status='pending')
 
         # Créez un message de relance
         subject = "Relance d'abonnement"
@@ -267,108 +265,7 @@ def subscribe(request, pk):
         return redirect('payment', subscription.id)
     return render(request, 'subscription.html', {'plan': plan})
 
-# Vue pour créer une session Stripe et démarrer le paiement
-@login_required
-def create_checkout_session(request, plan_id):
-    plan = get_object_or_404(Plan, id=plan_id)
 
-    # Créer une session de paiement Stripe
-    checkout_session = stripe.checkout.Session.create(
-        payment_method_types=['card'],
-        line_items=[{
-            'price_data': {
-                'currency': 'eur',
-                'product_data': {
-                    'name': plan.name,
-                },
-                'unit_amount': plan.price * 100,  # Prix en centimes
-            },
-            'quantity': 1,
-        }],
-        mode='payment',
-        success_url=request.build_absolute_uri('/payment/success/') + '?session_id={CHECKOUT_SESSION_ID}',
-        cancel_url=request.build_absolute_uri('/payment/cancel/'),
-    )
-
-    # Sauvegarder le plan dans la session pour l'utilisateur
-    request.session['plan_id'] = plan.id
-
-    return JsonResponse({
-        'id': checkout_session.id
-    })
-
-# Gestion du succès du paiement
-@login_required
-def payment_success(request):
-    session_id = request.GET.get('session_id')
-    session = stripe.checkout.Session.retrieve(session_id)
-
-    if session.payment_status == 'paid':
-        plan_id = request.session.get('plan_id')
-        plan = get_object_or_404(Plan, id=plan_id)
-
-        # Créer une souscription pour l'utilisateur
-        subscription = Subscription.objects.create(
-            user=request.user,
-            plan=plan,
-            payment_status='paid',
-        )
-        
-        # Mettre à jour l'utilisateur en premium
-        request.user.is_premium = True
-        request.user.save()
-
-        # Supprimer le plan de la session
-        del request.session['plan_id']
-
-        return render(request, 'payment_success.html', {'plan': plan})
-
-    return render(request, 'payment_failed.html')
-
-
-
-# Gestion du succès du paiement
-@login_required
-def payment_success(request):
-    session_id = request.GET.get('session_id')
-    session = stripe.checkout.Session.retrieve(session_id)
-
-    if session.payment_status == 'paid':
-        plan_id = request.session.get('plan_id')
-        plan = get_object_or_404(Plan, id=plan_id)
-
-        # Créer une souscription pour l'utilisateur
-        subscription = Subscription.objects.create(
-            user=request.user,
-            plan=plan,
-            payment_status='paid',
-        )
-        
-        # Mettre à jour l'utilisateur en premium
-        request.user.is_premium = True
-        request.user.save()
-
-        # Supprimer le plan de la session
-        del request.session['plan_id']
-
-        return render(request, 'payment_success.html', {'plan': plan})
-
-    return render(request, 'payment_failed.html')
-
-# Gestion de l'annulation du paiement
-@login_required
-def payment_cancel(request):
-    return render(request, 'payment_cancel.html')
-
-# Mise à jour du statut premium de l'utilisateur
-def update_premium_status(user):
-    current_subscription = Subscription.objects.filter(
-        user=user, end_date__gt=timezone.now()).first()
-    if current_subscription and current_subscription.plan.is_premium:
-        user.is_premium = True
-    else:
-        user.is_premium = False
-    user.save()
 
 # Vue pour la page d'abonnement spécifique
 
@@ -428,46 +325,8 @@ def register_user(request):
         form = SignUpForm()
     return render(request, 'administration/register.html', {'form': form})
 
-# @login_required
-# def read_message(request, message_id):
-#     # Récupérer le message spécifique
-#     message = get_object_or_404(Message, id=message_id, recipient=request.user)
 
-#     # Marquer le message comme lu
-#     if not message.is_read:
-#         message.is_read = True
-#         message.save()
 
-#     # Récupérer tous les messages de la discussion entre l'utilisateur et l'expéditeur
-#     thread_messages = Message.objects.filter(
-#         Q(sender=message.sender, recipient=request.user) |
-#         Q(sender=request.user, recipient=message.sender)
-#     ).order_by('timestamp')
-
-#     # Récupérer un destinataire valide pour "Nouveau message"
-#     recipient = User.objects.exclude(id=request.user.id).first()
-
-#     # Récupérer les messages reçus par l'utilisateur connecté
-#     messages_received = Message.objects.filter(recipient=request.user).order_by('-timestamp')
-
-#     # Filtre par rôle
-#     filter_role = request.GET.get('filter_role', 'all')
-
-#     unread_messages = messages_received.filter(is_read=False).count()
-
-#     context = {
-#         'message': message,
-#         'recipient': recipient,
-#         'messages': messages_received,
-#         'filter_role': filter_role,
-#         'unread_messages': unread_messages,
-#         'thread_messages': thread_messages
-#     }
-
-#     return render(request, 'read_message.html', context)
-
-from django.shortcuts import get_object_or_404
-from django.db.models import Q
 
 @login_required
 def read_message(request, message_id):
@@ -506,11 +365,6 @@ def read_message(request, message_id):
 
     return render(request, 'read_message.html', context)
 
-
-
-from django.shortcuts import get_object_or_404, redirect
-from django.contrib.auth.decorators import login_required
-from .models import Message
 
 @login_required
 def archive_message(request, message_id):
@@ -615,13 +469,6 @@ def delete_multiple_messages(request):
     return redirect('messages_inbox')
 
 
-
-
-
-from django.shortcuts import render, get_object_or_404
-from .models import Message
-from django.contrib.auth.decorators import login_required
-
 def messages_inbox(request):
     # Récupérer la catégorie depuis l'URL
     category = request.GET.get('category', 'received')
@@ -678,27 +525,6 @@ def messages_inbox(request):
     return render(request, 'messages_inbox.html', context)
 
 
-
-
-
-
-
-
-
-# @login_required
-# def send_message_default(request):
-    # Logique pour afficher la page de sélection du destinataire
-    # users = User.objects.exclude(id=request.user.id)  # Exclure l'utilisateur actuel de la liste des destinataires
-    # return render(request, 'send_message.html', {'users': users, 'subject': ''})
-
-
-from django.contrib.auth.decorators import login_required
-from django.shortcuts import render, get_object_or_404, redirect
-from django.contrib import messages
-from django.db.models import Q
-from .forms import MessageForm
-from .models import User
-
 @login_required
 def send_message(request, recipient_id=None):
     # Initialiser recipient à None pour les nouveaux messages
@@ -747,20 +573,6 @@ def send_message(request, recipient_id=None):
         'subject': subject,
         'recipient': recipient  # Transmettre seulement pour les réponses
     })
-
-
-
-
-# Vue pour lire un message et le marquer comme lu
-# @login_required
-# def read_message(request, message_id):
-#     message = get_object_or_404(Message, id=message_id)
-
-#     if message.recipient == request.user:
-#         message.is_read = True  # Le statut est bien mis à jour ici
-#         message.save()
-
-#     return render(request, 'read_message.html', {'message': message})
 
 
 
@@ -845,48 +657,6 @@ def validate_password(request):
     return JsonResponse({'conditions': conditions})
 
 
-# @login_required
-# def profile(request):
-#     user = request.user
-    
-#     # Récupérer le staff (si disponible) uniquement si le rôle est 'member'
-#     staff_id = None
-#     if user.role == 'member':
-#         staff_id = User.objects.filter(is_staff=True).first().id
-
-#     context = {
-#         'user': user,
-#         'staff_id': staff_id,
-#     }
-
-#     return render(request, 'profile.html', context)
-
-# @login_required
-# def profile(request):
-#     user = request.user
-    
-#     # Récupérer le staff (si disponible) uniquement si le rôle est 'member'
-#     staff_id = None
-#     if user.role == 'member':
-#         staff_id = User.objects.filter(is_staff=True).first().id
-
-#     # Récupérer les abonnements actuels et passés
-#     current_subscription = Subscription.objects.filter(user=user, payment_status='paid').first()
-#     # workout_schedules = WorkoutSchedule.objects.filter(participants=user)
-
-#     # Préparer les données pour le template
-#     context = {
-#         'user': user,  # S'assurer que l'utilisateur est bien passé au template
-#         'staff_id': staff_id,
-#         'current_subscription': current_subscription,
-#         'is_premium': user.is_premium  # Optionnel, car user.is_premium est déjà disponible
-#         # 'workout_schedules': workout_schedules,  # Remplacement de bookings par workout_schedules
-#     }
-
-#     return render(request, 'profile.html', context)
-# views.py
-
-from django.utils import timezone
 
 @login_required
 def profile(request):
@@ -895,13 +665,27 @@ def profile(request):
     # Récupérer le staff (si disponible) uniquement si le rôle est 'member'
     staff_id = None
     if user.role == 'member':
-        staff_id = User.objects.filter(is_staff=True).first().id
+        staff_user = User.objects.filter(is_staff=True).first()
+        staff_id = staff_user.id if staff_user else None
 
-    # Récupérer les abonnements actuels et passés
-    current_subscription = Subscription.objects.filter(user=user, payment_status='paid').first()
+    # Récupérer l'abonnement actuel en vérifiant le statut et le plan associé
+    current_subscription = Subscription.objects.filter(
+        user=user,
+        payment_status='paid'
+    ).select_related('plan').first()
 
     # Si l'utilisateur n'a pas de souscription active, afficher le popup
-    show_subscription_popup = current_subscription is None or current_subscription.get_end_date() < timezone.now()
+    show_subscription_popup = (
+        current_subscription is None or 
+        (current_subscription.get_end_date() and current_subscription.get_end_date() < timezone.now().date())
+    )
+
+    # Récupérer l'historique des achats (plans et services)
+    purchase_history = PurchaseHistory.objects.filter(user=user).select_related('plan', 'catalog_service').order_by('-purchase_date')
+    
+    # Filtrer les achats en deux catégories : plans et services
+    plan_purchases = purchase_history.filter(item_type='plan')
+    service_purchases = purchase_history.filter(item_type='service')
 
     # Préparer les données pour le template
     context = {
@@ -909,10 +693,171 @@ def profile(request):
         'staff_id': staff_id,
         'current_subscription': current_subscription,
         'is_premium': user.is_premium, 
-        'show_subscription_popup': show_subscription_popup,  # Pour déclencher le popup
+        'show_subscription_popup': show_subscription_popup,
+        'purchase_history': purchase_history,  # Historique global des achats si besoin
+        'plan_purchases': plan_purchases,       # Achats de plans
+        'service_purchases': service_purchases, # Achats de services
     }
 
     return render(request, 'profile.html', context)
+
+
+
+
+
+# def migrate_old_purchases():
+#     users = User.objects.all()
+    
+#     with transaction.atomic():
+#         for user in users:
+#             # Récupérer les abonnements payés
+#             old_subscriptions = Subscription.objects.filter(user=user, payment_status='paid')
+#             for subscription in old_subscriptions:
+#                 PurchaseHistory.objects.create(
+#                     user=user,
+#                     item_type='plan',
+#                     price=subscription.plan.price,
+#                     purchase_date=subscription.start_date,  # Utiliser le champ existant représentant la date d'achat
+#                     plan=subscription.plan
+#                 )
+#                 print(f"Ajout de l'abonnement pour {user.username}")
+
+#             # Suppression de la tentative d'ajout des CatalogService sans champ user
+#             print(f"Migration terminée pour {user.username}")
+
+# # Appeler la fonction pour effectuer la migration
+# migrate_old_purchases()
+
+
+def download_invoice(request, purchase_id):
+    # Récupérer l'achat et l'utilisateur
+    purchase = get_object_or_404(PurchaseHistory, id=purchase_id, user=request.user)
+    user = request.user
+
+    # Préparer la réponse pour un PDF
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="facture_{purchase.id}.pdf"'
+
+    # Créer un PDF avec reportlab
+    p = canvas.Canvas(response, pagesize=A4)
+    width, height = A4
+
+    # Coordonnées de BE Fit en haut à droite
+    p.setFont("Helvetica", 10)
+    p.drawString(width - 200, height - 50, "BE Fit")
+    p.drawString(width - 200, height - 65, "Adresse : 18, Place Eugene Simonis")
+    p.drawString(width - 200, height - 80, "Ville : Bruxelles, BE 1081")
+    p.drawString(width - 200, height - 95, "Tél. : +32 484 86 01 33")
+    p.drawString(width - 200, height - 110, "Email : befit@gmail.com")
+    p.drawString(width - 200, height - 125, "Horaires : Du Lu au Dim de 07h à 19h")
+
+    # Coordonnées de l'utilisateur en haut à gauche
+    p.setFont("Helvetica", 10)
+    p.drawString(50, height - 50, "Adresse de livraison")
+    p.drawString(50, height - 65, f"Nom: {user.first_name} {user.last_name}")
+    p.drawString(50, height - 80, f"Email: {user.email}")
+    p.drawString(50, height - 95, f"Adresse: {user.address or 'Non renseignée'}")
+
+    # Date et numéro de facture
+    p.setFont("Helvetica-Bold", 12)
+    p.drawString(50, height - 130, f"Date de la facture : {datetime.now().strftime('%d %m %Y')}")
+    p.drawString(50, height - 145, f"Numéro de facture : {purchase.id}-{datetime.now().strftime('%Y%m%d')}")
+
+    # Titre de la facture
+    p.setFont("Helvetica-Bold", 16)
+    p.drawString(50, height - 170, "Facture d'achat")
+
+    # Période de l'achat basée sur la date d'achat
+    p.setFont("Helvetica-Bold", 12)
+    p.drawString(50, height - 190, f"Période : {purchase.purchase_date.strftime('%B %Y')}")
+
+    # Détail de l'achat
+    y_position = height - 220
+    price_tvac = Decimal(purchase.price)
+    price_htva = price_tvac / Decimal("1.21")
+    tva_amount = price_tvac - price_htva
+
+    # Affichage du détail de l'achat
+    p.setFont("Helvetica", 10)
+    p.drawString(50, y_position, f"{purchase.get_item_name()} - {price_htva.quantize(Decimal('0.01'))}€ HTVA - {tva_amount.quantize(Decimal('0.01'))}€ TVA - {price_tvac}€ TVAC")
+    y_position -= 15
+    if purchase.item_type == 'plan':
+        p.drawString(60, y_position, f"Durée: {purchase.get_duration()} jours")
+        y_position -= 15
+        p.drawString(60, y_position, f"Date d'échéance: {purchase.get_end_date().strftime('%d %m %Y') if purchase.get_end_date() else 'Non renseignée'}")
+        y_position -= 15
+
+    # Totaux HTVA et TVAC pour cet achat unique
+    total_htva = price_htva
+    total_tva = tva_amount
+    total_tvac = price_tvac
+
+    # Affichage des totaux
+    y_position -= 30
+    p.setFont("Helvetica-Bold", 12)
+    p.drawString(50, y_position, f"Total HTVA : {total_htva.quantize(Decimal('0.01'))}€")
+    y_position -= 15
+    p.drawString(50, y_position, f"Total TVA (21%) : {total_tva.quantize(Decimal('0.01'))}€")
+    y_position -= 15
+    p.drawString(50, y_position, f"Total TVAC : {total_tvac.quantize(Decimal('0.01'))}€")
+
+    # Clauses légales
+    y_position -= 50
+    p.setFont("Helvetica-Bold", 10)
+    p.drawString(50, y_position, "Politique de rétractation :")
+    p.setFont("Helvetica", 8)
+    p.drawString(50, y_position - 12, "Conformément à l'article VI.47 du Code de droit économique, les consommateurs ont un droit de rétractation de 14 jours pour les services non entamés.")
+    
+    y_position -= 30
+    p.setFont("Helvetica-Bold", 10)
+    p.drawString(50, y_position, "Garantie légale :")
+    p.setFont("Helvetica", 8)
+    p.drawString(50, y_position - 12, "Les produits bénéficient d'une garantie légale de 2 ans selon l'article 1649bis du Code civil belge.")
+
+    y_position -= 40
+    p.setFont("Helvetica-Bold", 10)
+    p.drawString(50, y_position, "Confidentialité :")
+    p.setFont("Helvetica", 8)
+    p.drawString(50, y_position - 12, "Les informations personnelles sont protégées selon notre politique de confidentialité.")
+
+    # Sauvegarder et fermer le PDF
+    p.showPage()
+    p.save()
+
+    return response
+
+
+
+
+# def remove_duplicates():
+#     duplicates = (
+#         PurchaseHistory.objects
+#         .values('user', 'item_type', 'plan', 'catalog_service')
+#         .annotate(count=Count('id'))
+#         .filter(count__gt=1)
+#     )
+
+#     with transaction.atomic():
+#         for duplicate in duplicates:
+#             entries = PurchaseHistory.objects.filter(
+#                 user=duplicate['user'],
+#                 item_type=duplicate['item_type'],
+#                 plan=duplicate['plan'],
+#                 catalog_service=duplicate['catalog_service']
+#             ).order_by('id')
+            
+#             entries_to_delete = entries[1:]  # Garder le premier et supprimer les autres
+#             print(f"Suppression des doublons pour {duplicate} - Total à supprimer : {len(entries_to_delete)}")
+#             entries_to_delete.delete()
+
+#     print("Suppression des doublons terminée.")
+
+
+
+
+
+
+
 
     
 

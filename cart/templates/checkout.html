@@ -1,9 +1,84 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<div class="container">
-    <h1>Checkout</h1>
-    <p>Montant total : {{ total }} €</p>
-    <a href="{% url 'cart:checkout_session' %}" class="btn btn-primary">Procéder au paiement</a>
+<div class="container mt-5">
+    <h1 class="display-4 text-center mb-4">Checkout</h1>
+    <div class="row">
+        <div class="col-md-8 mx-auto">
+            {% if cart_plans or cart_services %}
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <h4 class="card-title">Détails de votre commande</h4>
+                        
+                        <!-- Liste des plans dans le panier -->
+                        {% if cart_plans %}
+                            <h5 class="mt-3">Plans dans le panier</h5>
+                            <ul class="list-group mb-3">
+                                {% for plan in cart_plans %}
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <h5 class="my-0">{{ plan.name }}</h5>
+                                            <small class="text-muted">Durée : {{ plan.duration }} jours</small>
+                                        </div>
+                                        <span class="text-muted">{{ plan.price }} €</span>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+
+                        <!-- Liste des services dans le panier -->
+                        {% if cart_services %}
+                            <h5 class="mt-3">Services dans le panier</h5>
+                            <ul class="list-group mb-3">
+                                {% for service in cart_services %}
+                                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <h5 class="my-0">{{ service.name }}</h5>
+                                            <small class="text-muted">{{ service.description }}</small>
+                                        </div>
+                                        <span class="text-muted">{{ service.price }} €</span>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        {% endif %}
+
+                        <!-- Affichage du total -->
+                        <div class="d-flex justify-content-between">
+                            <strong>Total :</strong>
+                            <strong>{{ total_amount }} €</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bouton pour procéder au paiement -->
+                <div class="text-center mt-4">
+                    <a href="{% url 'cart:checkout_session' %}" class="btn btn-primary btn-lg px-5 py-2">
+                        <i class="fas fa-credit-card"></i> Procéder au paiement
+                    </a>
+                </div>
+            {% else %}
+                <div class="alert alert-info text-center">
+                    Votre panier est vide. <a href="{% url 'home' %}#catalog-services">Parcourir les services</a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
 </div>
+
+<!-- Styles personnalisés -->
+<style>
+    .container h1 {
+        font-weight: bold;
+        color: #007bff;
+    }
+    .btn-primary {
+        background-color: #007bff;
+        border-color: #007bff;
+        font-size: 1.2em;
+    }
+    .btn-primary:hover {
+        background-color: #0056b3;
+        border-color: #0056b3;
+    }
+</style>
 {% endblock %}

@@ -41,6 +41,7 @@ urlpatterns = [
     path('subscription/<int:pk>/', views.subscribe, name='subscription'),
     path('subscriptions/', subscription_list, name='subscription_list'),
     path('subscribe/<int:pk>/', subscribe, name='subscribe'),
+    path('download_invoice/<int:purchase_id>/', views.download_invoice, name='download_invoice'),
     path('service/<int:catalog_service_id>/', views.service_detail, name='service_detail'),
     path('register/', views.register_user, name='register'),
     path('workout/<int:pk>/', views.workout_detail, name='workout_detail'),
@@ -57,11 +58,6 @@ urlpatterns = [
     path('politique-cookies/', views.cookies, name='cookies'),
     path('politique-confidentialite/', views.confidentialite, name='confidentialite'),
     path('mentions-legales/', views.mentions_legales, name='mentions_legales'),
-
-    # path('payment/<int:subscription_id>/', payment, name='payment'),
-    path('payment_success/<int:subscription_id>/', views.payment_success, name='payment_success'),
-    path('create-checkout-session/<int:plan_id>/', views.create_checkout_session, name='create_checkout_session'),
-
     path('new_workoutSchedule/', views.newWorkoutSchedule , name='newWorkoutSchedule'),
 ] 
 

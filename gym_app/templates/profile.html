@@ -51,15 +51,17 @@
             </div>
             <!-- Popup de souscription (affiché si show_subscription_popup est True) -->
     {% if show_subscription_popup %}
-    <div id="subscriptionPopup" class="popup-modal" style="display: none;">
+    <div id="subscriptionPopup">
         <div class="popup-content">
-            <img src="{% static 'images/admin_photo.jpg' %}" alt="Equipe BeFit" class="admin-photo mb-3">
-            <h5>Découvrez Tout Nos services sans plus attendre !</h5>
+            <img src="{% static 'image/befit_staff.png' %}" alt="Equipe BeFit" class="admin-photo mb-5">
+            <h5>Découvrez Tous Nos Services sans plus attendre !</h5>
             <p>Profitez de nos programmes exclusifs et de nos entraînements en souscrivant dès aujourd'hui.</p>
-            <a href="{% url 'home' %}#nos-offres" class="btn btn-primary">Voir nos Offres</a>
-            <button id="closePopup" class="btn btn-danger mt-3">Fermer</button>
+            <div class="button-group">
+                <a href="{% url 'home' %}#nos-offres" class="btn btn-primary">Voir nos Offres</a>
+                <button id="closePopup" class="btn btn-danger">Fermer</button>
+            </div>
         </div>
-    </div>
+    </div>    
     {% endif %}
         </div>
         <br>
@@ -131,7 +133,6 @@
                 <div class="card-body">
                     {% if current_subscription %}
                         <p><strong>Plan :</strong> {{ current_subscription.plan.name }}</p>
-                        <p><strong>Prix :</strong> {{ current_subscription.plan.price }}€</p>
                         <p><strong>Date de Début :</strong> {{ current_subscription.start_date|date:"d M Y" }}</p>
                         <p><strong>Date de Fin :</strong> {{ current_subscription.get_end_date|date:"d M Y" }}</p>
                     {% else %}
@@ -141,7 +142,6 @@
             </div>
         </div>
     </div>
-
     <div class="row">
         <!-- Réservations Actuelles -->
         <div class="col-md-6 mb-4">
@@ -207,121 +207,283 @@
         </div>
 
         <!-- Historique des Réservations -->
-        <div class="col-md-6 mb-4">
-            <div class="card shadow-sm">
-                <div class="card-header bg-primary text-white">
-                    <h2 class="h5 mb-0"><i class="fas fa-history"></i> Historique des Réservations</h2>
-                </div>
-                <div class="card-body">
-                    {% if pastscheduleWorkout %}
+<div class="col-md-6 mb-4">
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <h2 class="h5 mb-0"><ion-icon name="time-outline"></ion-icon> Historique des Réservations</h2>
+        </div>
+        <div class="card-body">
+            {% if pastscheduleWorkout %}
+                <ul class="list-group">
+                    {% for schedule in pastscheduleWorkout %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <h5 class="text-primary">{{ schedule.workout.title }}</h5>
+                            <p><strong>Coach:</strong> {{ schedule.coach.get_full_name }}</p>
+                            <p><strong>Date et Heure:</strong> {{ schedule.start_time|date:"d M Y H:i" }}</p>
+                        </div>
+                        <span class="badge bg-danger">Expirée</span>
+                    </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p class="text-muted text-center">Aucun historique de réservations.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+</div>
+</div>
+
+<!-- Historique des Achats -->
+<div class="container my-5">
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+            <h2 class="h5 mb-0"><ion-icon name="time-outline"></ion-icon> Historique des Achats</h2>
+            <!-- Filtre pour afficher les achats -->
+            <div>
+                <select id="purchaseFilter" class="form-select form-select-sm" style="width: auto; padding-right: 2.5rem;">
+                    <option value="all">Tous</option>
+                    <option value="plans">Plans</option>
+                    <option value="services">Services</option>
+                </select>
+            </div>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <!-- Colonne Plans -->
+                <div class="col-md-6" id="planPurchases">
+                    <h5 class="text-center fw-bold mb-4">Vos Plans Achetés</h5>
+                    {% if plan_purchases %}
                         <ul class="list-group">
-                            {% for schedule in pastscheduleWorkout %}
-                            <li class="list-group-item d-flex justify-content-between align-items-center">
-                                <div>
-                                    <h5 class="text-primary">{{ schedule.workout.title }}</h5>
-                                    <p><strong>Coach:</strong> {{ schedule.coach.get_full_name }}</p>
-                                    <p><strong>Date et Heure:</strong> {{ schedule.start_time|date:"d M Y H:i" }}</p>
-                                </div>
-                                <span class="badge bg-danger">Expirée</span>
-                            </li>
+                            {% for purchase in plan_purchases %}
+                                <li class="list-group-item d-flex align-items-center">
+                                    <!-- Icône pour Plan -->
+                                    <ion-icon name="document-text-outline" class="icon me-3" style="color: #007bff;"></ion-icon>
+                                    <!-- Commentaire : remplacer par image
+                                    <img src="{% static 'images/plan_icon.png' %}" alt="Plan Icon" class="icon me-3"> -->
+                                    <div>
+                                        <strong class="text-primary">{{ purchase.get_item_name }}</strong> - <span class="text-success">{{ purchase.price }}€</span>
+                                        <p class="text-muted mb-1">Acheté le : {{ purchase.purchase_date|date:"d M Y" }}</p>
+                                        <p><strong>Durée :</strong> {{ purchase.get_duration }} jours</p>
+                                        <p><strong class="text-danger">Date d'échéance :</strong> {{ purchase.get_end_date|date:"d M Y" }}</p>
+                                        <a href="{% url 'download_invoice' purchase.id %}" class="link-pdf">Télécharger la facture en PDF</a> <!-- Lien stylisé pour PDF -->
+                                    </div>
+                                </li>
                             {% endfor %}
                         </ul>
                     {% else %}
-                        <p class="text-muted text-center">Aucun historique de réservations.</p>
+                        <p class="text-muted text-center">Aucun plan acheté.</p>
+                    {% endif %}
+                </div>
+
+                <!-- Colonne Services -->
+                <div class="col-md-6" id="servicePurchases">
+                    <h5 class="text-center fw-bold mb-4">Vos Services Achetés</h5>
+                    {% if service_purchases %}
+                        <ul class="list-group">
+                            {% for purchase in service_purchases %}
+                                <li class="list-group-item d-flex align-items-center">
+                                    {% if purchase.catalog_service.type == 'diet_plan' %}
+                                        <!-- Icône pour Diet Plan -->
+                                        <ion-icon name="nutrition-outline" class="icon me-3" style="color: #28a745;"></ion-icon>
+                                        <!-- Commentaire : remplacer par image
+                                        <img src="{% static 'images/diet_plan_icon.png' %}" alt="Diet Plan Icon" class="icon me-3"> -->
+                                    {% elif purchase.catalog_service.type == 'personalized_coaching' %}
+                                        <!-- Icône pour Coaching -->
+                                        <ion-icon name="person-circle-outline" class="icon me-3" style="color: #ff8c00;"></ion-icon>
+                                        <!-- Commentaire : remplacer par image
+                                        <img src="{% static 'images/coaching_icon.png' %}" alt="Coaching Icon" class="icon me-3"> -->
+                                    {% else %}
+                                        <!-- Icône par défaut pour autre service -->
+                                        <ion-icon name="construct-outline" class="icon me-3" style="color: #6c757d;"></ion-icon>
+                                        <!-- Commentaire : remplacer par image
+                                        <img src="{% static 'images/default_service_icon.png' %}" alt="Default Service Icon" class="icon me-3"> -->
+                                    {% endif %}
+                                    <div>
+                                        <strong class="text-primary">{{ purchase.get_item_name }}</strong> - <span class="text-success">{{ purchase.price }}€</span>
+                                        <p class="text-muted mb-1">Acheté le : {{ purchase.purchase_date|date:"d M Y" }}</p>
+                                        {% if purchase.catalog_service.type == 'diet_plan' or purchase.catalog_service.type == 'personalized_coaching' %}
+                                            <p><strong>Durée :</strong> {{ purchase.get_duration }} jours</p>
+                                        {% endif %}
+                                        <a href="{% url 'download_invoice' purchase.id %}" class="link-pdf">Télécharger la facture en PDF</a> <!-- Lien stylisé pour PDF -->
+                                    </div>
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p class="text-muted text-center">Aucun service acheté.</p>
                     {% endif %}
                 </div>
             </div>
         </div>
     </div>
 </div>
-<!-- CSS pour le popup -->
+
+<!-- CSS pour les icônes, le filtre et le lien PDF -->
 <style>
-    .popup-modal {
+    .icon {
+        font-size: 24px;
+        flex-shrink: 0;
+    }
+    #purchaseFilter {
+        font-size: 0.9rem;
+        padding: 0.25rem 2rem 0.25rem 0.5rem; /* Augmentation de l'espace à droite */
+    }
+    .text-danger {
+        font-weight: bold;
+        color: #dc3545;
+    }
+    .text-primary {
+        font-weight: bold;
+        color: #007bff;
+    }
+    .text-success {
+        color: #28a745;
+    }
+    .link-pdf {
+        color: #d9534f;
+        font-style: italic;
+        font-weight: bold;
+        text-decoration: none;
+        transition: color 0.3s ease;
+    }
+    .link-pdf:hover {
+        color: #b52a27;
+        text-decoration: underline;
+    }
+    /* Style du fond du popup */
+    #subscriptionPopup {
+        display: none;
         position: fixed;
         top: 0;
         left: 0;
         width: 100%;
         height: 100%;
-        background-color: rgba(0, 0, 0, 0.5);
-        display: flex;
-        align-items: center;
+        background: rgba(0, 0, 0, 0.5);
         justify-content: center;
-        z-index: 9999;
+        align-items: center;
+        z-index: 1000;
     }
+
+   /* Style du contenu du popup */
+
+    #subscriptionPopup {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        backdrop-filter: blur(5px); /* Flou de fond */
+        position: fixed; /* Pour centrer sur l'écran */
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 999; /* Assure que le popup soit au-dessus des autres éléments */
+    }
+
     .popup-content {
-        background-color: white;
+        background: #fff;
         padding: 30px;
-        border-radius: 12px;
-        text-align: center;
-        width: 90%;
+        border-radius: 15px; /* Coins arrondis plus marqués */
         max-width: 500px;
-        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
-        font-family: Arial, sans-serif;
-        position: relative;
-        transition: all 0.3s ease-in-out;
+        width: 90%;
+        text-align: center;
+        box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.3); /* Ombre plus prononcée */
     }
+
     .popup-content h5 {
-        font-size: 1.4rem;
-        color: #007bff;
-        margin-bottom: 10px;
         font-weight: bold;
-    }
-    .popup-content p {
-        font-size: 1rem;
         color: #333;
+    }
+
+    .popup-content p {
+        color: #666;
         margin-bottom: 20px;
     }
-    .admin-photo {
-        width: 120px;
-        height: 120px;
-        border-radius: 50%;
-        object-fit: cover;
+
+    .popup-content img.admin-photo {
+        width: 150px; /* Taille de l'image agrandie */
+        height: 150px; /* Taille de l'image agrandie */
+        border-radius: 50%; /* Forme ovale */
         margin-bottom: 15px;
-        border: 3px solid #007bff;
+        object-fit: cover; /* Garde les proportions de l'image */
     }
+
+    /* Style des boutons */
+    .popup-content .btn {
+        margin: 10px 5px;
+        padding: 10px 20px;
+        font-size: 1rem;
+        font-weight: bold;
+        border-radius: 5px;
+    }
+
     .popup-content .btn-primary {
-        background-color: #28a745;
-        border-color: #28a745;
-        padding: 10px 20px;
-        font-size: 1rem;
-        border-radius: 8px;
-        transition: background-color 0.3s ease-in-out;
+        background-color: #007bff;
+        color: #fff;
     }
-    .popup-content .btn-primary:hover {
-        background-color: #218838;
-    }
+
     .popup-content .btn-danger {
-        margin-left: 10px;
-        padding: 10px 20px;
-        font-size: 1rem;
-        border-radius: 8px;
+        background-color: #dc3545;
+        color: #fff;
+    }
+
+    /* Alignement des boutons */
+    .button-group {
+        display: flex;
+        justify-content: center;
     }
 </style>
 
+
 {% block extra_js %}
 <script>
-    // Vérifier si on doit montrer le popup de souscription
-    const showSubscriptionPopup = {'{ show_subscription_popup|yesno:"true,false"|lower }'};
+    // Gestion de l'affichage du popup de souscription
+const showSubscriptionPopup = "{{ show_subscription_popup|yesno:'true,false' }}" === "true";
 
-    if (showSubscriptionPopup) {
-        setTimeout(() => {
-            document.getElementById("subscriptionPopup").style.display = "flex";
-        }, 2000);  // Affichage du popup après 2 secondes
+if (showSubscriptionPopup) {
+    setTimeout(() => {
+        document.getElementById("subscriptionPopup").style.display = "flex";
+    }, 2000);
+}
+
+// Code pour fermer le popup
+document.getElementById("closePopup").onclick = function() {
+    document.getElementById("subscriptionPopup").style.display = "none";
+};
+
+// Fermer le popup en cliquant en dehors de celui-ci
+window.onclick = function(event) {
+    const popup = document.getElementById("subscriptionPopup");
+    if (event.target === popup) {
+        popup.style.display = "none";
     }
+};
 
-    // Gestion de la fermeture du popup
-    document.getElementById("closePopup").onclick = function() {
-        document.getElementById("subscriptionPopup").style.display = "none";
-    };
 
-    // Fermer le popup si on clique à l'extérieur
-    window.onclick = function(event) {
-        const popup = document.getElementById("subscriptionPopup");
-        if (event.target === popup) {
-            popup.style.display = "none";
+
+    // Filtrage des achats entre les plans et les services
+    document.getElementById('purchaseFilter').addEventListener('change', function() {
+        let filterValue = this.value;
+        let planSection = document.getElementById('planPurchases');
+        let serviceSection = document.getElementById('servicePurchases');
+
+        if (filterValue === 'plans') {
+            planSection.style.display = 'block';
+            serviceSection.style.display = 'none';
+        } else if (filterValue === 'services') {
+            planSection.style.display = 'none';
+            serviceSection.style.display = 'block';
+        } else {
+            planSection.style.display = 'block';
+            serviceSection.style.display = 'block';
         }
-    };
+    });
 </script>
+
 {% endblock %}
+
+
+
 
 {% endblock %}

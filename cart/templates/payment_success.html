@@ -1,11 +1,41 @@
 {% extends 'base.html' %}
 {% load i18n %}
 {% block content %}
-<div class="container">
-    <div class="alert alert-success mt-5 text-center">
-        <h4>Paiement réussi !</h4>
-        <p>Merci pour votre achat. Vous avez maintenant accès à notre plan : <strong>{{ plan.name }}</strong> pour une durée de {{ plan.duration }} jours.</p>
-        <a href="{% url 'profile' %}" class="btn btn-primary">Accéder à votre profil</a>
+<div class="container mt-5">
+    <div class="alert alert-success text-center p-5 shadow-lg rounded">
+        <h3 class="fw-bold text-success">Paiement réussi !</h3>
+        <p class="mt-4">
+            Merci pour votre achat. 
+            {% if plan %}
+                <!-- Message pour les achats de plans (abonnement, coaching personnalisé, diet plan) -->
+                Vous avez maintenant accès à notre plan : <strong>{{ plan.name }}</strong>
+                pour une durée de <strong>{{ plan.duration }} jours</strong>.
+            {% elif service %}
+                <!-- Message pour les achats de services d'accessoires -->
+                {% if service.type == 'gym_accessory' %}
+                    Vous avez ajouté l'accessoire de gym <strong>{{ service.name }}</strong> à votre compte.
+                    Profitez-en pleinement !
+                {% elif service.type == 'diet_plan' %}
+                    <!-- Message pour les achats de diet plans -->
+                    Vous avez maintenant accès à notre diet plan : <strong>{{ service.name }}</strong>
+                    pour une durée de <strong>{{ service.duration }} jours</strong>.
+                {% elif service.type == 'personalized_coaching' %}
+                    <!-- Message pour les achats de coaching personnalisé -->
+                    Vous avez maintenant accès à notre service de coaching personnalisé : 
+                    <strong>{{ service.name }}</strong> pour une durée de <strong>{{ service.duration }} jours</strong>.
+                {% else %}
+                    <!-- Message générique pour les autres services -->
+                    Vous avez ajouté le service <strong>{{ service.name }}</strong> à votre compte. Profitez-en pleinement !
+                {% endif %}
+            {% else %}
+                <!-- Message générique en cas d'achat indéterminé -->
+                Vous avez maintenant accès à votre achat. Profitez pleinement de nos services !
+            {% endif %}
+        </p>
+        <p class="lead mt-3">Nous vous remercions pour votre confiance en BE-FIT.</p>
+        <a href="{% url 'profile' %}" class="btn btn-primary btn-lg mt-4">
+            <i class="fas fa-user-circle"></i> Accéder à votre profil
+        </a>
     </div>
 </div>
 {% endblock %}

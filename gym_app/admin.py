@@ -11,7 +11,7 @@ from django.contrib.admin import AdminSite
 from django.urls import path
 from django.utils.html import format_html
 from django.db.models import Count
-from .models import WorkoutSchedule, WorkoutParticipation
+from .models import WorkoutSchedule, WorkoutParticipation, PurchaseHistory 
 
 # Gestion des utilisateurs avec la possibilité d'ajouter des spécialités pour les coachs
 class CoachInline(admin.StackedInline):
@@ -197,10 +197,31 @@ class ServiceImageInline(admin.TabularInline):
     extra = 1  # Nombre d'images supplémentaires à afficher
 
 
-admin.site.register(ServiceImage)  # En option, pour voir les images séparément
+
+class PurchaseHistoryAdmin(admin.ModelAdmin):
+    list_display = ['user', 'item_type', 'price', 'purchase_date', 'get_item_name', 'get_duration', 'get_end_date', 'plan', 'catalog_service']
+    list_filter = ['item_type', 'purchase_date']
+    search_fields = ['user__username', 'item_type', 'plan__name', 'catalog_service__name']
+
+
+    def get_item_name(self, obj):
+        return obj.get_item_name()
+    get_item_name.short_description = 'Nom de l\'élément'
+
+    def get_duration(self, obj):
+        return obj.get_duration()
+    get_duration.short_description = 'Durée (jours)'
+
+    def get_end_date(self, obj):
+        return obj.get_end_date()
+    get_end_date.short_description = 'Date d\'échéance'
+
+
 
 
 # admin.site.register(Booking, BookingAdmin)
+admin.site.register(PurchaseHistory, PurchaseHistoryAdmin)
+admin.site.register(ServiceImage)  # En option, pour voir les images séparément
 admin.site.register(User, CustomUserAdmin)
 admin.site.register(Workout, WorkoutAdmin)
 admin.site.register(WorkoutImage)

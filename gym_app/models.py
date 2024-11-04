@@ -8,6 +8,7 @@ from django.dispatch import receiver
 from django.db.models.signals import m2m_changed
 from django.contrib.auth import get_user_model
 
+
 class User(AbstractUser):
     ROLE_CHOICES = [
         ('admin', 'Admin'),
@@ -269,6 +270,65 @@ class Subscription(models.Model):
                 body=f"Votre souscription au plan {self.plan.name} a été confirmée. Profitez de vos avantages premium !"
             )
         super().save(*args, **kwargs)
+
+class PurchaseHistory(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    item_type = models.CharField(max_length=50, choices=[('plan', 'Plan'), ('service', 'Service')])
+    price = models.DecimalField(max_digits=10, decimal_places=2)
+    purchase_date = models.DateTimeField(auto_now_add=True)
+
+    # Utilisation de chaînes pour éviter l'import circulaire
+    plan = models.ForeignKey('Plan', null=True, blank=True, on_delete=models.SET_NULL)
+    catalog_service = models.ForeignKey('CatalogService', null=True, blank=True, on_delete=models.SET_NULL)
+
+    def get_item_name(self):
+        """Retourne le nom de l'item acheté (plan ou service)."""
+        if self.item_type == 'plan' and self.plan:
+            return self.plan.name
+        elif self.item_type == 'service' and self.catalog_service:
+            return self.catalog_service.name
+        return None
+
+    def get_duration(self):
+        """Retourne la durée du plan si l'achat est un plan."""
+        if self.item_type == 'plan' and self.plan:
+            return self.plan.duration
+        return None
+
+    def get_end_date(self):
+        """Retourne la date de fin de l'abonnement pour un plan, si applicable."""
+        if self.item_type == 'plan' and self.plan:
+            subscription = Subscription.objects.filter(user=self.user, plan=self.plan, payment_status='paid').first()
+            return subscription.get_end_date() if subscription else None
+        return None
+
+    @classmethod
+    def migrate_existing_plans_to_purchase_history(cls):
+        """
+        Migrer les plans actuels des utilisateurs qui n'ont pas de PurchaseHistory
+        en créant une entrée pour chaque plan déjà acheté mais non enregistré.
+        """
+        users_with_subscriptions = Subscription.objects.filter(payment_status='paid').values('user', 'plan').distinct()
+        
+        for entry in users_with_subscriptions:
+            user = User.objects.get(id=entry['user'])
+            plan = Plan.objects.get(id=entry['plan'])
+
+            # Vérifier si un PurchaseHistory existe déjà pour cet utilisateur et ce plan
+            if not cls.objects.filter(user=user, plan=plan, item_type='plan').exists():
+                # Créer un nouvel historique d'achat pour les anciens abonnements
+                cls.objects.create(
+                    user=user,
+                    item_type='plan',
+                    price=plan.price,
+                    purchase_date=Subscription.objects.filter(user=user, plan=plan, payment_status='paid').first().start_date,
+                    plan=plan
+                )
+
+    def __str__(self):
+        return f"{self.user.username} - {self.get_item_name() or 'Unknown Item'}"
+
+
 
 
 class Review(models.Model):

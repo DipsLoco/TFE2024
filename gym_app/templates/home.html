@@ -118,7 +118,7 @@ style="height: 100vh; background-image: url('/media/background_images/background
                             {{ plan.description }}
                             {% endif %}
                         </p>
-                        <a class="btn btn-outline-primary d-grid" href="{% url 'plan' plan.id %}">Sélectionner Votre Plan</a>
+                        <a class="btn btn-outline-primary d-grid" href="{% url 'cart:add_plan_to_cart' plan.id %}">Sélectionner Votre Plan</a>
                     </div>
                 </div>
             </div>
