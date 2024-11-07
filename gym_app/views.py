@@ -1,3 +1,4 @@
+from difflib import get_close_matches
 import json
 from urllib import request
 import stripe
@@ -34,15 +35,14 @@ from django.db.models import Q
 from django.shortcuts import render, get_object_or_404
 from .models import Message
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, get_object_or_404, redirect
+from django.http import HttpResponseRedirect
 from django.contrib import messages
 from django.db.models import Q
 from .forms import MessageForm
 from .models import User
 from django.shortcuts import render, get_object_or_404
-from .models import (Plan, PurchaseHistory, ServiceImage, Workout, Coach, Review, WorkoutSchedule, CatalogService,
-                     PersonalizedCoaching, GymAccessory, DietPlan)
+from .models import (Plan, PurchaseHistory, ServiceImage, Workout, Coach, Review, WorkoutSchedule, CatalogService, PersonalizedCoaching, GymAccessory, DietPlan)
 from django.utils.translation import gettext as _
 from django.http import HttpResponse
 from reportlab.pdfgen import canvas
@@ -52,6 +52,12 @@ from reportlab.lib import colors
 from reportlab.lib.units import cm
 from decimal import Decimal
 from django.db import transaction
+from django.views.decorators.http import require_GET
+from django.template.loader import render_to_string
+from difflib import get_close_matches
+from django.http import JsonResponse
+
+
 
 
 # Vue pour la page à propos
@@ -79,6 +85,74 @@ def home(request):
 
 
 
+# Fonction de recherche complète
+
+@require_GET
+def search(request):
+    query = request.GET.get('q', '').strip()
+    context = {
+        "query": query,
+        "results": {
+            "workouts": [],
+            "coachs": [],
+            "plans": [],
+            "reviews": [],
+            "services": [],
+        },
+        "url_names": {
+            "workouts": "workout_detail",
+            "coachs": "coach_detail",
+            "plans": "plan_detail",
+            "reviews": "review_detail",
+            "services": "service_detail",
+        },
+    }
+
+    if query:
+        # Remplissage des résultats en fonction de la requête
+        context["results"]["workouts"] = list(Workout.objects.filter(
+            Q(title__icontains=query) | Q(description__icontains=query)
+        ).values("id", "title", "description"))
+
+        context["results"]["coachs"] = list(Coach.objects.filter(
+            Q(username__icontains=query) | Q(about__icontains=query)
+        ).values("id", "username", "about"))
+
+        context["results"]["plans"] = list(Plan.objects.filter(
+            Q(name__icontains=query) | Q(description__icontains=query)
+        ).values("id", "name", "description"))
+
+        context["results"]["reviews"] = list(Review.objects.filter(
+            Q(content__icontains=query)
+        ).values("id", "content"))
+
+        context["results"]["services"] = list(CatalogService.objects.filter(
+            Q(name__icontains=query) | Q(description__icontains=query)
+        ).values("id", "name", "description"))
+
+    if not any(context["results"].values()):
+        context["message"] = "Aucun résultat trouvé pour votre recherche."
+        context["suggestions"] = get_suggestions(query)
+    else:
+        context["message"] = None
+
+    # Si la requête est AJAX, retourner un JSON avec le HTML des résultats
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        html = render_to_string('partials/search_results.html', context, request=request)
+        return JsonResponse({"html": html})
+
+    # Sinon, rendre la page de recherche principale
+    return render(request, 'searchbar.html', context)
+
+def get_suggestions(query):
+    keywords = [
+        *Workout.objects.values_list('title', flat=True),
+        *Plan.objects.values_list('name', flat=True),
+        *CatalogService.objects.values_list('name', flat=True),
+        "Conditions de Vente", "Cookies", "À propos", "Mentions Légales", "Confidentialité"
+    ]
+    return get_close_matches(query, keywords, n=3, cutoff=0.6)
+
 def load_services():
     # Services disponibles
     catalog_services = CatalogService.objects.filter(is_available=True).distinct()
@@ -95,7 +169,8 @@ def load_services():
             'type': 'catalog',
             'coach': None,
             'stock': None,
-            'partner_company': None
+            'partner_company': None,
+            'images': ServiceImage.objects.filter(catalog_service=service)
         }
 
     for coaching in personalized_coaching:
@@ -104,7 +179,8 @@ def load_services():
             'type': 'personalized_coaching',
             'coach': coaching.coach,
             'stock': None,
-            'partner_company': None
+            'partner_company': None,
+            'images': ServiceImage.objects.filter(catalog_service=coaching.catalog_service)
         }
 
     for accessory in gym_accessories:
@@ -113,7 +189,8 @@ def load_services():
             'type': 'gym_accessory',
             'coach': None,
             'stock': accessory.stock,
-            'partner_company': None
+            'partner_company': None,
+            'images': ServiceImage.objects.filter(catalog_service=accessory.catalog_service)
         }
 
     for diet in diet_plans:
@@ -122,7 +199,8 @@ def load_services():
             'type': 'diet_plan',
             'coach': None,
             'stock': None,
-            'partner_company': diet.partner_company
+            'partner_company': diet.partner_company,
+            'images': ServiceImage.objects.filter(catalog_service=diet.catalog_service)
         }
 
     # Convertir le dictionnaire en liste pour le template
@@ -176,22 +254,10 @@ def load_single_service(catalog_service_id):
     return service_data
 
 
-
-
-
 def service_detail(request, catalog_service_id):
     service_data = load_single_service(catalog_service_id)
     print("Service Data:", service_data)  # Debug: Afficher les données dans la console
     return render(request, 'service_detail.html', {'service_data': service_data})
-
-
-
-
-
-
-
-
-
 
 
 # Vue pour la page FAQ
@@ -284,7 +350,7 @@ def login_user(request):
         user = authenticate(request, username=username, password=password)
         if user is not None:
             login(request, user)
-            messages.success(request, f'Bienvenue, {user.username}!')
+            messages.success(request, f'Bienvenue 😊, {user.username}!')
             return redirect('home')
         else:
             messages.error(

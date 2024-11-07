@@ -4,26 +4,75 @@
 
 {% block content %}
 
-<header class="bg-dark py-5"
-style="height: 100vh; background-image: url('/media/background_images/background.jpg'); background-size: 100% auto; background-repeat: no-repeat; background-position: center;">
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Great+Vibes&display=swap" rel="stylesheet">
+
+<!-- Section Header avec un dégradé et une animation au chargement -->
+<header class="bg-dark py-5 header-section" style="height: 100vh; background-image: linear-gradient(to right, rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.3)), url('/media/background_images/background.jpg'); background-size: cover; background-position: center;">
     <div class="container px-5">
         <div class="row gx-5 justify-content-center">
-            <div class="col-lg-10 text-center my-5"
-                style="background-color: rgba(0, 0, 0, 0.6); padding: 5px; border-radius: 10px;">
-                <!-- <h1 class="display-4 fw-bold text-white mb-2">BE-FIT</h1> -->
-                
-                <p class="lead text-white-50 mb-4">{% trans "Restez en forme" %}</p>
-                <p class="card-text text-white h4 mb-4">Repoussez vos limites, devenez la meilleure version de vous-même
-                    avec BeFit. Votre transformation commence ici maintenant.</p>
-                <a class="btn btn-outline-warning btn-lg px-1" href="#nos-offres">Nos Formules</a>
+            <div class="col-lg-10 text-center my-5">
+                <p class="lead text-white-50 mb-4" style="font-size: 1.5rem; font-weight: 400;">{% trans "Restez en forme" %}</p>
+                <p class="card-text text-white h4 mb-4">Repoussez vos limites, devenez la meilleure version de vous-même avec BeFit. Votre transformation commence ici maintenant.</p>
+                <a class="btn btn-outline-warning btn-lg px-4 py-2" href="#nos-offres" style="border-radius: 50px; font-weight: bold; transition: 0.3s;">
+                    Nos Formules
+                </a>
             </div>
         </div>
     </div>
 </header>
 
+<!-- Barre de recherche intégrée dans la navigation -->
+<!-- <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container px-4">
+        <a class="navbar-brand px-4" href="{% url 'home' %}">BE-FIT</a>
+        <div class="collapse navbar-collapse">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item"><a class="nav-link" href="#workouts">{{ _('Nos Workouts') }}</a></li>
+                <li class="nav-item"><a class="nav-link" href="#coachs">{{ _('Nos Coachs') }}</a></li>
+                <li class="nav-item"><a class="nav-link" href="#nos-offres">{{ _('Nos Formules') }}</a></li>
+                <li class="nav-item"><a class="nav-link" href="#catalog-services">{{ _('Notre Catalogue') }}</a></li>
+                <li class="nav-item"><a class="nav-link" href="#testimonial">{{ _('Nos Témoignages') }}</a></li>
+            </ul> -->
+            
+            <!-- Barre de recherche -->
+            <form class="d-flex ms-auto search-form" action="{% url 'search' %}" method="get" onsubmit="clearSearchField()">
+                <input id="navbarSearchInput" class="form-control me-2" type="search" name="q" placeholder="Recherche" aria-label="Search" value="{{ request.GET.q|default:'' }}">
+                <button class="btn btn-outline-light" type="submit">Recherche</button>
+                
+                <!-- Bouton de rafraîchissement -->
+                <button class="btn btn-outline-light ms-2" type="button" onclick="window.location.reload();">
+                    <i class="fa fa-sync-alt"></i>
+                </button>
+            </form>
+            <style>
+                .search-form {
+                    max-width: 300px; /* Limite la largeur de la barre de recherche */
+                }
+                .search-input {
+                    width: 100%; /* Assure que l'input occupe toute la largeur de la zone définie */
+                }
+            </style>
+            
+            
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const searchInput = document.getElementById("searchInput");
+        searchInput.value = "";  // Réinitialise le champ au chargement de la page
 
-<!-- Nos Workouts Section -->
-<section id="workouts" class="py-5 bg-light">
+        document.getElementById("searchForm").addEventListener("submit", function() {
+            setTimeout(function() {
+                searchInput.value = ""; // Réinitialise le champ après la soumission
+            }, 100);
+        });
+    });
+</script>            
+            
+        </div>
+    </div>
+</nav>
+
+<!-- Section pour Nos Workouts avec un léger arrière-plan et effets visuels -->
+<section id="workouts" class="py-5 bg-light section-box">
     <div class="container px-5 my-5">
         <div class="text-center mb-5">
             <h2 class="display-5 fw-bold text-dark">Nos Workouts</h2>
@@ -31,58 +80,16 @@ style="height: 100vh; background-image: url('/media/background_images/background
         <div class="row gx-5 gy-5">
             {% for workout in workouts %}
             <div class="col-lg-6 col-md-6 mb-4">
-                <div class="card h-100 shadow-sm">
+                <div class="card h-100 shadow-sm workout-card">
                     {% if workout.get_main_image %}
-                    <img src="{{ workout.get_main_image.image.url }}" alt="Image de {{ workout.title }}"
-                        class="card-img-top" style="height: 200px; object-fit: cover;">
+                    <img src="{{ workout.get_main_image.image.url }}" alt="Image de {{ workout.title }}" class="card-img-top workout-image">
                     {% else %}
-                    <img src="path/to/default/image.jpg" alt="Image par défaut" class="card-img-top"
-                        style="height: 200px; object-fit: cover;">
+                    <img src="path/to/default/image.jpg" alt="Image par défaut" class="card-img-top workout-image">
                     {% endif %}
                     <div class="card-body">
                         <h4 class="card-title">{{ workout.title }}</h4>
-                        <p class="card-text">
-                            {% if workout.description|length > 200 %}
-                            {{ workout.description|slice:":200" }}...
-                            {% else %}
-                            {{ workout.description }}
-                            {% endif %}
-                        </p>
-                        <a class="text-decoration-none fw-bold" href="{% url 'workout_detail' workout.id %}">Voir les details du cours pour réserver <i class="bi bi-arrow-right"></i></a>
-                    </div>
-                </div>
-            </div>
-            {% endfor %}
-        </div>
-    </div>
-</section>
-<!-- Nos Coachs Section -->
-<section id="coachs" class="py-5">
-    <div class="container px-5 my-5">
-        <div class="text-center mb-5">
-            <h2 class="display-5 fw-bold text-dark">Nos Coachs</h2>
-        </div>
-        <div class="row gx-5 gy-5">
-            {% for coach in coachs %}
-            <div class="col-lg-6 col-md-6 mb-4">
-                <div class="card h-100 shadow-sm">
-                    {% if coach.image %}
-                    <img src="{{ coach.image.url }}" alt="Image de {{ coach.username }}" class="card-img-top"
-                        style="height: 300px; object-fit: contain;">
-                    {% else %}
-                    <img src="path/to/default/image.jpg" alt="Image par défaut" class="card-img-top"
-                        style="height: 300px; object-fit: contain;">
-                    {% endif %}
-                    <div class="card-body">
-                        <h4 class="card-title">{{ coach.username }}</h4>
-                        <p class="card-text">Spécialités :
-                            {% for specialty in coach.specialties.all %}
-                            {{ specialty.title }}{% if not forloop.last %}, {% endif %}
-                            {% endfor %}
-                        </p>
-                        <p class="card-text"><strong>Disponibile :</strong> {{ coach.available|yesno:"Oui,Non" }}</p> <!-- Affichage de "Oui" ou "Non" -->
-                        <p class="card-text"><strong>Expérience :</strong> {{ coach.exp }} ans</p> <!-- Affichage de l'expérience -->
-                        <p class="card-text"><strong>Mon parcours :</strong> {{ coach.about }}</p> <!-- Affichage de "Mon parcours" -->
+                        <p class="card-text">{{ workout.description|truncatechars:200 }}</p>
+                        <a class="text-decoration-none fw-bold" href="{% url 'workout_detail' workout.id %}">Voir les détails <i class="bi bi-arrow-right"></i></a>
                     </div>
                 </div>
             </div>
@@ -91,8 +98,37 @@ style="height: 100vh; background-image: url('/media/background_images/background
     </div>
 </section>
 
-<!-- Nos Offres Section -->
-<section id="nos-offres" class="py-5 bg-light">
+<!-- Section Nos Coachs avec un effet de survol sur les images et des animations -->
+<section id="coachs" class="py-5 section-box">
+    <div class="container px-5 my-5">
+        <div class="text-center mb-5">
+            <h2 class="display-5 fw-bold text-dark">Nos Coachs</h2>
+        </div>
+        <div class="row gx-5 gy-5">
+            {% for coach in coachs %}
+            <div class="col-lg-6 col-md-6 mb-4">
+                <div class="card h-100 shadow-sm coach-card">
+                    {% if coach.image %}
+                    <img src="{{ coach.image.url }}" alt="Image de {{ coach.username }}" class="card-img-top coach-image">
+                    {% else %}
+                    <img src="path/to/default/image.jpg" alt="Image par défaut" class="card-img-top coach-image">
+                    {% endif %}
+                    <div class="card-body">
+                        <h4 class="card-title">{{ coach.username }}</h4>
+                        <p class="card-text">Spécialités : {{ coach.specialties.all|join:", " }}</p>
+                        <p class="card-text"><strong>Disponible :</strong> {{ coach.available|yesno:"Oui,Non" }}</p>
+                        <p class="card-text"><strong>Expérience :</strong> {{ coach.exp }} ans</p>
+                        <p class="card-text"><strong>Mon parcours :</strong> {{ coach.about }}</p>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+
+<!-- Nos Offres avec des effets visuels et des animations d'apparition -->
+<section id="nos-offres" class="py-5 bg-light section-box">
     <div class="container px-5 my-5">
         <div class="text-center mb-5">
             <h2 class="display-5 fw-bold text-dark">Nos Offres</h2>
@@ -101,24 +137,17 @@ style="height: 100vh; background-image: url('/media/background_images/background
         <div class="row gx-5 justify-content-center">
             {% for plan in plans %}
             <div class="col-lg-6 col-xl-4 mb-4">
-                <div class="card h-100 shadow-sm">
+                <div class="card h-100 shadow-sm plan-card">
                     <div class="card-body p-5">
                         <div class="small text-uppercase fw-bold mb-3">
-                            <i class="bi bi-star-fill text-warning"></i>
-                            {{ plan.name }}
+                            <i class="bi bi-star-fill text-warning"></i> {{ plan.name }}
                         </div>
                         <div class="mb-3">
                             <span class="display-4 fw-bold">{{ plan.price }}€</span>
                             <span class="text-muted">/ mois</span>
                         </div>
-                        <p class="card-text mb-4">
-                            {% if plan.description|length > 200 %}
-                            {{ plan.description|slice:":200" }}...
-                            {% else %}
-                            {{ plan.description }}
-                            {% endif %}
-                        </p>
-                        <a class="btn btn-outline-primary d-grid" href="{% url 'cart:add_plan_to_cart' plan.id %}">Sélectionner Votre Plan</a>
+                        <p class="card-text mb-4">{{ plan.description|truncatechars:200 }}</p>
+                        <a class="btn btn-outline-primary d-grid btn-plan" href="{% url 'cart:add_plan_to_cart' plan.id %}">Sélectionner Votre Plan</a>
                     </div>
                 </div>
             </div>
@@ -127,137 +156,66 @@ style="height: 100vh; background-image: url('/media/background_images/background
     </div>
 </section>
 
-
-<!-- Catalog services -->
-<section id="catalog-services" class="services-section">
+<!-- Catalog Services avec un effet de zoom et de transition -->
+<section id="catalog-services" class="services-section section-box">
     <div class="container px-5 my-5">
         <div class="text-center mb-5">
             <h2 class="display-5 fw-bold text-dark">Nos Services</h2>
-            <br>
         </div>
         <div class="row">
             {% for item in all_services %}
-                <div class="col-md-4 mb-4">
-                    <div class="card h-100 shadow-sm">
-                        {% if item.service.image %}
-                            <img src="{{ item.service.image.url }}" alt="Image de {{ item.service.name }}" class="card-img-top" style="height: 300px; object-fit: contain; border-radius: 12px 12px 0 0; width: 100%;">
-                        {% else %}
-                            <img src="{% static 'default/image/path.jpg' %}" alt="Image par défaut" class="card-img-top" style="height: 300px; object-fit: contain; border-radius: 12px 12px 0 0; width: 100%;">
+            <div class="col-md-4 mb-4">
+                <div class="card h-100 shadow-sm service-card">
+                    {% if item.service.image %}
+                    <img src="{{ item.service.image.url }}" alt="Image de {{ item.service.name }}" class="card-img-top service-image">
+                    {% else %}
+                    <img src="{% static 'default/image/path.jpg' %}" alt="Image par défaut" class="card-img-top service-image">
+                    {% endif %}
+                    <div class="card-body text-center">
+                        <h4 class="card-title">{{ item.service.name }}</h4>
+                        <p class="card-text">{{ item.service.description|truncatechars:40 }}</p>
+                        <p><strong>Prix :</strong> {{ item.service.price }}€</p>
+                        {% if item.type != 'gym_accessory' and item.service.duration %}
+                        <p><strong>Durée :</strong> {{ item.service.duration }} jours</p>
                         {% endif %}
-                        <div class="card-body text-center">
-                            <h4 class="card-title">{{ item.service.name }}</h4>
-                            <p class="card-text">
-                                {{ item.service.description|truncatechars:40 }}
-                            </p>
-                            <p><strong>Prix :</strong> {{ item.service.price }}€</p>
-                            
-                            <!-- Afficher la durée si elle est disponible et si ce n'est pas un accessoire de gym -->
-                            {% if item.type != 'gym_accessory' and item.service.duration %}
-                                <p><strong>Durée :</strong> {{ item.service.duration }} jours</p>
-                            {% endif %}
-                            
-                            <!-- Attributs spécifiques -->
-                            {% if item.type == 'personalized_coaching' and item.coach %}
-                                <p><strong>Coach :</strong> {{ item.coach.username }}</p>
-                            {% elif item.type == 'gym_accessory' and item.stock %}
-                                <p><strong>Stock :</strong> {{ item.stock }}</p>
-                            {% elif item.type == 'diet_plan' and item.partner_company %}
-                                <p><strong>Partenaire :</strong> <a href="{{ item.partner_company }}" target="_blank">{{ item.partner_company }}</a></p>
-                            {% endif %}
-                            
-                            <div class="d-grid">
-                                <a href="{% url 'service_detail' item.service.id %}" class="btn btn-primary">En savoir plus</a>
-                            </div>
+                        <div class="d-grid">
+                            <a href="{% url 'service_detail' item.service.id %}" class="btn btn-primary btn-service">En savoir plus</a>
                         </div>
                     </div>
                 </div>
+            </div>
             {% endfor %}
         </div>
     </div>
 </section>
 
-
-
-
-<style>
-    #catalog-services {
-        background-color: #f9f9f9;
-        padding: 50px 0;
-    }
-    
-    #catalog-services .card {
-        border-radius: 10px;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-        transition: transform 0.3s, box-shadow 0.3s;
-    }
-    
-    #catalog-services .card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
-    }
-    
-    #catalog-services .card-img-top {
-        border-radius: 10px 10px 0 0;
-        height: 200px;
-        object-fit: cover;
-    }
-    
-    #catalog-services .card-body {
-        text-align: center;
-    }
-    
-    #catalog-services .card-title {
-        font-size: 1.25rem;
-        font-weight: bold;
-    }
-    
-    #catalog-services .btn-primary {
-        background-color: #007bff;
-        color: white;
-        padding: 10px 20px;
-        border-radius: 5px;
-        text-decoration: none;
-        transition: background-color 0.3s, transform 0.3s;
-    }
-    
-    #catalog-services .btn-primary:hover {
-        background-color: #0056b3;
-        transform: scale(1.05);
-    }
-</style>
-
-
-
-
-<!-- Section commentaires -->
-<section class="py-5 border-bottom">
+<!-- Section Commentaires -->
+<section class="testimonial-section">
     <div class="container px-5 my-5">
         <div class="text-center mb-5">
-            <h2 class="display-5 fw-bold text-dark">Témoignages Clients</h2>
-            <p class="lead mb-0">Ce que disent nos membres</p>
+            <h2 class="testimonial-title">Témoignages Clients</h2>
+            <p class="lead text-secondary">Ce que disent nos membres</p>
         </div>
         <div class="row gx-5 justify-content-center">
             {% for review in reviews %}
             <div class="col-lg-6 mb-4">
-                <div class="card h-100 shadow-sm">
+                <div class="card testimonial-card shadow-sm">
                     <div class="card-body">
-                        <div class="d-flex">
+                        <div class="d-flex align-items-center">
                             <div class="flex-shrink-0">
                                 {% if review.user.image %}
                                 <img src="{{ review.user.image.url }}" alt="{{ review.user.username }}"
-                                    class="rounded-circle" style="width: 50px; height: 50px; object-fit: cover;">
+                                     class="rounded-circle" style="width: 60px; height: 60px; object-fit: cover;">
                                 {% else %}
                                 <img src="path/to/default/user/image.jpg" alt="{{ review.user.username }}"
-                                    class="rounded-circle" style="width: 50px; height: 50px; object-fit: cover;">
+                                     class="rounded-circle" style="width: 60px; height: 60px; object-fit: cover;">
                                 {% endif %}
                             </div>
                             <div class="ms-3">
                                 <h5 class="card-title mb-1">{{ review.user.username }}</h5>
-                                <p class="card-text mb-1"><strong>Cours :</strong> {{ review.workout.title }}</p>
-                                <p class="card-text mb-1"><strong>Date :</strong> {{ review.datetime|date:"d M Y H:i" }}
-                                </p>
-                                <p class="card-text mb-1"><strong>Membre depuis :</strong> {{review.user.date_joined|date:"d M Y" }}
-                                </p>
+                                <p class="text-muted mb-1"><strong>Cours :</strong> {{ review.workout.title }}</p>
+                                <p class="text-muted mb-1"><strong>Date :</strong> {{ review.datetime|date:"d M Y H:i" }}</p>
+                                <p class="text-muted mb-1"><strong>Membre depuis :</strong> {{ review.user.date_joined|date:"d M Y" }}</p>
                             </div>
                         </div>
                         <hr>
@@ -270,75 +228,581 @@ style="height: 100vh; background-image: url('/media/background_images/background
     </div>
 </section>
 
-
-     <!-- Contact Section -->
-     <section id="contact" class="bg-light py-5">
-        <div class="container px-5 my-5">
-            <div class="text-center mb-5">
-                <div class="feature bg-primary bg-gradient text-white rounded-3 mb-3"><i class="bi bi-envelope"></i>
-                </div>
-                <h2 class="fw-bold">Formulaire de Contact</h2>
-                <p class="lead mb-0">Nous aimerions recevoir de vos nouvelles !</p>
+<!-- Section Contact -->
+<section id="contact" class="contact-section">
+    <div class="container px-5 my-5">
+        <div class="text-center mb-5">
+            <div class="feature bg-primary bg-gradient text-white rounded-circle p-4 mb-3">
+                <i class="bi bi-envelope contact-icon"></i>
             </div>
-            <div class="row gx-5 justify-content-center">
-                <div class="col-lg-6">
-                    <form id="contactForm" data-sb-form-api-token="API_TOKEN">
-                        <!-- Name input-->
-                        <div class="form-floating mb-3">
-                            <input class="form-control" id="name" type="text" placeholder="Enter your name..."
-                                data-sb-validations="required" />
-                            <label for="name">Votre nom complet</label>
-                            <div class="invalid-feedback" data-sb-feedback="name:required">Un nom est requis.</div>
-                        </div>
-                        <!-- Email address input-->
-                        <div class="form-floating mb-3">
-                            <input class="form-control" id="email" type="email" placeholder="name@example.com"
-                                data-sb-validations="required,email" />
-                            <label for="email">Adresse email</label>
-                            <div class="invalid-feedback" data-sb-feedback="email:required">Un email est requis.</div>
-                            <div class="invalid-feedback" data-sb-feedback="email:email">L'email n'est pas valide.</div>
-                        </div>
-                        <!-- Phone number input-->
-                        <div class="form-floating mb-3">
-                            <input class="form-control" id="phone" type="tel" placeholder="(123) 456-7890"
-                                data-sb-validations="required" />
-                            <label for="phone">Numéro de téléphone</label>
-                            <div class="invalid-feedback" data-sb-feedback="phone:required">Un numéro de téléphone est
-                                requis.</div>
-                        </div>
-                        <!-- Message input-->
-                        <div class="form-floating mb-3">
-                            <textarea class="form-control" id="message" placeholder="Enter your message here..."
-                                style="height: 10rem" data-sb-validations="required"></textarea>
-                            <label for="message">Message</label>
-                            <div class="invalid-feedback" data-sb-feedback="message:required">Un message est requis.
-                            </div>
-                        </div>
-                        <!-- Submit success message-->
-                        <div class="d-none" id="submitSuccessMessage">
-                            <div class="text-center mb-3">
-                                <div class="fw-bolder">Envoi du formulaire réussi !</div>
-                                Pour activer ce formulaire, inscrivez-vous sur
-                                <br />
-                                <a
-                                    href="https://startbootstrap.com/solution/contact-forms">https://startbootstrap.com/solution/contact-forms</a>
-                            </div>
-                        </div>
-                        <!-- Submit error message-->
-                        <div class="d-none" id="submitErrorMessage">
-                            <div class="text-center text-danger mb-3">Erreur lors de l'envoi du message !</div>
-                        </div>
-                        <!-- Submit Button-->
-                        <div class="d-grid"><button class="btn btn-primary btn-lg disabled" id="submitButton"
-                                type="submit">Soumettre</button></div>
-                    </form>
-                </div>
+            <h2 class="contact-title">Formulaire de Contact</h2>
+            <p class="lead text-secondary">Nous aimerions recevoir de vos nouvelles !</p>
+        </div>
+        <div class="row gx-5 justify-content-center">
+            <div class="col-lg-6">
+                <form id="contactForm" data-sb-form-api-token="API_TOKEN" class="contact-form">
+                    <!-- Name input-->
+                    <div class="form-floating mb-3">
+                        <input class="form-control" id="name" type="text" placeholder="Enter your name..."
+                               data-sb-validations="required" />
+                        <label for="name">Votre nom complet</label>
+                        <div class="invalid-feedback" data-sb-feedback="name:required">Un nom est requis.</div>
+                    </div>
+                    <!-- Email address input-->
+                    <div class="form-floating mb-3">
+                        <input class="form-control" id="email" type="email" placeholder="name@example.com"
+                               data-sb-validations="required,email" />
+                        <label for="email">Adresse email</label>
+                        <div class="invalid-feedback" data-sb-feedback="email:required">Un email est requis.</div>
+                        <div class="invalid-feedback" data-sb-feedback="email:email">L'email n'est pas valide.</div>
+                    </div>
+                    <!-- Phone number input-->
+                    <div class="form-floating mb-3">
+                        <input class="form-control" id="phone" type="tel" placeholder="(123) 456-7890"
+                               data-sb-validations="required" />
+                        <label for="phone">Numéro de téléphone</label>
+                        <div class="invalid-feedback" data-sb-feedback="phone:required">Un numéro de téléphone est requis.</div>
+                    </div>
+                    <!-- Message input-->
+                    <div class="form-floating mb-3">
+                        <textarea class="form-control" id="message" placeholder="Enter your message here..."
+                                  style="height: 10rem" data-sb-validations="required"></textarea>
+                        <label for="message">Message</label>
+                        <div class="invalid-feedback" data-sb-feedback="message:required">Un message est requis.</div>
+                    </div>
+                    <!-- Submit Button-->
+                    <div class="d-grid">
+                        <button class="btn contact-btn btn-lg" id="submitButton" type="submit">Soumettre</button>
+                    </div>
+                </form>
             </div>
         </div>
-    </section>
+    </div>
+</section>
+
+<!-- Menu latéral défilant -->
+<div id="side-menu" class="side-menu">
+    <a href="#nos-offres">Nos Formules</a>
+    <a href="#coachs">Nos Coachs</a>
+    <a href="#workouts">Nos Workouts</a>
+    <a href="{% url 'home' %}" class="btn btn-px1 sm">
+    <a href="{% url 'home' %}" class="btn btn-px1 sm">
+        <span>retour <i class="fas fa-home"></i> Accueil</span>
+    </a>
+        
+    <a href="#catalog-services">Catalogue Services</a>
+    <a href="#contact">Contact</a>
+    <a href="#footer">Nos Coordonnées</a>
+</div>
+
+<style>
+
+   /* Styles pour l'effet visuel */
+.header-section { animation: fadeIn 1.5s ease-in; }
+
+/* Style pour les coachs */
+.coach-image { object-fit: contain; height: 300px; }
+
+/* Side Menu */
+.side-menu {
+    position: fixed;
+    top: 20%;
+    right: 20px;
+    background-color: rgba(0, 0, 0, 0.7); /* Opacité de fond */
+    border-radius: 10px;
+    padding: 10px;
+    display: flex;
+    flex-direction: column; /* éléments empilés verticalement */
+    align-items: flex-start; /* Alignement à gauche */
+    width: auto;
+    opacity: 0.7; /* Opacité de la barre latérale */
+    transition: all 0.3s;
+}
+
+/* Style des liens dans le menu */
+.side-menu a {
+    color: white;
+    padding: 3px;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 14px; /* Taille du texte */
+    transition: background-color 0.3s;
+    width: 100%; /* Les liens prennent toute la largeur du menu */
+}
+
+/* Couleur de fond au survol de tous les liens sauf le bouton "Retour" */
+.side-menu a:hover {
+    background-color: #1430ff; /* Fond noir au survol pour tous les liens */
+    border-radius: 5px; /* Coins arrondis lors du survol */
+}
+
+/* Spécifique au bouton "Retour" (Accueil) */
+.side-menu .btn-px1 {
+    background-color: #e78f02; /* Couleur dorée/ orange pour le bouton "Retour" */
+    color: white; /* Texte en blanc */
+    padding: 0px;
+    font-size: 14px;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    border-radius: 5px; /* Coins arrondis pour le bouton */
+    transition: background-color 0.3s; /* Transition pour le changement de couleur */
+}
+
+/* couleur au survol du bouton "Retour" */
+.side-menu .btn-px1:hover {
+    background-color: #000000; 
+}
+
+
+
+/* Lorsque le menu est visible */
+.side-menu.visible {
+    display: flex !important; /* Assure que le menu reste en flex */
+    flex-direction: column !important; /* Empêche le passage en disposition horizontale */
+    display: block;
+}
 
 
 
 
+
+    /* Card Hover Effects */
+    .workout-card, .coach-card, .plan-card, .service-card, .testimonial-card, .contact-card {
+        border-radius: 10px;
+        transition: transform 0.3s, box-shadow 0.3s;
+    }
+
+    /* Effet de fadeIn */
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+</style>
+
+<script>
+    // Gestion de l'affichage du menu latéral
+    window.addEventListener('scroll', () => {
+        const menu = document.getElementById('side-menu');
+        if (window.scrollY > 300) {
+            menu.classList.add('visible');
+        } else {
+            menu.classList.remove('visible');
+        }
+    });
+</script>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<style>
+    /* Styles généraux */
+    body, h1, h2, h3, p, a {
+        font-family: 'Roboto', sans-serif;
+    }
+
+    /* Animation de fadeIn */
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    /* Header */
+    .header-section {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        text-align: center;
+        animation: fadeIn 1.5s ease-in; /* Animation plus lente pour un fondu doux */
+    }
+
+    /* Card Hover Effects */
+    .workout-card, .coach-card, .plan-card, .service-card, .testimonial-card, .contact-card {
+        border-radius: 10px;
+        transition: transform 0.3s, box-shadow 0.3s;
+    }
+
+    .workout-card:hover, .coach-card:hover, .plan-card:hover, .service-card:hover, .testimonial-card:hover, .contact-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0px 10px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Boutons avec effets */
+    .btn-plan, .btn-service, .contact-btn {
+        transition: all 0.3s ease;
+        border-radius: 50px;
+        font-weight: bold;
+    }
+
+    .btn-plan:hover, .btn-service:hover, .contact-btn:hover {
+        background-color: #0056b3;
+        color: white;
+        transform: scale(1.05);
+    }
+
+    /* Images dans les cartes */
+    .workout-image, .coach-image, .service-image {
+        height: 200px;
+        object-fit: cover;
+        border-radius: 10px 10px 0 0;
+    }
+
+    /* Section commentaire */
+    .testimonial-section {
+        padding: 50px 0;
+        background: linear-gradient(to bottom right, #ffffff, #f3f4f6);
+    }
+
+    .testimonial-title {
+        font-family: 'Great Vibes', cursive;
+        font-size: 3em;
+        color: #0056b3;
+        text-shadow: 2px 2px #ddd;
+    }
+
+    .testimonial-card {
+        border: none;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+        background-color: #ffffff;
+        padding: 30px;
+    }
+
+    .testimonial-card h5 {
+        font-size: 1.25rem;
+        font-weight: bold;
+        color: #0056b3;
+    }
+
+    .testimonial-card .card-text {
+        font-size: 1rem;
+        color: #333;
+    }
+
+    .testimonial-card hr {
+        border-top: 2px solid #ddd;
+    }
+
+    /* Section Contact */
+    .contact-section {
+        padding: 50px 0;
+        background: linear-gradient(to bottom right, #f9f9f9, #ffffff);
+    }
+
+    .contact-icon {
+        font-size: 2.5rem;
+        color: #0056b3;
+    }
+
+    .contact-title {
+        font-family: 'Great Vibes', cursive;
+        font-size: 3em;
+        color: #0056b3;
+        text-shadow: 2px 2px #ddd;
+    }
+
+    .contact-form .form-control {
+        border-radius: 10px;
+        border: 1px solid #ddd;
+    }
+
+    .contact-form .form-control:focus {
+        border-color: #0056b3;
+        box-shadow: 0 0 10px rgba(0, 86, 179, 0.1);
+    }
+
+    .contact-btn {
+        border-radius: 50px;
+        background-color: #0056b3;
+        color: #ffffff;
+        transition: background-color 0.3s ease;
+    }
+
+    /* Section Box Styling */
+    .section-box {
+        padding: 50px 0;
+        background: linear-gradient(to bottom, #f0f0f0, #ffffff);
+        border-top: 1px solid #ddd;
+        border-bottom: 1px solid #ddd;
+    }
+    
+    /* Styles généraux */
+    body, h1, h2, h3, p, a {
+        font-family: 'Roboto', sans-serif;
+    }
+
+    /* Animation de fadeIn */
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    /* Header */
+    .header-section {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        text-align: center;
+        animation: fadeIn 1.5s ease-in; /* Animation plus lente pour un fondu doux */
+    }
+
+    /* Card Hover Effects */
+    .workout-card, .coach-card, .plan-card, .service-card, .testimonial-card, .contact-card {
+        border-radius: 10px;
+        transition: transform 0.3s, box-shadow 0.3s;
+    }
+
+    .workout-card:hover, .coach-card:hover, .plan-card:hover, .service-card:hover, .testimonial-card:hover, .contact-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0px 10px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Boutons avec effets */
+    .btn-plan, .btn-service, .contact-btn {
+        transition: all 0.3s ease;
+        border-radius: 50px;
+        font-weight: bold;
+    }
+
+    .btn-plan:hover, .btn-service:hover, .contact-btn:hover {
+        background-color: #0056b3;
+        color: white;
+        transform: scale(1.05);
+    }
+
+    /* Images dans les cartes */
+    .workout-image, .coach-image, .service-image {
+        height: 200px;
+        object-fit: cover;
+        border-radius: 10px 10px 0 0;
+    }
+
+    /* Section commentaire */
+    .testimonial-section {
+        padding: 50px 0;
+        background: linear-gradient(to bottom right, #ffffff, #f3f4f6);
+    }
+
+    .testimonial-title {
+        font-family: 'Great Vibes', cursive;
+        font-size: 3em;
+        color: #0056b3;
+        text-shadow: 2px 2px #ddd;
+    }
+
+    .testimonial-card {
+        border: none;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+        background-color: #ffffff;
+        padding: 30px;
+    }
+
+    .testimonial-card h5 {
+        font-size: 1.25rem;
+        font-weight: bold;
+        color: #0056b3;
+    }
+
+    .testimonial-card .card-text {
+        font-size: 1rem;
+        color: #333;
+    }
+
+    .testimonial-card hr {
+        border-top: 2px solid #ddd;
+    }
+
+    /* Section Contact */
+    .contact-section {
+        padding: 50px 0;
+        background: linear-gradient(to bottom right, #f9f9f9, #ffffff);
+    }
+
+    .contact-icon {
+        font-size: 2.5rem;
+        color: #0056b3;
+    }
+
+    .contact-title {
+        font-family: 'Great Vibes', cursive;
+        font-size: 3em;
+        color: #0056b3;
+        text-shadow: 2px 2px #ddd;
+    }
+
+    .contact-form .form-control {
+        border-radius: 10px;
+        border: 1px solid #ddd;
+    }
+
+    .contact-form .form-control:focus {
+        border-color: #0056b3;
+        box-shadow: 0 0 10px rgba(0, 86, 179, 0.1);
+    }
+
+    .contact-btn {
+        border-radius: 50px;
+        background-color: #0056b3;
+        color: #ffffff;
+        transition: background-color 0.3s ease;
+    }
+
+    /* Section Box Styling */
+    .section-box {
+        padding: 50px 0;
+        background: linear-gradient(to bottom, #f0f0f0, #ffffff);
+        border-top: 1px solid #ddd;
+        border-bottom: 1px solid #ddd;
+    }
+</style>
 
 {% endblock %}
+
+
+
+
+
+<!-- <style>
+    /* Styles généraux */
+    body, h1, h2, h3, p, a {
+        font-family: 'Roboto', sans-serif;
+    }
+
+    /* Animation de fadeIn */
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    /* Header */
+    .header-section {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        text-align: center;
+        animation: fadeIn 1.5s ease-in; /* Animation plus lente pour un fondu doux */
+    }
+
+    /* Card Hover Effects */
+    .workout-card, .coach-card, .plan-card, .service-card, .testimonial-card, .contact-card {
+        border-radius: 10px;
+        transition: transform 0.3s, box-shadow 0.3s;
+    }
+
+    .workout-card:hover, .coach-card:hover, .plan-card:hover, .service-card:hover, .testimonial-card:hover, .contact-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0px 10px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    /* Boutons avec effets */
+    .btn-plan, .btn-service, .contact-btn {
+        transition: all 0.3s ease;
+        border-radius: 50px;
+        font-weight: bold;
+    }
+
+    .btn-plan:hover, .btn-service:hover, .contact-btn:hover {
+        background-color: #0056b3;
+        color: white;
+        transform: scale(1.05);
+    }
+
+    /* Images dans les cartes */
+    .workout-image, .coach-image, .service-image {
+        height: 200px;
+        object-fit: cover;
+        border-radius: 10px 10px 0 0;
+    }
+
+    /* Section commentaire */
+    .testimonial-section {
+        padding: 50px 0;
+        background: linear-gradient(to bottom right, #ffffff, #f3f4f6);
+    }
+
+    .testimonial-title {
+        font-family: 'Great Vibes', cursive;
+        font-size: 3em;
+        color: #0056b3;
+        text-shadow: 2px 2px #ddd;
+    }
+
+    .testimonial-card {
+        border: none;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+        background-color: #ffffff;
+        padding: 30px;
+    }
+
+    .testimonial-card h5 {
+        font-size: 1.25rem;
+        font-weight: bold;
+        color: #0056b3;
+    }
+
+    .testimonial-card .card-text {
+        font-size: 1rem;
+        color: #333;
+    }
+
+    .testimonial-card hr {
+        border-top: 2px solid #ddd;
+    }
+
+    /* Section Contact */
+    .contact-section {
+        padding: 50px 0;
+        background: linear-gradient(to bottom right, #f9f9f9, #ffffff);
+    }
+
+    .contact-icon {
+        font-size: 2.5rem;
+        color: #0056b3;
+    }
+
+    .contact-title {
+        font-family: 'Great Vibes', cursive;
+        font-size: 3em;
+        color: #0056b3;
+        text-shadow: 2px 2px #ddd;
+    }
+
+    .contact-form .form-control {
+        border-radius: 10px;
+        border: 1px solid #ddd;
+    }
+
+    .contact-form .form-control:focus {
+        border-color: #0056b3;
+        box-shadow: 0 0 10px rgba(0, 86, 179, 0.1);
+    }
+
+    .contact-btn {
+        border-radius: 50px;
+        background-color: #0056b3;
+        color: #ffffff;
+        transition: background-color 0.3s ease;
+    }
+
+    /* Section Box Styling */
+    .section-box {
+        padding: 50px 0;
+        background: linear-gradient(to bottom, #f0f0f0, #ffffff);
+        border-top: 1px solid #ddd;
+        border-bottom: 1px solid #ddd;
+    }
+</style> -->

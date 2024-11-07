@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+{% load i18n %}
+{% block content %}
+
+<div id="searchResultsContainer" style="margin-top: 20px;">
+    <form id="searchForm" class="d-flex ms-auto" style="position: relative;">
+        <input id="searchInput" class="form-control me-2" type="search" placeholder="{% trans 'Recherche' %}" aria-label="Search" value="{{ query }}">
+        <button class="btn btn-outline-light" type="submit">{% trans "Recherche" %}</button>
+    </form>
+
+    <div id="searchResults" class="search-footer-space">
+        {% include 'partials/search_results.html' %}
+    </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const searchInput = document.getElementById("searchInput");
+    const searchResults = document.getElementById("searchResults");
+    const query = "{{ query }}";
+
+    if (query) {
+        // Lancer la recherche automatiquement si un mot-clé est déjà présent
+        performSearch(query);
+    }
+
+    searchInput.addEventListener("input", function() {
+        const newQuery = searchInput.value.trim();
+        if (newQuery.length >= 3) {
+            performSearch(newQuery);
+        } else {
+            searchResults.innerHTML = '<p class="text-muted">Veuillez entrer au moins 3 caractères pour la recherche.</p>';
+            searchResults.classList.remove('show');
+        }
+    });
+
+    function performSearch(query) {
+        fetch(`/search/?q=${query}`, {
+            headers: { 'X-Requested-With': 'XMLHttpRequest' }
+        })
+        .then(response => {
+            if (!response.ok) throw new Error("Erreur réseau ou serveur.");
+            return response.json();
+        })
+        .then(data => {
+            if (data.html) {
+                searchResults.innerHTML = data.html; // Mettre à jour avec les résultats
+            } else {
+                searchResults.innerHTML = "<p class='text-muted'>Aucun résultat trouvé.</p>";
+            }
+            searchResults.classList.add('show');
+        })
+        .catch(error => console.error("Erreur:", error));
+    }
+});
+</script>
+
+<style>
+    /* Style pour la barre de recherche */
+    #searchResultsContainer {
+        margin-top: 20px;
+    }
+
+    /* Espace pour le footer */
+    .search-footer-space {
+        margin-bottom: 50px;
+    }
+
+    /* Fixer le footer en bas de la page */
+    footer {
+        position: fixed;
+        bottom: 0;
+        width: 100%;
+        background-color: #000;
+        color: #fff;
+        padding: 10px 0;
+        text-align: center;
+    }
+    /* Style uniforme pour la barre de recherche */
+#navbarSearchInput, #searchInput {
+    width: 100%; /* Ajustez cette valeur si nécessaire */
+    padding: 10px;
+    margin: 5px auto;
+    box-sizing: border-box;
+}
+
+</style>
+
+{% endblock %}
+
+
+

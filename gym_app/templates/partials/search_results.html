@@ -1,0 +1,129 @@
+{% load i18n %}
+{% block content %}
+
+<div id="searchResultsContainer">
+    {% if query %}
+        <p><strong>{% trans "Résultats pour" %} "{{ query }}" :</strong></p>
+
+        {% if suggestions %}
+            <p>{% trans "Voulez-vous dire :" %}
+                {% for suggestion in suggestions %}
+                    <a href="{% url 'search' %}?q={{ suggestion }}">{{ suggestion }}</a>{% if not forloop.last %}, {% endif %}
+                {% endfor %}
+            </p>
+        {% endif %}
+
+        <div class="search-footer-space">
+            {% for category, items in results.items %}
+                {% if items %}
+                    <h5>{{ category|title }} ({{ items.count }} résultats)</h5>
+                    <ul>
+                        {% for item in items %}
+                            <li>
+                                <a href="{% url url_names.get category item.id %}">
+                                    <strong>{{ item.title|default:item.name }}</strong> - {{ item.description|truncatechars:100 }}
+                                </a>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="text-muted">{% trans "Aucun résultat pour cette catégorie." %}</p>
+                {% endif %}
+            {% endfor %}
+        </div>
+    {% else %}
+        <p class="text-muted">{% trans "Veuillez entrer un terme de recherche." %}</p>
+    {% endif %}
+</div>
+
+<style>
+    /* Générales */
+    body {
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+        margin: 0;
+        font-family: Arial, sans-serif;
+    }
+    .content {
+        flex: 1;
+    }
+    .search-bar {
+    width: 90% !important; /* Fixe la largeur de la barre de recherche */
+    max-width: 700px !important; /* Limite maximale pour les grands écrans */
+    margin: 20px auto !important;
+    display: flex;
+    align-items: center;
+}
+
+#searchInput {
+    flex: 1;
+    padding: 10px 15px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 4px 0 0 4px;
+    box-sizing: border-box;
+    width: 100% !important; /* Largeur constante */
+    max-width: 700px !important; /* Largeur maximale */
+}
+
+
+    /* Container des résultats de recherche */
+    #searchResultsContainer {
+        padding: 20px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        background-color: #fff;
+        border-radius: 8px;
+    }
+    #searchResultsContainer p {
+        margin: 10px 0;
+    }
+    #searchResultsContainer h5 {
+        margin-top: 20px;
+        font-size: 1.2em;
+    }
+    #searchResultsContainer ul {
+        list-style-type: none;
+        padding-left: 0;
+    }
+    #searchResultsContainer li {
+        margin-bottom: 8px;
+    }
+    #searchResultsContainer a {
+        text-decoration: none;
+        color: #007bff;
+    }
+    #searchResultsContainer a:hover {
+        text-decoration: underline;
+    }
+
+    .search-button {
+        padding: 10px 15px;
+        font-size: 16px;
+        border: 1px solid #007bff;
+        border-left: none;
+        background-color: #007bff;
+        color: white;
+        border-radius: 0 4px 4px 0;
+        cursor: pointer;
+    }
+    .search-button:hover {
+        background-color: #0056b3;
+    }
+
+    /* Footer */
+    .search-footer-space {
+        min-height: 300px;
+        padding-bottom: 20px;
+    }
+    .footer {
+        text-align: center;
+        padding: 20px;
+        background-color: #222;
+        color: #fff;
+        margin-top: auto;
+        width: 100%;
+    }
+</style>
+
+{% endblock %}

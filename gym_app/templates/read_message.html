@@ -19,10 +19,7 @@
                 <i class="fas fa-pencil-alt"></i> Nouveau message
             </a>
         </div>
-        <!-- Titre Lecture du Message centré avec ombre -->
-        <h1 class="text-center text-capitalize" style="font-family: 'Brush Script MT', cursive; font-size: 50px; color: #007bff; text-shadow: 2px 2px #ccc;">
-            Lecture Du Message
-        </h1>
+        <h1 class="message-title text-center">Lecture du Message</h1>
         <!-- Boutons Mon Profil et Retour Accueil alignés à droite -->
         <div class="d-flex">
             <a href="{% url 'profile' %}" class="btn btn-info btn-sm mr-2">
@@ -132,6 +129,12 @@
 
     <!-- Styles -->
     <style>
+        .message-title {
+        font-family: 'Great Vibes', cursive; /* Utilise la même belle calligraphie */
+        font-size: 2.8em; /* Ajustez la taille selon vos préférences */
+        color: #007bff; /* Couleur principale */
+        text-shadow: 2px 2px #ccc; /* Ombre douce */
+        }
         .chat-window {
             border: 1px solid #ddd;
             padding: 10px;

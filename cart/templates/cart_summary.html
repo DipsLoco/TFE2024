@@ -1,12 +1,10 @@
 {% extends 'base.html' %}
 {% load i18n %}
 {% block content %}
-<header class="bg-dark py-5"
-    style="background-image: url('/media/background_images/background.jpg'); background-size: cover; background-repeat: no-repeat; background-position: center;">
+<header class="bg-dark py-5" style="background-image: url('/media/background_images/background.jpg'); background-size: cover; background-repeat: no-repeat; background-position: center;">
     <div class="container px-5">
         <div class="row gx-5 justify-content-center">
-            <div class="col-lg-10 text-center my-5"
-                style="background-color: rgba(0, 0, 0, 0.6); padding: 20px; border-radius: 10px;">
+            <div class="col-lg-10 text-center my-5" style="background-color: rgba(0, 0, 0, 0.6); padding: 20px; border-radius: 10px;">
                 <h1 class="display-4 fw-bold text-white mb-2">BE-FIT - SHOPPING CART</h1>
                 <p class="lead text-white-50 mb-4">Restez en forme</p>
             </div>
@@ -37,18 +35,26 @@
                     <tr>
                         <td><input type="checkbox" name="selected_items" value="plan-{{ plan.id }}"></td>
                         <td>{{ plan.name }}</td>
-                        <td>N/A</td>
+                        <td>
+                            {% if plan.image %}
+                                <img src="{{ plan.image.url }}" alt="Image de {{ plan.name }}" style="width: 50px; height: 50px;">
+                            {% else %}
+                                N/A
+                            {% endif %}
+                        </td>
                         <td>{{ plan.price }} €</td>
                         <td>{{ plan.duration|default:"N/A" }} jours</td>
-                        <td>{{ plan.subscription.start_date|date:"d M Y"|default:"N/A" }}</td>
-                        <td>{{ plan.subscription.get_end_date|date:"d M Y"|default:"N/A" }}</td>
+                        <td>{{ plan.start_date|date:"d M Y"|default:"N/A" }}</td>
+                        <td>{{ plan.end_date|date:"d M Y"|default:"N/A" }}</td>
                         <td>
-                            <a href="{% url 'cart:cart_delete' 'plan' plan.id %}" class="btn btn-danger btn-sm">Supprimer</a>
+                            <a href="{% url 'cart:cart_delete' 'plan' plan.id %}" class="btn btn-action" style="background-color: rgba(255, 39, 50, 0.85);">
+                                <i class="bi bi-trash-fill me-2"></i> Supprimer
+                            </a>
                         </td>
                     </tr>
                     {% endfor %}
                 {% endif %}
-                
+
                 {% if cart_services %}
                     {% for service in cart_services %}
                     <tr>
@@ -67,9 +73,13 @@
                         <td>N/A</td>
                         <td>
                             {% if service.image_id %}
-                                <a href="{% url 'cart:cart_delete' 'service' service.image_id %}" class="btn btn-danger btn-sm">Supprimer</a>
+                                <a href="{% url 'cart:cart_delete' 'service' service.image_id %}" class="btn btn-action" style="background-color: rgba(255, 39, 50, 0.85);">
+                                    <i class="bi bi-trash-fill me-2"></i> Supprimer
+                                </a>
                             {% else %}
-                                <a href="{% url 'cart:cart_delete' 'service' service.id %}" class="btn btn-danger btn-sm">Supprimer</a>
+                                <a href="{% url 'cart:cart_delete' 'service' service.id %}" class="btn btn-action" style="background-color: rgba(255, 39, 50, 0.85);">
+                                    <i class="bi bi-trash-fill me-2"></i> Supprimer
+                                </a>
                             {% endif %}
                         </td>
                     </tr>
@@ -84,18 +94,28 @@
             </tbody>
         </table>
 
-        <div class="d-flex justify-content-between">
-            <!-- Bouton pour vider le panier avec un fond rouge et texte noir -->
-            <a href="{% url 'cart:cart_clear' %}" class="btn" style="background-color: rgb(241, 35, 45); color: black; border: none;">
-                <i class="bi bi-trash"></i> Vider le panier
+        <div class="d-flex justify-content-between align-items-center mt-4">
+            <!-- Boutons pour supprimer la sélection et vider le panier -->
+            <div class="d-flex">
+                <button type="submit" class="btn btn-action me-2" style= "font-size: 14px; background-color: orange;">
+                    <i class="bi bi-x-lg me-2"></i> Supprimer la sélection
+                </button>
+                <a href="{% url 'cart:cart_clear' %}" class="btn btn-action" style="background-color: rgba(255, 39, 50, 0.85);">
+                    <i class="bi bi-trash me-2"></i> Vider le panier
+                </a>
+            </div>
+
+            <!-- Boutons pour ajouter un service et ajouter un plan -->
+            <a href="{% url 'home' %}#catalog-services" class="btn btn-action me-2" style="background-color: #d3d3d3; color: black;">
+                <i class="bi bi-plus-circle me-2"></i> Ajouter un service
             </a>
-            <!-- Bouton pour supprimer la sélection avec un fond orange et texte noir -->
-            <button type="submit" class="btn" style="background-color: orange; color: black; border: none;">
-                Supprimer la sélection
-            </button>
-            <!-- Bouton pour confirmer et payer avec un fond vert et texte noir -->
-            <button type="button" class="btn" data-bs-toggle="modal" data-bs-target="#paiementModal" style="background-color: rgb(40, 255, 40); color: black; border: none;">
-                Confirmer et Payer
+            <a href="{% url 'home' %}#nos-offres" class="btn btn-action" style="background-color: #d3d3d3; color: black;">
+                <i class="bi bi-plus-circle me-2"></i> Ajouter un plan
+            </a>
+
+            <!-- Bouton pour confirmer et payer -->
+            <button type="button" class="btn btn-action" data-bs-toggle="modal" data-bs-target="#paiementModal" style="background-color: rgb(13, 161, 0);">
+                <i class="bi bi-credit-card me-2"></i> Confirmer et Payer
             </button>
         </div>                
     </form>
@@ -137,5 +157,32 @@
         window.location.href = "{% url 'cart:checkout_session' %}"; 
     });
 </script>
+
+<style>
+    /* Styles pour uniformiser les boutons et ajouter des effets */
+    .btn-action {
+        width: 200px; /* Uniforme la largeur des boutons */
+        height: 40px; /* Uniforme la hauteur des boutons */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+        border-radius: 5px;
+        color: white;
+        text-align: center;
+        transition: all 0.3s ease;
+    }
+
+    /* Effet de survol pour tous les boutons */
+    .btn-action:hover {
+        opacity: 0.9;
+        transform: scale(1.02);
+    }
+
+    /* Couleur grise plus vive */
+    .btn-action[style*="background-color: #d3d3d3;"] {
+        background-color: #c0c0c0;
+    }
+</style>
 
 {% endblock %}

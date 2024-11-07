@@ -216,9 +216,6 @@ class PurchaseHistoryAdmin(admin.ModelAdmin):
         return obj.get_end_date()
     get_end_date.short_description = 'Date d\'échéance'
 
-
-
-
 # admin.site.register(Booking, BookingAdmin)
 admin.site.register(PurchaseHistory, PurchaseHistoryAdmin)
 admin.site.register(ServiceImage)  # En option, pour voir les images séparément

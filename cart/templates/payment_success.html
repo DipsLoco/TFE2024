@@ -6,11 +6,11 @@
         <h3 class="fw-bold text-success">Paiement réussi !</h3>
         <p class="mt-4">
             Merci pour votre achat. 
-            {% if plan %}
+            {% if plan and plan.name %}
                 <!-- Message pour les achats de plans (abonnement, coaching personnalisé, diet plan) -->
                 Vous avez maintenant accès à notre plan : <strong>{{ plan.name }}</strong>
                 pour une durée de <strong>{{ plan.duration }} jours</strong>.
-            {% elif service %}
+            {% elif service and service.name %}
                 <!-- Message pour les achats de services d'accessoires -->
                 {% if service.type == 'gym_accessory' %}
                     Vous avez ajouté l'accessoire de gym <strong>{{ service.name }}</strong> à votre compte.
@@ -37,5 +37,26 @@
             <i class="fas fa-user-circle"></i> Accéder à votre profil
         </a>
     </div>
+
+    <!-- Popup pour les messages supplémentaires -->
+    {% if messages %}
+        <div id="popup-message" class="alert alert-info mt-4" role="alert">
+            {% for message in messages %}
+                {{ message }}
+            {% endfor %}
+        </div>
+    {% endif %}
 </div>
+
+<script>
+    // Script pour afficher le popup et le cacher automatiquement après quelques secondes
+    document.addEventListener('DOMContentLoaded', function () {
+        const popup = document.getElementById('popup-message');
+        if (popup) {
+            setTimeout(() => {
+                popup.style.display = 'none';
+            }, 5000);  // Cache le popup après 5 secondes
+        }
+    });
+</script>
 {% endblock %}

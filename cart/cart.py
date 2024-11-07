@@ -13,26 +13,34 @@ class Cart:
         self.cart = cart
 
     def add_plan(self, plan):
+        # Récupérer l'image du plan et l'ajouter aux données du panier
         plan_id = f'plan-{plan.id}'
         if plan_id not in self.cart:
-            self.cart[plan_id] = {'prix': str(plan.price), 'type': 'plan', 'duration': plan.duration}
-            print(f"[DEBUG] Plan ajouté : {plan_id}")  # Point de débogage
+            plan_image_url = plan.image.url if plan.image else None  # Assure que l'image existe avant d'accéder à l'URL
+            self.cart[plan_id] = {
+                'prix': str(plan.price),
+                'type': 'plan',
+                'duration': plan.duration,
+                'image_url': plan_image_url  # Ajoute l'URL de l'image au panier
+            }
+        print(f"[DEBUG] Plan ajouté : {plan_id} avec image : {plan_image_url}")  # Point de débogage
         self.session.modified = True
 
-    def add_service(self, service, image_id=None):
-        service_key = f'service-{service.id}-image-{image_id}' if image_id else f'service-{service.id}'
-        if service_key not in self.cart:
-            try:
-                # Récupère le prix de l'image si un ID est fourni, sinon utilise le prix du service
-                image_price = (
-                    ServiceImage.objects.get(id=image_id).price if image_id else service.price
-                )
-                self.cart[service_key] = {'prix': str(image_price), 'type': 'service', 'image_id': image_id}
-                print(f"[DEBUG] Service ajouté : {service_key}")  # Point de débogage
-            except ServiceImage.DoesNotExist:
-                print(f"[ERROR] Image avec ID {image_id} introuvable.")
-                return
-        self.session.modified = True
+    # Modification dans cart.py
+
+def add_service(self, service, image_id=None):
+    service_key = f'service-{service.id}-image-{image_id}' if image_id else f'service-{service.id}'
+    if service_key not in self.cart:
+        try:
+            # Utiliser le prix de CatalogService directement
+            image_price = service.price  # Prix général de CatalogService
+            self.cart[service_key] = {'prix': str(image_price), 'type': 'service', 'image_id': image_id}
+            print(f"[DEBUG] Service ajouté : {service_key}")  # Point de débogage
+        except CatalogService.DoesNotExist:
+            print(f"[ERROR] Service avec ID {service.id} introuvable.")
+            return
+    self.session.modified = True
+
 
     def __len__(self):
         return len(self.cart)

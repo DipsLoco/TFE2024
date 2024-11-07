@@ -62,8 +62,8 @@ def send_welcome_message(sender, instance, created, **kwargs):
         Message.objects.create(
             sender=User.objects.filter(is_staff=True).first(),  # Expéditeur : un admin ou staff
             recipient=instance,  # Nouveau membre
-            subject="Bienvenue chez BeFit",
-            body="Bienvenue chez BeFit ! Nous sommes ravis de vous accueillir. N'hésitez pas à consulter nos services et profiter de nos plans d'entraînement."
+            subject="Bienvenue chez BeFit 😊",
+            body="Bienvenue chez BeFit  ! Nous sommes ravis de vous accueillir 😊. N'hésitez pas à consulter nos services et profiter de nos plans d'entraînement."
         )
     
 
@@ -358,7 +358,6 @@ class ServiceImage(models.Model):
 
     def __str__(self):
         return f"{self.catalog_service.name} - Image"
-
 
 
 class PersonalizedCoaching(models.Model):

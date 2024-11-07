@@ -18,6 +18,7 @@ urlpatterns = [
     path('about/', views.about, name='about'),
     path('faq/', views.faq, name='faq'),
     path('', views.home, name='home'),
+    path('search/', views.search, name='search'),
     path('login/', views.login_user, name='login'),
     path('logout/', views.logout_user, name='logout'),
     path('profile/', profile, name='profile'),
@@ -66,7 +67,7 @@ if settings.DEBUG:
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
 # static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT) : 
-# Cette ligne permet de servir les fichiers médias (comme les images téléchargées) pendant le développement lorsque le mode debug est activé.
+# permet de servir les fichiers médias (comme les images téléchargées) pendant le développement lorsque le mode debug est activé.
 
-# if settings.DEBUG: : Cela garantit que les fichiers médias sont uniquement servis par Django lorsque vous êtes en mode développement.
+# if settings.DEBUG: : Cela garantit que les fichiers médias sont uniquement servis par Django lorsque je suis en mode développement.
 #  En production, un serveur web comme Nginx ou Apache s'occupera de cette tâche.

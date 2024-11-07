@@ -2,55 +2,90 @@
 {% load static %}
 {% load i18n %}
 {% block content %}
-<header class="bg-dark py-1">
+<header class="bg-dark py-5" style="position: relative; overflow: hidden;">
     <div class="container px-5">
         <div class="row gx-5 justify-content-center">
             <div class="col-lg-6">
-                <div class="text-center my-5">
-                    <h1 class="display-5 fw-bolder text-white mb-2">A propos de nous</h1>
+                <div class="text-center my-5" style="animation: fadeIn 2s ease-in-out;">
+                    <h1 class="display-5 fw-bolder text-white mb-2">À propos de nous</h1>
                 </div>
             </div>
         </div>
     </div>
 </header>
 <br /><br />
+
 <style>
-    /* Conteneur principal pour le contenu avec images et texte */
+    /* Animation pour le fondu */
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    /* Conteneur principal avec animation pour les images et le texte */
     .about-content {
         display: flex;
         justify-content: space-between;
-        height: 100vh;
-        /* Assure une hauteur de la taille de la fenêtre */
+        animation: fadeIn 1.5s ease-in;
+        gap: 20px;
     }
 
-    /* Conteneur pour les images à gauche et à droite */
+    /* Conteneur pour les images */
     .about-images {
         flex: 1;
         display: flex;
         flex-direction: column;
         gap: 20px;
-        /* Espace entre les images */
         justify-content: space-between;
     }
 
-    /* Conteneur pour le texte au milieu */
+    /* Animation d'apparition pour les images */
+    .about-images img {
+        width: 100%;
+        height: calc(50% - 10px);
+        object-fit: cover;
+        border-radius: 10px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        opacity: 0;
+        animation: fadeInImage 1s ease-in-out forwards;
+    }
+
+    /* Différents délais d'animation pour chaque image */
+    .about-images img:nth-child(1) { animation-delay: 0.3s; }
+    .about-images img:nth-child(2) { animation-delay: 0.6s; }
+
+    /* Animation de fondu pour chaque image */
+    @keyframes fadeInImage {
+        from { opacity: 0; transform: scale(1.05); }
+        to { opacity: 1; transform: scale(1); }
+    }
+
+    /* Conteneur de texte avec effet de scroll et style professionnel */
     .about-text {
         flex: 2;
         padding: 0 20px;
         text-align: justify;
         overflow-y: auto;
-        /* Permet de faire défiler si le texte déborde */
+        background-color: rgba(255, 255, 255, 0.9);
+        border-radius: 15px;
+        padding: 30px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        max-height: 100vh;
+        animation: fadeIn 2s ease-in;
     }
 
-    /* Style pour les images */
-    .about-images img {
-        width: 100%;
-        height: calc(50% - 10px);
-        /* La moitié de la hauteur de la colonne moins la moitié de l'écart */
-        object-fit: cover;
-        /* Assure que les images couvrent entièrement leur conteneur */
-        border-radius: 10px;
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    /* Style du texte pour le rendre agréable à lire */
+    .about-text p {
+        font-size: 1.1rem;
+        line-height: 1.6;
+        color: #333;
+    }
+
+    /* Effet de survol pour les images */
+    .about-images img:hover {
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+        transform: scale(1.03);
+        transition: transform 0.3s, box-shadow 0.3s;
     }
 </style>
 
@@ -62,7 +97,7 @@
             <img src="{% static 'image/left2.jpg' %}" alt="Image 2">
         </div>
 
-        <!-- Contenu texte -->
+        <!-- Texte avec fond blanc semi-transparent -->
         <div class="about-text">
             <p>
                 Fondé en 2020, BE Fit Workout Gym a vu le jour grâce à la passion inébranlable de son Fondateur pour la
@@ -113,6 +148,6 @@
         </div>
     </div>
 </div>
-<br/><br/>
+<br /><br />
 
 {% endblock %}

@@ -42,6 +42,11 @@
     <!-- librairies icon pour section affichage historique achat page profil script.js -->
     <script src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js" type="module"></script>
     <script src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js" nomodule></script>
+    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet">
+    <!-- Ajouter Font Awesome (CDN) dans ton fichier HTML -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet">
+
+
     
 
 
@@ -129,11 +134,11 @@
                         <h4 style="color: white; font-size: 1.1rem; margin-bottom: 10px;">Nos Services</h4>
                         <ul style="padding-left: 0;">
                             <li style="list-style: none; margin-bottom: 5px;"><i class="bx bx-chevron-right"></i> <a
-                                    href="#" style="color: white;">Personal Training</a></li>
+                                    href="{% url 'home' %}#catalog-services" style="color: white;">Personal Training</a></li>
                             <li style="list-style: none; margin-bottom: 5px;"><i class="bx bx-chevron-right"></i> <a
-                                    href="#" style="color: white;">Produits</a></li>
+                                    href="{% url 'home' %}#catalog-services" style="color: white;">Gym_Accessoires</a></li>
                             <li style="list-style: none; margin-bottom: 5px;"><i class="bx bx-chevron-right"></i> <a
-                                    href="#" style="color: white;">Plan diet</a></li>
+                                    href="{% url 'home' %}#catalog-services" style="color: white;">Plan diet</a></li>
                         </ul>
                     </div>
 

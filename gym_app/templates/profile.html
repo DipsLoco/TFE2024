@@ -5,10 +5,10 @@
 <div class="container my-5">
     <!-- En-tête du profil avec le statut Premium en haut à droite -->
     <div class="d-grid gap-2 d-md-flex justify-content-md-end">
-        <a href="{% url 'messages_inbox' %}" class="btn btn-mauve" style="background-color: #6a0dad;"> <i class="fas fa-envelope text-white"></i> Boîte de Réception <br></a>
+        <a href="{% url 'messages_inbox' %}" class="btn btn-mauve" style="background-color: #076eff;border-color: #000000;"><i class="fas fa-user"></i> <i class="fas fa-envelope text-white"></i> Boîte de Réception <br></a>
     </div><br>
     <div class="d-flex justify-content-between align-items-center mb-5">
-        <h1 class="text-primary" style="font-weight: bold;">Profil de {{ user.first_name }}</h1>
+        <h1 class="text-primary profil-title">Profil de {{ user.first_name }}</h1>
         
         <div class="d-flex align-items-center">
             <!-- Tableau de bord Coach -->
@@ -27,12 +27,12 @@
             
             <!-- Bouton pour contacter le staff pour les membres -->
             {% if user.role == 'member' %}
-                <a href="{% url 'send_message' staff_id %}" class="btn btn-primary ms-3">Contacter le staff</a>
+                <a href="{% url 'send_message' staff_id %}" class="btn btn-primary ms-3"><i class="fas fa-users"></i> Contacter le staff</a>
             {% endif %}
             
             <!-- Bouton pour souscrire si l'utilisateur n'est pas premium -->
             {% if not user.is_premium %}
-                <a href="{% url 'home' %}#nos-offres" class="btn btn-success ms-3">Souscrire à un Plan</a>
+                <a href="{% url 'home' %}#nos-offres" class="btn btn-success ms-3"><i class="fas fa-file-alt"></i> Souscrire à un Plan</a>
             {% endif %}
         </div>
     </div>
@@ -45,9 +45,9 @@
     {% else %}
         <div class="d-flex align-items-center">
             <!-- Texte principal avec arrière-plan rouge -->
-            <div class="text-grey alert-link d-flex align-items-center px-3 py-2" role="alert" style="font-size: 1.1rem; font-weight: bold;">
+            <div class="card-text-grey alert-link d-flex align-items-center px-3 py-2" role="alert" style="font-size: 1.1rem; font-weight: bold;">
                 <i class="fas fa-exclamation-triangle me-2"></i>
-                <span>Vous n'avez aucun Plan actuellement.</span>
+                <span>Vous n'avez aucun Plan actuellement ... </span> <i class="fas fa-file-alt"></i>
             </div>
             <!-- Popup de souscription (affiché si show_subscription_popup est True) -->
     {% if show_subscription_popup %}
@@ -55,7 +55,7 @@
         <div class="popup-content">
             <img src="{% static 'image/befit_staff.png' %}" alt="Equipe BeFit" class="admin-photo mb-5">
             <h5>Découvrez Tous Nos Services sans plus attendre !</h5>
-            <p>Profitez de nos programmes exclusifs et de nos entraînements en souscrivant dès aujourd'hui.</p>
+            <p>Profitez de nos programmes exclusifs et de nos entraînements en souscrivant dès aujourd'hui 😊.</p>
             <div class="button-group">
                 <a href="{% url 'home' %}#nos-offres" class="btn btn-primary">Voir nos Offres</a>
                 <button id="closePopup" class="btn btn-danger">Fermer</button>
@@ -119,7 +119,7 @@
                             <p><strong>Membre depuis :</strong> {{ user.date_joined|date:"d M Y" }}</p>
                         </div>
                     </div>
-                    <a class="tags">Modifier mes informations</a>
+                    <a class="tags"><i class="fas fa-pencil-alt"></i> Modifier mes informations</a>
                 </div>
             </div>
         </div>
@@ -319,7 +319,6 @@
         </div>
     </div>
 </div>
-
 <!-- CSS pour les icônes, le filtre et le lien PDF -->
 <style>
     .icon {
@@ -432,6 +431,12 @@
     .button-group {
         display: flex;
         justify-content: center;
+    }
+    .profil-title {
+        font-family: 'Great Vibes', cursive; /* Utilise une belle calligraphie */
+        font-weight: bold;
+        font-size: 2.5em; /* Ajustez la taille selon vos préférences */
+        color: #007bff; /* Couleur principale (text-primary) */
     }
 </style>
 

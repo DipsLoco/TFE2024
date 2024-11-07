@@ -4,15 +4,12 @@
 {% block content %}
 <div class="container mt-5">
     <div class="action-buttons d-flex justify-content-between align-items-center mb-4">
-        <!-- Bouton Nouveau message aligné à gauche -->
+        
         <a href="{% url 'send_message' 1 %}" class="btn btn-turquoise btn-sm">
             <i class="fas fa-pencil-alt"></i> Nouveau message
         </a>
-        <!-- Titre Boîte de Réception centré avec ombre -->
-        <h1 class="text-center text-capitalize" style="font-family: 'Brush Script MT', cursive; font-size: 50px; color: #007bff; text-shadow: 2px 2px #ccc;">
-            Boîte de Réception
-        </h1>
-        <!-- Boutons Mon Profil et Retour Accueil alignés à droite -->
+        <h1 class="reception-title text-center">Boîte de Réception</h1>
+       
         <div>
             <a href="{% url 'profile' %}" class="btn btn-info btn-sm mr-2">
                 <i class="fas fa-user"></i> Mon Profil
@@ -216,6 +213,12 @@
 </script>
 
 <style>
+    .reception-title {
+        font-family: 'Great Vibes', cursive; /* Utilise la même belle calligraphie */
+        font-size: 2.8em; /* Ajustez la taille selon vos préférences */
+        color: #007bff; /* Couleur principale */
+        text-shadow: 2px 2px #ccc; /* Ombre douce */
+    }
     .message-info {
         flex: 1;
         padding-right: 10px;
