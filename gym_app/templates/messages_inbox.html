@@ -51,7 +51,7 @@
 
     <!-- Embellissement du titre "Filtrer" -->
     <h3 class="styled-title">
-        <i class="fas fa-filter"></i> Filtrer
+        <i class="fas fa-filter"></i> Filtrer par
     </h3>
     
 
@@ -60,6 +60,9 @@
     <a href="{% url 'messages_inbox' %}?filter_role=all" class="btn btn-outline-primary btn-custom-small mr-2">
         <i class="fas fa-users"></i> Tous
     </a>
+    <!-- <a href="{% url 'messages_inbox' %}?filter_role=member" class="btn btn-outline-warning btn-custom-small mr-2">
+        <i class="fas fa-chalkboard-teacher"></i> Membre
+    </a> -->
     <a href="{% url 'messages_inbox' %}?filter_role=coach" class="btn btn-outline-warning btn-custom-small mr-2">
         <i class="fas fa-chalkboard-teacher"></i> Coach
     </a>

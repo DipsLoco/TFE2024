@@ -3,7 +3,7 @@
 {% load i18n %}
 
 {% block content %}
-<div class="container mt-5">
+<div class="container mt-0">
     <h2 class="text-primary">Tableau de Bord du Coach</h2>
     
     
@@ -17,6 +17,17 @@
 </div>
 
 <style>
+h2.text-primary {
+    font-family: 'Brush Script MT', cursive; /* Choisissez une police calligraphique adaptée */
+    font-size: 2.5rem; /* Ajustez la taille selon le rendu souhaité */
+    color: #007bff;
+}
+footer {
+    padding: 5px 0; /* Diminuez le padding pour réduire la hauteur */
+    font-size: 0.9rem; /* Ajustez la taille de la police si nécessaire */
+    line-height: 1.4;
+}
+
 .btn-coach-dashboard {
     font-size: 1.1rem;
     padding: 0.5rem 1rem;
@@ -35,6 +46,17 @@
 .modal-title {
     font-weight: bold;
 }
+footer {
+        position: relative;
+        bottom: 0;
+        width: 100%;
+        background-color: #000;
+        color: #fff;
+        padding: 5px 0;
+        text-align: center;
+        font-size: 0.9rem; /* Ajustez la taille de la police si nécessaire */
+        line-height: 1.4;
+        
+        }
 </style>
-
 {% endblock %}

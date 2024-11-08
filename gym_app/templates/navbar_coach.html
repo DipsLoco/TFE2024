@@ -1,20 +1,129 @@
+{% load static %}
 {% load i18n %}
-<!-- navbar_coach.html -->
-
-<nav class="navbar navbar-expand-lg bg-body-tertiary">
+<nav class="navbar navbar-expand-lg navbar-coach">
     <div class="container-fluid">
+        <a class="navbar-brand" href="{% url 'coach_dashboard' %}">
+            <img src="{% static 'image/logo.png' %}" alt="Logo" class="navbar-logo"> BeFit Coach
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown"
+                aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
         <div class="collapse navbar-collapse" id="navbarNavDropdown">
-            <ul class="navbar-nav">
+            <ul class="navbar-nav ms-auto">
                 <li class="nav-item">
-                    <a class="nav-link active" aria-current="page" href="{% url 'coach_dashboard' %}">Dashboard</a>
+                    <a class="nav-link" aria-current="page" href="{% url 'coach_dashboard' %}">Dashboard</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link active" aria-current="page" href="{% url 'newWorkoutSchedule' %}">Planifier Workout</a>
+                    <a class="nav-link" aria-current="page" href="{% url 'newWorkoutSchedule' %}">Planifier Workout</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link active" aria-current="page" href="#">Commentaires</a>
+                    <a class="nav-link" href="#">Commentaires</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link btn-logout" href="{% url 'logout' %}">
+                        <i class="fas fa-sign-out-alt"></i> Déconnexion
+                    </a>
                 </li>
             </ul>
         </div>
     </div>
 </nav>
+
+<style>
+/* Styles spécifiques à la navbar du coach */
+.navbar-coach {
+    background-color: #1E1E2F;
+    padding: 0.5rem 1rem; /*reduit la hauteur */
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.3);
+    transition: all 0.3s ease-in-out;
+}
+
+/* Logo et titre */
+.navbar-coach .navbar-logo {
+    height: 35px;
+    margin-right: 10px;
+    transition: transform 0.3s ease-in-out;
+}
+
+.navbar-coach .navbar-brand {
+    color: #FFD700;
+    font-weight: bold;
+    font-size: 1.25rem;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+}
+
+.navbar-coach .navbar-brand:hover .navbar-logo {
+    transform: rotate(15deg) scale(1.1);
+}
+
+/* Style des liens */
+.navbar-coach .nav-link {
+    color: #FFFFFF;
+    font-weight: 500;
+    padding: 0.8rem 1.2rem;
+    margin-right: 10px;
+    position: relative;
+    text-transform: uppercase;
+    transition: color 0.3s ease, background-color 0.3s ease;
+}
+
+.navbar-coach .nav-link:before {
+    content: "";
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background-color: #FFD700;
+    transform: scaleX(0);
+    transition: transform 0.3s ease;
+}
+
+.navbar-coach .nav-link:hover {
+    color: #FFD700;
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.navbar-coach .nav-link:hover:before {
+    transform: scaleX(1);
+}
+
+/* Bouton de déconnexion avec icône */
+.navbar-coach .btn-logout {
+    color: #FF6961;
+    font-weight: 500;
+}
+
+.navbar-coach .btn-logout:hover {
+    color: #FFFFFF;
+    background-color: #FF6961;
+    border-radius: 4px;
+}
+
+/* Style pour le toggle en mode mobile */
+.navbar-coach .navbar-toggler {
+    border: none;
+}
+
+.navbar-coach .navbar-toggler-icon {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='%23FFD700' viewBox='0 0 16 16'%3E%3Cpath fill-rule='evenodd' d='M1.5 12.5a.5.5 0 0 1 .5-.5h12a.5.5 0 0 1 0 1h-12a.5.5 0 0 1-.5-.5zM1.5 8a.5.5 0 0 1 .5-.5h12a.5.5 0 0 1 0 1h-12a.5.5 0 0 1-.5-.5zM1.5 3.5a.5.5 0 0 1 .5-.5h12a.5.5 0 0 1 0 1h-12a.5.5 0 0 1-.5-.5z'/%3E%3C/svg%3E");
+}
+
+/* Adaptabilité pour les écrans plus petits */
+@media (max-width: 991px) {
+    .navbar-coach {
+        padding: 0.8rem 1.5rem;
+    }
+
+    .navbar-coach .nav-link {
+        padding: 0.7rem;
+    }
+
+    .navbar-coach .navbar-brand {
+        font-size: 1rem;
+    }
+}
+</style>

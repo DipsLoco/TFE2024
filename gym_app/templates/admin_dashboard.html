@@ -413,20 +413,6 @@
     var busyHourCountsKeys = data.busyHourCountsKeys;  
     var busyHourCountsValues = data.busyHourCountsValues.map(Number);  
 
-    // Cercle progressif pour le taux d'inscription
-    // var registrationCircle = new ProgressBar.Circle('#registrationCircle', {
-    //     color: '#007bff',
-    //     strokeWidth: 6,
-    //     duration: 1400,
-    //     from: { color: '#eee' },
-    //     to: { color: '#007bff' },
-    //     step: function (state, circle) {
-    //         circle.path.setAttribute('stroke', state.color);
-    //         circle.setText(monthlyRegistrationPercentage.toFixed(1) + '%');
-    //     }
-    // });
-    // registrationCircle.animate(monthlyRegistrationPercentage / 100);
-
     // Cercle progressif pour le taux de présence
     var attendanceCircle = new ProgressBar.Circle('#attendanceCircle', {
         color: '#28a745',

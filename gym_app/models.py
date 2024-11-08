@@ -7,6 +7,7 @@ from django.utils import timezone
 from django.dispatch import receiver
 from django.db.models.signals import m2m_changed
 from django.contrib.auth import get_user_model
+from django_q.tasks import async_task
 
 
 class User(AbstractUser):
@@ -49,7 +50,7 @@ class Message(models.Model):
     def __str__(self):
         return f"De {self.sender} à {self.recipient} - {self.subject}"
 
-from django_q.tasks import async_task
+
 
 def send_message_task(sender_id, recipient_id, subject, body):
     async_task('gym_app.tasks.send_welcome_message', sender_id, recipient_id, subject, body)
@@ -202,6 +203,7 @@ def update_complet_status(sender, instance, **kwargs):
 @receiver(post_save, sender=WorkoutSchedule)
 def check_expired_status(sender, instance, **kwargs):
     instance.update_expired_status()
+
 
 class WorkoutParticipation(models.Model):
     workout_schedule = models.ForeignKey('WorkoutSchedule', on_delete=models.CASCADE)  # Référence à la séance

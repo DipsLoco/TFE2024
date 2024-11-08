@@ -17,7 +17,7 @@ from django.dispatch import receiver
 from django.urls import reverse
 from django.http import HttpResponseForbidden, JsonResponse
 from gym_app.models import CatalogService, Coach, DietPlan, GymAccessory, Message, PersonalizedCoaching, Plan, Review, Subscription, Workout, WorkoutImage, WorkoutSchedule, WorkoutParticipation
-from .forms import SignUpForm, UserProfileForm, WorkoutParticipationForm
+from .forms import SignUpForm, UserProfileForm, WorkoutParticipationForm, WorkoutScheduleForm
 from datetime import timedelta
 from django.utils import timezone
 from datetime import timedelta
@@ -34,7 +34,7 @@ from .forms import MessageForm
 from django.db.models import Q
 from django.shortcuts import render, get_object_or_404
 from .models import Message
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import HttpResponseRedirect
 from django.contrib import messages
@@ -56,6 +56,11 @@ from django.views.decorators.http import require_GET
 from django.template.loader import render_to_string
 from difflib import get_close_matches
 from django.http import JsonResponse
+from django.contrib.auth.decorators import login_required, user_passes_test
+from django.shortcuts import render, redirect
+from django.contrib import messages
+from .forms import WorkoutScheduleForm
+
 
 
 
@@ -561,6 +566,8 @@ def messages_inbox(request):
     # Appliquer les filtres de rôle
     if filter_role == 'all':
         messages = messages
+    elif filter_role == 'user':
+        messages = messages.filter(sender__role='user')
     elif filter_role == 'coach':
         messages = messages.filter(sender__role='coach')
     elif filter_role == 'staff':
@@ -1031,6 +1038,63 @@ def coach_dashboard(request):
 @login_required
 def newWorkoutSchedule(request):
     return render(request, 'newWorkoutSchedule.html' , {})
+
+
+
+from django.contrib import messages
+from django.shortcuts import redirect, render
+from django.contrib.auth.decorators import login_required, user_passes_test
+from .forms import WorkoutScheduleForm
+from .models import WorkoutSchedule, User
+
+@login_required
+@user_passes_test(lambda u: u.role in ['coach', 'admin'])
+def add_workout_schedule(request):
+    user = request.user
+
+    # Récupération des créneaux en fonction du rôle
+    schedule_queryset = WorkoutSchedule.objects.filter(coach=user) if user.role == 'coach' else WorkoutSchedule.objects.all()
+
+    # Récupération des utilisateurs pouvant être ajoutés en tant que participants
+    participants_queryset = User.objects.filter(role='member').only('first_name', 'last_name', 'email')
+
+    if request.method == 'POST':
+        form = WorkoutScheduleForm(request.POST, user=user, schedule=schedule_queryset)
+        
+        if form.is_valid():
+            # Sauvegarde de la séance de workout avec les participants sélectionnés
+            workout_schedule = form.save(commit=False)
+            workout_schedule.coach = user
+            workout_schedule.save()
+            form.save_m2m()  # Sauvegarde des relations ManyToMany (participants)
+
+            messages.success(request, "Séance de workout créée avec succès.")
+            return redirect('coach_dashboard' if user.role == 'coach' else 'admin_dashboard')
+        else:
+            messages.error(request, "Erreur dans le formulaire. Veuillez vérifier les champs.")
+    else:
+        # Initialisation du formulaire avec les paramètres nécessaires
+        form = WorkoutScheduleForm(user=user, schedule=schedule_queryset)
+
+    return render(request, 'newWorkoutSchedule.html', {
+        'form': form,
+        'participants': participants_queryset,  # Transmettre les participants à la vue pour les afficher dans le template
+    })
+
+
+
+
+def get_schedule_details(request, schedule_id):
+    try:
+        schedule = WorkoutSchedule.objects.get(id=schedule_id)
+        data = {
+            'start_time': schedule.start_time.strftime('%Y-%m-%dT%H:%M'),
+            'end_time': schedule.end_time.strftime('%Y-%m-%dT%H:%M')
+        }
+        return JsonResponse(data)
+    except WorkoutSchedule.DoesNotExist:
+        return JsonResponse({'error': 'Créneau non trouvé'}, status=404)
+
 
 
 

@@ -1,7 +1,7 @@
 from django.urls import path
 from django.conf.urls.static import static
 from befit_app import settings
-from .views import (admin_dashboard, cancel_reservation, affiche_workout, coach_dashboard, delete_draft, delete_message, mark_important, send_message, messages_inbox, subscribe, subscription_list, validate_username, validate_password, profile, edit_profile, workout_list, subscription, coach_dashboard, contact_coach, contact_member, remind_subscription)
+from .views import (admin_dashboard, cancel_reservation, affiche_workout, coach_dashboard, delete_draft, delete_message, mark_important, send_message, messages_inbox, subscribe, subscription_list, validate_username, validate_password, profile, edit_profile, workout_list, subscription, coach_dashboard, contact_coach, contact_member, add_workout_schedule, remind_subscription)
 from gym_app import views
 from django_q.tasks import schedule
 from django.conf import settings
@@ -46,6 +46,7 @@ urlpatterns = [
     path('service/<int:catalog_service_id>/', views.service_detail, name='service_detail'),
     path('register/', views.register_user, name='register'),
     path('workout/<int:pk>/', views.workout_detail, name='workout_detail'),
+    path('workout-schedule/add/', views.add_workout_schedule, name='add_workout_schedule'),
     path('validate_username/', validate_username, name='validate_username'),
     path('validate_password/', validate_password, name='validate_password'),
     path('reserve/<int:workout_id>/', views.affiche_workout, name='affiche_workout'),
@@ -59,7 +60,10 @@ urlpatterns = [
     path('politique-cookies/', views.cookies, name='cookies'),
     path('politique-confidentialite/', views.confidentialite, name='confidentialite'),
     path('mentions-legales/', views.mentions_legales, name='mentions_legales'),
-    path('new_workoutSchedule/', views.newWorkoutSchedule , name='newWorkoutSchedule'),
+    path('new_workoutSchedule/', views.add_workout_schedule, name='newWorkoutSchedule'),
+    path('get_schedule_details/<int:schedule_id>/', views.get_schedule_details, name='get_schedule_details'),
+
+
 ] 
 
 if settings.DEBUG:
