@@ -26,21 +26,17 @@ class Cart:
         print(f"[DEBUG] Plan ajouté : {plan_id} avec image : {plan_image_url}")  # Point de débogage
         self.session.modified = True
 
-    # Modification dans cart.py
-
-def add_service(self, service, image_id=None):
-    service_key = f'service-{service.id}-image-{image_id}' if image_id else f'service-{service.id}'
-    if service_key not in self.cart:
-        try:
-            # Utiliser le prix de CatalogService directement
-            image_price = service.price  # Prix général de CatalogService
-            self.cart[service_key] = {'prix': str(image_price), 'type': 'service', 'image_id': image_id}
-            print(f"[DEBUG] Service ajouté : {service_key}")  # Point de débogage
-        except CatalogService.DoesNotExist:
-            print(f"[ERROR] Service avec ID {service.id} introuvable.")
-            return
-    self.session.modified = True
-
+    def add_service(self, service, image_id=None):
+        service_key = f'service-{service.id}-image-{image_id}' if image_id else f'service-{service.id}'
+        if service_key not in self.cart:
+            try:
+                image_price = service.price  # Prix général de CatalogService
+                self.cart[service_key] = {'prix': str(image_price), 'type': 'service', 'image_id': image_id}
+                print(f"[DEBUG] Service ajouté : {service_key}")  # Point de débogage
+            except CatalogService.DoesNotExist:
+                print(f"[ERROR] Service avec ID {service.id} introuvable.")
+                return
+        self.session.modified = True
 
     def __len__(self):
         return len(self.cart)

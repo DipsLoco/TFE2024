@@ -4,9 +4,9 @@
 <div class="container my-5">
     <div class="row justify-content-center">
         <div class="col-md-8">
-            <div class="card shadow-lg">
-                <div class="card-header bg-dark text-white">
-                    <h3 class="text-center">Modifier mon profil</h3>
+            <div class="card shadow-lg border-0 rounded-xl">
+                <div class="card-header bg-dark text-white text-center py-4">
+                    <h3 class="h4 mb-0 font-weight-bold">Modifier mon profil</h3>
                 </div>
                 <div class="card-body">
                     <form method="post" enctype="multipart/form-data">
@@ -14,13 +14,13 @@
 
                         <!-- Prénom et Nom -->
                         <div class="row">
-                            <div class="col-md-6 mb-3">
+                            <div class="col-md-6 mb-4">
                                 <label for="{{ form.first_name.id_for_label }}" class="form-label">Prénom :</label>
                                 {{ form.first_name }}
                                 <small class="form-text text-muted">{{ form.first_name.help_text|safe }}</small>
                                 <div class="text-danger">{{ form.first_name.errors }}</div>
                             </div>
-                            <div class="col-md-6 mb-3">
+                            <div class="col-md-6 mb-4">
                                 <label for="{{ form.last_name.id_for_label }}" class="form-label">Nom :</label>
                                 {{ form.last_name }}
                                 <small class="form-text text-muted">{{ form.last_name.help_text|safe }}</small>
@@ -29,7 +29,7 @@
                         </div>
 
                         <!-- Email -->
-                        <div class="mb-3">
+                        <div class="mb-4">
                             <label for="{{ form.email.id_for_label }}" class="form-label">Adresse e-mail :</label>
                             {{ form.email }}
                             <small class="form-text text-muted">Nous ne partagerons jamais votre e-mail avec quelqu'un d'autre.</small>
@@ -37,22 +37,21 @@
                         </div>
 
                         <!-- Téléphone -->
-                        <div class="mb-3">
+                        <div class="mb-4">
                             <label for="{{ form.phone.id_for_label }}" class="form-label">Téléphone :</label>
                             {{ form.phone }}
-                            
                             <div class="text-danger">{{ form.phone.errors }}</div>
                         </div>
 
                         <!-- Adresse et Code Postal -->
                         <div class="row">
-                            <div class="col-md-6 mb-3">
+                            <div class="col-md-6 mb-4">
                                 <label for="{{ form.address.id_for_label }}" class="form-label">Adresse :</label>
                                 {{ form.address }}
                                 <small class="form-text text-muted">{{ form.address.help_text|safe }}</small>
                                 <div class="text-danger">{{ form.address.errors }}</div>
                             </div>
-                            <div class="col-md-6 mb-3">
+                            <div class="col-md-6 mb-4">
                                 <label for="{{ form.postal_code.id_for_label }}" class="form-label">Code Postal :</label>
                                 {{ form.postal_code }}
                                 <small class="form-text text-muted">{{ form.postal_code.help_text|safe }}</small>
@@ -61,30 +60,43 @@
                         </div>
 
                         <!-- Image de profil -->
-                        <div class="mb-3">
+                        <div class="mb-4">
                             <label for="{{ form.image.id_for_label }}" class="form-label">Image de profil :</label>
                             {{ form.image }}
                             <small class="form-text text-muted">Téléchargez une nouvelle image pour mettre à jour votre profil.</small>
                             <div class="text-danger">{{ form.image.errors }}</div>
                         </div>
 
-                        <!-- URL des réseaux sociaux avec icônes -->
-                        <div class="mb-3">
+                        <!-- URL des réseaux sociaux -->
+                        <div class="mb-4">
                             <label for="{{ form.social_url.id_for_label }}" class="form-label">Réseaux sociaux :</label>
                             <div class="input-group">
-                                <span class="input-group-text">
+                                <span class="input-group-text bg-primary text-white">
                                     <i class="fab fa-facebook-f"></i>
                                 </span>
                                 {{ form.social_url }}
                             </div>
-                            <small class="form-text text-muted">Ajoutez l'URL de votre profil social.</small>
+                            <small class="form-text text-muted">Ajoutez l'URL de votre profil Facebook.</small>
                             <div class="text-danger">{{ form.social_url.errors }}</div>
                         </div>
 
+                        <!-- Instagram URL -->
+                        <div class="mb-4">
+                            <label for="{{ form.instagram_url.id_for_label }}" class="form-label">Instagram :</label>
+                            <div class="input-group">
+                                <span class="input-group-text bg-danger text-white">
+                                    <i class="fab fa-instagram"></i>
+                                </span>
+                                {{ form.instagram_url }}
+                            </div>
+                            <small class="form-text text-muted">Ajoutez l'URL de votre profil Instagram.</small>
+                            <div class="text-danger">{{ form.instagram_url.errors }}</div>
+                        </div>
+                        <a href="{% url 'change_password' %}" class="btn btn-warning">Modifier mon mot de passe</a>
                         <!-- Boutons d'enregistrement et d'annulation -->
-                        <div class="d-grid gap-2">
-                            <button type="submit" class="btn btn-dark btn-lg">Enregistrer les modifications</button>
-                            <a href="{% url 'profile' %}" class="btn btn-secondary btn-lg">Annuler</a>
+                        <div class="d-grid gap-3 mt-4">
+                            <button type="submit" class="btn btn-dark btn-lg shadow-sm">Enregistrer les modifications</button>
+                            <a href="{% url 'profile' %}" class="btn btn-secondary btn-lg shadow-sm">Annuler</a>
                         </div>
                     </form>
                 </div>
@@ -104,20 +116,23 @@
         color: white;
         font-weight: bold;
         text-align: center;
+        border-top-left-radius: 1rem;
+        border-top-right-radius: 1rem;
     }
 
     .form-label {
-        font-weight: bold;
+        font-weight: 600;
+        font-size: 1rem;
     }
 
     .form-control {
-        border-radius: 0.5rem;
+        border-radius: 1rem;
         border: 1px solid #ced4da;
-        transition: border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+        transition: all 0.3s ease-in-out;
     }
 
     .form-control:focus {
-        border-color: #80bdff;
+        border-color: #007bff;
         box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
     }
 
@@ -125,6 +140,7 @@
         background-color: #343a40;
         border-color: #343a40;
         font-size: 1.2rem;
+        padding: 0.75rem;
     }
 
     .btn-dark:hover {
@@ -134,6 +150,7 @@
 
     .btn-secondary {
         font-size: 1.2rem;
+        padding: 0.75rem;
         background-color: #6c757d;
     }
 
@@ -144,7 +161,7 @@
     .input-group-text {
         background-color: #007bff;
         color: white;
-        border-radius: 0.5rem;
+        border-radius: 0.75rem;
     }
 
     .fab {
@@ -152,7 +169,33 @@
     }
 
     .form-text {
-        font-size: 0.85rem;
+        font-size: 0.875rem;
+        color: #6c757d;
     }
+
+    /* Form group spacing */
+    .mb-4 {
+        margin-bottom: 1.5rem !important;
+    }
+
+    .d-grid {
+        display: grid;
+        gap: 1rem;
+    }
+
+    /* Add shadow to buttons */
+    .btn-dark, .btn-secondary {
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn-dark:hover, .btn-secondary:hover {
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    /* Styling Instagram URL */
+    .input-group-text.bg-danger {
+        background-color: #e1306c;
+    }
+    
 </style>
 {% endblock %}

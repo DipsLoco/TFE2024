@@ -6,6 +6,8 @@ from gym_app import views
 from django_q.tasks import schedule
 from django.conf import settings
 from django.conf.urls.static import static
+from django.contrib.auth import views as auth_views
+
 
 
 
@@ -45,6 +47,8 @@ urlpatterns = [
     path('download_invoice/<int:purchase_id>/', views.download_invoice, name='download_invoice'),
     path('service/<int:catalog_service_id>/', views.service_detail, name='service_detail'),
     path('register/', views.register_user, name='register'),
+    # path('changer-mot-de-passe/', views.change_password, name='change_password'),
+    path('change-password/', auth_views.PasswordChangeView.as_view(success_url='/profile/'), name='change_password'),
     path('workout/<int:pk>/', views.workout_detail, name='workout_detail'),
     path('workout-schedule/add/', views.add_workout_schedule, name='add_workout_schedule'),
     path('validate_username/', validate_username, name='validate_username'),

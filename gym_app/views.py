@@ -60,6 +60,11 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from .forms import WorkoutScheduleForm
+from django.contrib.auth.forms import PasswordChangeForm
+from django.contrib.auth import update_session_auth_hash
+from .forms import UserProfileForm
+from .models import Message 
+
 
 
 
@@ -85,6 +90,7 @@ def home(request):
     
     # Charger les services uniques
     context.update(load_services())
+    
     
     return render(request, 'home.html', context)
 
@@ -396,6 +402,35 @@ def register_user(request):
         form = SignUpForm()
     return render(request, 'administration/register.html', {'form': form})
 
+# Message envoye en auto des qu un user change de mot de passe , il est sauveagarder avec le signal pre save et post save voir le fichier signal.py
+@receiver(post_save, sender=User)
+def send_password_change_notification(sender, instance, created, **kwargs):
+    # Vérifier si c'est une modification et pas une création
+    if not created:
+        # Comparer le mot de passe avant et après pour détecter un changement
+        if instance.password != instance.__original_password:
+            try:
+                # Récupérer un administrateur (ou un utilisateur staff) pour envoyer le message
+                admin_user = User.objects.filter(is_staff=True).first()
+
+                if admin_user:
+                    # Créer le message de confirmation uniquement pour un changement de mot de passe
+                    Message.objects.create(
+                        sender=admin_user,  # L'administrateur est l'expéditeur
+                        recipient=instance,  # L'utilisateur qui a changé son mot de passe
+                        subject="Modification de votre mot de passe",
+                        body="Votre mot de passe a été modifié avec succès. Si vous n'êtes pas à l'origine de ce changement, veuillez contacter l'administrateur."
+                    )
+                    print(f"Message de confirmation envoyé à {instance.username}.")
+                else:
+                    print("[Erreur] Aucun utilisateur administrateur trouvé pour envoyer le message.")
+
+            except Exception as e:
+                print(f"Erreur lors de l'envoi du message de changement de mot de passe : {e}")
+
+
+
+
 
 
 
@@ -517,8 +552,6 @@ def delete_message(request, message_id):
     return redirect('messages_inbox')
 
 
-    return redirect('messages_inbox')
-from django.shortcuts import redirect
 
 @login_required
 def delete_multiple_messages(request):
@@ -547,21 +580,21 @@ def messages_inbox(request):
 
     # Filtrer les messages en fonction de la catégorie sélectionnée
     if category == 'received':
-        messages = Message.objects.filter(recipient=request.user, is_deleted=False)
+        messages = Message.objects.filter(recipient=request.user, is_deleted=False).order_by('-timestamp')  # Tri par date descendante
     elif category == 'sent':
-        messages = Message.objects.filter(sender=request.user).order_by('-timestamp')
+        messages = Message.objects.filter(sender=request.user).order_by('-timestamp')  # Tri par date descendante
     elif category == 'drafts':
-        messages = Message.objects.filter(sender=request.user, is_draft=True)
+        messages = Message.objects.filter(sender=request.user, is_draft=True).order_by('-timestamp')  # Tri par date descendante
     elif category == 'important':
-        messages = Message.objects.filter(recipient=request.user, is_important=True)
+        messages = Message.objects.filter(recipient=request.user, is_important=True).order_by('-timestamp')  # Tri par date descendante
     elif category == 'trash':
-        messages = Message.objects.filter(recipient=request.user, is_deleted=True)
+        messages = Message.objects.filter(recipient=request.user, is_deleted=True).order_by('-timestamp')  # Tri par date descendante
     elif category == 'archived':
-        messages = Message.objects.filter(recipient=request.user, is_archived=True)
+        messages = Message.objects.filter(recipient=request.user, is_archived=True).order_by('-timestamp')  # Tri par date descendante
     elif category == 'unread':
-        messages = Message.objects.filter(recipient=request.user, is_read=False, is_deleted=False)
+        messages = Message.objects.filter(recipient=request.user, is_read=False, is_deleted=False).order_by('-timestamp')  # Tri par date descendante
     else:
-        messages = Message.objects.filter(recipient=request.user, is_deleted=False)
+        messages = Message.objects.filter(recipient=request.user, is_deleted=False).order_by('-timestamp')  # Tri par date descendante
 
     # Appliquer les filtres de rôle
     if filter_role == 'all':
@@ -1035,54 +1068,56 @@ def coach_dashboard(request):
     })
 
 
-@login_required
-def newWorkoutSchedule(request):
-    return render(request, 'newWorkoutSchedule.html' , {})
-
 
 
 from django.contrib import messages
-from django.shortcuts import redirect, render
+from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required, user_passes_test
 from .forms import WorkoutScheduleForm
-from .models import WorkoutSchedule, User
+from .models import WorkoutSchedule, User, Workout
+from django.utils import timezone
 
 @login_required
 @user_passes_test(lambda u: u.role in ['coach', 'admin'])
 def add_workout_schedule(request):
     user = request.user
 
-    # Récupération des créneaux en fonction du rôle
-    schedule_queryset = WorkoutSchedule.objects.filter(coach=user) if user.role == 'coach' else WorkoutSchedule.objects.all()
+    # Récupération de tous les créneaux sans filtre par rôle
+    schedule_queryset = WorkoutSchedule.objects.all()
 
     # Récupération des utilisateurs pouvant être ajoutés en tant que participants
     participants_queryset = User.objects.filter(role='member').only('first_name', 'last_name', 'email')
 
+    # Filtrer les workouts selon les spécialités du coach
+    if user.role == 'coach':
+        try:
+            # Accède aux spécialités du coach à travers la relation OneToOne avec User
+            workout_queryset = user.coach.specialties.all()
+        except Coach.DoesNotExist:
+            # Gestion de l'erreur si le coach n'existe pas pour cet utilisateur
+            workout_queryset = Workout.objects.none()
+    else:
+        workout_queryset = Workout.objects.all()
+
     if request.method == 'POST':
-        form = WorkoutScheduleForm(request.POST, user=user, schedule=schedule_queryset)
+        form = WorkoutScheduleForm(request.POST, user=user, schedule=schedule_queryset, workout_queryset=workout_queryset)
         
         if form.is_valid():
-            # Sauvegarde de la séance de workout avec les participants sélectionnés
             workout_schedule = form.save(commit=False)
             workout_schedule.coach = user
             workout_schedule.save()
             form.save_m2m()  # Sauvegarde des relations ManyToMany (participants)
-
             messages.success(request, "Séance de workout créée avec succès.")
             return redirect('coach_dashboard' if user.role == 'coach' else 'admin_dashboard')
         else:
             messages.error(request, "Erreur dans le formulaire. Veuillez vérifier les champs.")
     else:
-        # Initialisation du formulaire avec les paramètres nécessaires
-        form = WorkoutScheduleForm(user=user, schedule=schedule_queryset)
+        form = WorkoutScheduleForm(user=user, schedule=schedule_queryset, workout_queryset=workout_queryset)
 
     return render(request, 'newWorkoutSchedule.html', {
         'form': form,
-        'participants': participants_queryset,  # Transmettre les participants à la vue pour les afficher dans le template
+        'participants': participants_queryset,
     })
-
-
-
 
 def get_schedule_details(request, schedule_id):
     try:
@@ -1094,7 +1129,6 @@ def get_schedule_details(request, schedule_id):
         return JsonResponse(data)
     except WorkoutSchedule.DoesNotExist:
         return JsonResponse({'error': 'Créneau non trouvé'}, status=404)
-
 
 
 
@@ -1361,5 +1395,7 @@ def cookies(request):
 def confidentialite(request):
     return render(request, 'confidentialite.html')
 
+
+# N est pas utiliser actuellement car idem que politique de confidentialite
 def mentions_legales(request):
     return render(request, 'mentions_legales.html')

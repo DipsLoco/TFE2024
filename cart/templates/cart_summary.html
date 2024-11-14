@@ -13,7 +13,7 @@
 </header>
 
 <div class="container mt-5">
-    <h2>Votre panier</h2>
+    <h2 class="cart-title">Votre panier</h2>
     <form id="cartForm" method="post" action="{% url 'cart:delete_selected_items' %}">
         {% csrf_token %}
         <table class="table table-striped">
@@ -21,12 +21,13 @@
                 <tr>
                     <th></th> <!-- Colonne pour la case à cocher -->
                     <th>Nom du plan ou service</th>
-                    <th>Image</th>
+                    <th></th>
+                    <th></th>
                     <th>Prix</th>
                     <th>Durée</th>
                     <th>Date de début</th>
                     <th>Date d'échéance</th>
-                    <th>Action</th>
+                    <th>Supprimer</th>
                 </tr>
             </thead>
             <tbody>
@@ -35,6 +36,7 @@
                     <tr>
                         <td><input type="checkbox" name="selected_items" value="plan-{{ plan.id }}"></td>
                         <td>{{ plan.name }}</td>
+                        <td>Vous disposez d’un droit de rétractation de 14 jours  </td>
                         <td>
                             {% if plan.image %}
                                 <img src="{{ plan.image.url }}" alt="Image de {{ plan.name }}" style="width: 50px; height: 50px;">
@@ -46,11 +48,12 @@
                         <td>{{ plan.duration|default:"N/A" }} jours</td>
                         <td>{{ plan.start_date|date:"d M Y"|default:"N/A" }}</td>
                         <td>{{ plan.end_date|date:"d M Y"|default:"N/A" }}</td>
-                        <td>
-                            <a href="{% url 'cart:cart_delete' 'plan' plan.id %}" class="btn btn-action" style="background-color: rgba(255, 39, 50, 0.85);">
-                                <i class="bi bi-trash-fill me-2"></i> Supprimer
+                        <td class="trash text-center"> 
+                            <a href="{% url 'cart:cart_delete' 'plan' plan.id %}" class="btn btn-trash">
+                                <i class="bi bi-trash-fill"></i>
                             </a>
                         </td>
+                        
                     </tr>
                     {% endfor %}
                 {% endif %}
@@ -60,6 +63,7 @@
                     <tr>
                         <td><input type="checkbox" name="selected_items" value="service-{{ service.id }}"></td>
                         <td>{{ service.name }}</td>
+                        <td>Vous disposez d’un droit de rétractation de 14 jours  </td>
                         <td>
                             {% if service.image_id %}
                                 <img src="{{ service.image_url }}" alt="Image de {{ service.name }}" style="width: 50px; height: 50px;">
@@ -71,17 +75,18 @@
                         <td>N/A</td>
                         <td>N/A</td>
                         <td>N/A</td>
-                        <td>
+                        <td class="trash">
                             {% if service.image_id %}
-                                <a href="{% url 'cart:cart_delete' 'service' service.image_id %}" class="btn btn-action" style="background-color: rgba(255, 39, 50, 0.85);">
-                                    <i class="bi bi-trash-fill me-2"></i> Supprimer
+                                <a href="{% url 'cart:cart_delete' 'service' service.image_id %}" class="btn btn-trash">
+                                    <i class="bi bi-trash-fill"></i>
                                 </a>
                             {% else %}
-                                <a href="{% url 'cart:cart_delete' 'service' service.id %}" class="btn btn-action" style="background-color: rgba(255, 39, 50, 0.85);">
-                                    <i class="bi bi-trash-fill me-2"></i> Supprimer
+                                <a href="{% url 'cart:cart_delete' 'service' service.id %}" class="btn btn-trash">
+                                    <i class="bi bi-trash-fill"></i>
                                 </a>
                             {% endif %}
                         </td>
+                        
                     </tr>
                     {% endfor %}
                 {% endif %}
@@ -159,30 +164,87 @@
 </script>
 
 <style>
-    /* Styles pour uniformiser les boutons et ajouter des effets */
-    .btn-action {
-        width: 200px; /* Uniforme la largeur des boutons */
-        height: 40px; /* Uniforme la hauteur des boutons */
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 16px;
-        border-radius: 5px;
-        color: white;
-        text-align: center;
-        transition: all 0.3s ease;
-    }
+   /* Alignement centré pour la colonne "Supprimer" */
+th:last-child, .trash {
+    width: 80px;
+    text-align: center;
+    vertical-align: middle;
+}
 
-    /* Effet de survol pour tous les boutons */
-    .btn-action:hover {
-        opacity: 0.9;
-        transform: scale(1.02);
-    }
+/* Style pour le bouton corbeille */
+.btn-trash {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background-color: rgba(255, 39, 50, 0.85);
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 0;
+    margin: 0 auto; /* Centrer horizontalement dans la colonne */
+    transition: all 0.3s ease;
+}
 
-    /* Couleur grise plus vive */
-    .btn-action[style*="background-color: #d3d3d3;"] {
-        background-color: #c0c0c0;
-    }
+.btn-trash i {
+    font-size: 0.9rem;  /* Réduction de la taille de l'icône */
+    font-weight: bold;
+}
+
+    
+
+
+/* Effet au survol sans changement de couleur */
+.btn-trash:hover {
+    transform: scale(1.05);
+    color: white;
+}
+
+/* Centrage global des éléments dans toutes les colonnes */
+.table th, .table td {
+    vertical-align: middle;
+    text-align: center;
+}
+
+/* Largeur spécifique pour certaines colonnes pour un alignement parfait */
+.table th:nth-child(5), .table td:nth-child(5), /* Prix */
+.table th:nth-child(6), .table td:nth-child(6), /* Image */
+.table th:nth-child(7), .table td:nth-child(7), /* Durée */
+.table th:nth-child(8), .table td:nth-child(8), /* Date de début */
+.table th:nth-child(9), .table td:nth-child(9)  /* Date d'échéance */ {
+    min-width: 100px;
+}
+
+/* Ajustement spécifique pour la colonne Supprimer */
+.trash {
+    display: flex;
+    align-items: center;/* Centrage vertical */
+    justify-content: center;/* Centrage horizontal */
+    width: 60px;
+    height: 70px;  /* Ajustez la hauteur selon les besoins pour l'alignement */
+}
+
+.trash .btn-trash {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Embellissement du titre du panier */
+.cart-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 2.5rem;
+    font-weight: bold;
+    color: #333;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+
+
 </style>
 
 {% endblock %}

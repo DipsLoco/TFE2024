@@ -114,7 +114,7 @@ AUTH_USER_MODEL = 'gym_app.User'
 LOGIN_URL = '/login/'
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'
 SESSION_COOKIE_SECURE = False  # True si tu utilises HTTPS
-SESSION_EXPIRE_AT_BROWSER_CLOSE = True
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False # détermine si la session doit expirer à la fermeture du navigateur. Si True, entraîne  déconnexion après le changement de mot de passe, car la session pourrait être effacée
 STRIPE_SECRET_KEY = 'sk_test_51NAZGUIuDh7cZGu7O2BQQX7pRdlKZ11nz91vU4buwTdCg9YjF1nTG2TrC6gtXzIASog4VnCpP2ENjkKh7vkem2d300yum2ChD2'
 STRIPE_PUBLIC_KEY = 'pk_test_51NAZGUIuDh7cZGu7Fr7Atfzx99eYbTPTN2tWeFluHd2at0fmuif98iChDsRfCvg6Ob0oGF1LKmVe4ITP6e9nZUFo00qjHrXrX4'
 

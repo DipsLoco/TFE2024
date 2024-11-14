@@ -3,8 +3,9 @@
 {% load i18n %}
 
 {% block content %}
+<br>
 <div class="container mt-0">
-    <h2 class="text-primary">Tableau de Bord du Coach</h2>
+    <h2 class="text-primary">Tableau de Bord du Coach   *{{ user.first_name }} *</h2>
     
     
     {% include 'navbar_coach.html' %}

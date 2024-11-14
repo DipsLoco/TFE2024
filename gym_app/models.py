@@ -10,6 +10,7 @@ from django.contrib.auth import get_user_model
 from django_q.tasks import async_task
 
 
+
 class User(AbstractUser):
     ROLE_CHOICES = [
         ('admin', 'Admin'),
@@ -28,10 +29,12 @@ class User(AbstractUser):
     is_premium = models.BooleanField(default=False)  # Statut premium
     date_joined = models.DateTimeField(default=timezone.now)  # Date de création du compte
     social_url = models.URLField(blank=True, null=True)  # URL des réseaux sociaux
+    instagram_url = models.URLField(blank=True, null=True)  # URL d'Instagram de l'utilisateur
     image = models.ImageField(upload_to='membre_images/', blank=True, null=True)  # Image du membre
+
     groups = models.ManyToManyField(Group, related_name='custom_user_groups', blank=True)  # Nom unique pour éviter les conflits
     user_permissions = models.ManyToManyField(Permission, related_name='custom_user_permissions', blank=True)  # Nom unique pour éviter les conflits
-    
+
 
 User = get_user_model()
 

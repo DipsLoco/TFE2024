@@ -6,6 +6,7 @@ from django.core.exceptions import ValidationError
 from django import forms
 import re
 
+
 # Formulaire pour l'envoi de messages
 class MessageForm(forms.ModelForm):
     """Formulaire pour créer un message avec un objet et un corps du message."""
@@ -17,43 +18,18 @@ class MessageForm(forms.ModelForm):
             'body': forms.Textarea(attrs={'class': 'form-control', 'placeholder': 'Votre message', 'rows': 5}),
         }
 
-# Formulaire pour la participation aux séances de workout
-class WorkoutParticipationForm(forms.ModelForm):
-    """Formulaire pour indiquer la présence à une séance."""
-    class Meta:
-        model = WorkoutParticipation
-        fields = ['present']
-        widgets = {
-            'present': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
-        }
 
-# Validation de l'horaire sans conflit de location
-def clean(self):
-    """Validation pour éviter le chevauchement de créneaux dans la même location."""
-    cleaned_data = super().clean()
-    location = cleaned_data.get('location')
-    start_time = cleaned_data.get('start_time')
-    end_time = cleaned_data.get('end_time')
 
-    if location and start_time and end_time:
-        # Recherche des séances en conflit avec la même location et des horaires qui se chevauchent
-        conflicting_schedule = WorkoutSchedule.objects.filter(
-            location=location,
-            start_time__lt=end_time,
-            end_time__gt=start_time
-        ).exclude(id=self.instance.id)
-        
-        # Si un conflit est trouvé, une erreur est levée
-        if conflicting_schedule.exists():
-            raise ValidationError("Cette location est déjà réservée pour l'heure sélectionnée.")
-    
-    return cleaned_data
+from datetime import datetime, timedelta, time
+from django import forms
+from django.utils import timezone
+from django.core.exceptions import ValidationError
+from .models import WorkoutSchedule, WorkoutParticipation, User, Workout
 
-# Formulaire pour la gestion des séances de workout
 class WorkoutScheduleForm(forms.ModelForm):
-    """Formulaire pour la création et modification de séances de workout."""
+    """Formulaire pour la création et modification de séances de workout avec validation des créneaux et gestion des participants."""
     schedule_choice = forms.ChoiceField(
-        label="Choisissez un autre créneau",
+        label="Choisissez un créneau",
         required=True,
         widget=forms.Select(attrs={'class': 'form-select'})
     )
@@ -71,56 +47,103 @@ class WorkoutScheduleForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         user = kwargs.pop('user', None)
         schedule = kwargs.pop('schedule', None)
+        workout_queryset = kwargs.pop('workout_queryset', Workout.objects.all())
         super().__init__(*args, **kwargs)
-        
-        # Configuration des choix de créneaux horaires si fourni
-        if schedule:
-            self.fields['schedule_choice'].choices = [
-                (s.id, f"{s.start_time.strftime('%d %b %Y %H:%M')}") for s in schedule
-            ]
-        
-        # Configuration de la liste de participants selon le rôle de l'utilisateur
-        if user and user.role == 'coach':
+
+        # Créneaux horaires pour les 6 prochains jours
+        today = timezone.now().date()
+        time_slots = [(8, 10), (10, 12), (14, 16), (16, 18)]
+        schedule_choices = []
+        for day_offset in range(6):
+            date = today + timedelta(days=day_offset)
+            for start_hour, end_hour in time_slots:
+                start_time = timezone.make_aware(datetime.combine(date, time(start_hour)))
+                end_time = timezone.make_aware(datetime.combine(date, time(end_hour)))
+                schedule_choices.append((
+                    start_time.strftime('%Y-%m-%d %H:%M'), 
+                    f"{date.strftime('%A %d %B')} {start_hour}h-{end_hour}h"
+                ))
+
+        self.fields['schedule_choice'].choices = schedule_choices
+        self.fields['participants'].required = False
+
+        # Queryset pour les participants et les workouts selon le rôle
+        if user and user.role in ['coach', 'admin']:
             self.fields['participants'].queryset = User.objects.filter(role='member').only('first_name', 'last_name', 'email')
+            self.fields['workout'].queryset = workout_queryset
         else:
             self.fields['participants'].queryset = User.objects.all()
 
-        # Génération dynamique des créneaux horaires pour le jour actuel
-        today = timezone.now().date()
-        time_slots = [
-            (f"{today} 08:00", "8h-10h"),
-            (f"{today} 10:00", "10h-12h"),
-            (f"{today} 12:00", "12h-14h"),
-            (f"{today} 14:00", "14h-16h"),
-            (f"{today} 16:00", "16h-18h"),
-        ]
-        # Conversion des créneaux pour l'affichage des jours et horaires
-        self.fields['schedule_choice'].choices = [(slot[0], f"{today.strftime('%A %d %B')} {slot[1]}") for slot in time_slots]
+    def clean(self):
+        """Validation des conflits d'horaires pour éviter les double réservations pour le coach."""
+        cleaned_data = super().clean()
+        start_time = cleaned_data.get('start_time')
+        end_time = cleaned_data.get('end_time')
+        location = cleaned_data.get('location')
+        coach = self.instance.coach if self.instance.pk else self.initial.get('user')
 
-    def clean_participants(self):
-        """Vérifie que le nombre de participants ne dépasse pas la limite."""
-        participants = self.cleaned_data.get('participants')
-        if participants and len(participants) > self.max_participants:
-            raise ValidationError(f"Ce cours est complet avec un maximum de {self.max_participants} participants.")
-        return participants
+        # Vérification de conflit d'horaire pour la salle
+        if location and start_time and end_time:
+            conflicting_schedule = WorkoutSchedule.objects.filter(
+                location=location,
+                start_time__lt=end_time,
+                end_time__gt=start_time
+            ).exclude(id=self.instance.id)
+            
+            if conflicting_schedule.exists():
+                raise ValidationError(
+                    "La salle sélectionnée est déjà réservée pour ce créneau. "
+                    "Merci de choisir un autre créneau ou une autre salle."
+                )
+
+        # Vérification de conflit d'horaire pour le coach, même créneau mais pour lieu différent
+        if coach and start_time and end_time:
+            conflicting_coach_schedule = WorkoutSchedule.objects.filter(
+                coach=coach,
+                start_time__lt=end_time,
+                end_time__gt=start_time
+            ).exclude(id=self.instance.id)
+            
+            if conflicting_coach_schedule.exists():
+                raise ValidationError(
+                    "Vous avez déjà une séance programmée à cette heure, pour ce lieu ou un autre. "
+                    "Vous ne pouvez pas être à deux endroits différents à la même heure, le même jour, ou dans la même salle. "
+                    "Merci de choisir un créneau horaire différent."
+                )
+
+        return cleaned_data
 
     def save(self, commit=True):
-        """Sauvegarde en utilisant les informations du créneau choisi."""
+        """Sauvegarde en utilisant les informations du créneau choisi et assure l'enregistrement des participants."""
         schedule_instance = super().save(commit=False)
-        schedule_id = self.cleaned_data['schedule_choice']
-        schedule = WorkoutSchedule.objects.get(id=schedule_id)
         
-        # Mise à jour des informations de créneau pour le nouvel objet WorkoutSchedule
-        schedule_instance.coach = schedule.coach
-        schedule_instance.location = schedule.location
-        schedule_instance.start_time = schedule.start_time
-        schedule_instance.end_time = schedule.end_time
+        # Utilise schedule_choice pour définir start_time et end_time
+        schedule_choice_str = self.cleaned_data['schedule_choice']
+        schedule_start_time = timezone.make_aware(datetime.strptime(schedule_choice_str, '%Y-%m-%d %H:%M'))
+        schedule_end_time = schedule_start_time + timedelta(hours=2)
         
+        # Mise à jour des heures de début et de fin pour l'instance WorkoutSchedule
+        schedule_instance.start_time = schedule_start_time
+        schedule_instance.end_time = schedule_end_time
+
         if commit:
             schedule_instance.save()
             self.save_m2m()  # Sauvegarde des relations ManyToMany (participants)
+            schedule_instance.participants.set(self.cleaned_data['participants'])  # Liaison manuelle des participants
+            print(f"Participants enregistrés : {self.cleaned_data['participants']}")
         
         return schedule_instance
+
+
+class WorkoutParticipationForm(forms.ModelForm):
+    """Formulaire pour indiquer la présence à une séance."""
+    class Meta:
+        model = WorkoutParticipation
+        fields = ['present']
+        widgets = {
+            'present': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
+        }
+
 
 
 # Formulaire pour l'inscription des utilisateurs
@@ -215,7 +238,38 @@ class UserProfileForm(forms.ModelForm):
     """Formulaire pour modifier les informations de profil utilisateur."""
     class Meta:
         model = User
-        fields = ['first_name', 'last_name', 'email', 'phone', 'address', 'postal_code', 'image', 'social_url']
+        fields = ['first_name', 'last_name', 'email', 'phone', 'address', 'postal_code', 'image','social_url','instagram_url']
         widgets = {
             'image': forms.ClearableFileInput(attrs={}),  # Retire l'attribut multiple si un seul fichier est nécessaire
         }
+         # Champs pour modifier le mot de passe
+    current_password = forms.CharField(
+        widget=forms.PasswordInput(attrs={'class': 'form-control'}),
+        label="Mot de passe actuel",
+        required=True
+    )
+    new_password1 = forms.CharField(
+        widget=forms.PasswordInput(attrs={'class': 'form-control'}),
+        label="Nouveau mot de passe",
+        required=True
+    )
+    new_password2 = forms.CharField(
+        widget=forms.PasswordInput(attrs={'class': 'form-control'}),
+        label="Confirmer le mot de passe",
+        required=True
+    )
+
+    # Validation du mot de passe
+    def clean(self):
+        cleaned_data = super().clean()
+        new_password1 = cleaned_data.get("new_password1")
+        new_password2 = cleaned_data.get("new_password2")
+
+        if new_password1 != new_password2:
+            self.add_error('new_password2', "Les mots de passe ne correspondent pas.")
+    
+        if len(new_password1) < 8:  # Validation de la longueur du mot de passe
+            self.add_error('new_password1', "Le mot de passe doit comporter au moins 8 caractères.")
+
+        return cleaned_data
+

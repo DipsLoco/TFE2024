@@ -2,24 +2,36 @@
 {% block dashboard_content %}
 {% load i18n %}
 
+{% if form.errors %}
+    <ul>
+        {% for field, errors in form.errors.items %}
+            <li>{{ field }}: {{ errors }}</li>
+        {% endfor %}
+    </ul>
+{% endif %}
+
+
 <div class="workout-form-container">
     <h1 class="page-title">Créer une séance de workout</h1>
-    
-    {% if form.non_field_errors %}
-    <div class="alert alert-danger">
-        {{ form.non_field_errors }}
-    </div>
+
+    <!-- Bloc d'affichage des messages de validation (succès/erreur) -->
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert {{ message.tags }}">
+                {{ message }}
+            </div>
+        {% endfor %}
     {% endif %}
 
     <form method="post" class="workout-form">
         {% csrf_token %}
-        
+
         <!-- Sélection de la séance d'entraînement -->
         <div class="form-group">
             {{ form.workout.label_tag }}
             {{ form.workout }}
             {% if form.workout.errors %}
-            <div class="text-danger">{{ form.workout.errors }}</div>
+                <div class="text-danger">{{ form.workout.errors }}</div>
             {% endif %}
         </div>
 
@@ -28,14 +40,14 @@
             {{ form.location.label_tag }}
             {{ form.location }}
             {% if form.location.errors %}
-            <div class="text-danger">{{ form.location.errors }}</div>
+                <div class="text-danger">{{ form.location.errors }}</div>
             {% endif %}
         </div>
 
+        <!-- Gestion des participants -->
         <div class="form-group">
             <label for="id_participants">Sélectionnez des participants</label>
             <div class="row">
-                <!-- Liste de gauche : Utilisateurs disponibles -->
                 <div class="col-5">
                     <select multiple="multiple" name="participants" class="form-control participants-select" id="id_participants">
                         {% for participant in participants %}
@@ -43,37 +55,31 @@
                         {% endfor %}
                     </select>
                 </div>
-        
-                <!-- Flèches -->
                 <div class="col-2 text-center">
                     <button type="button" id="move-to-right" class="btn btn-primary my-2">→</button>
                     <button type="button" id="move-to-left" class="btn btn-primary my-2">←</button>
                 </div>
-        
-                <!-- Liste de droite : Participants sélectionnés -->
                 <div class="col-5">
-                    <select multiple="multiple" class="form-control participants-select" id="id_participants_right">
-                    </select>
+                    <select multiple="multiple" class="form-control participants-select" id="id_participants_right"></select>
                 </div>
             </div>
         </div>
-        
-        
+
         <!-- Choix du créneau de séance -->
         <div class="form-group">
             {{ form.schedule_choice.label_tag }}
             {{ form.schedule_choice }}
             {% if form.schedule_choice.errors %}
-            <div class="text-danger">{{ form.schedule_choice.errors }}</div>
+                <div class="text-danger">{{ form.schedule_choice.errors }}</div>
             {% endif %}
         </div>
 
-        <!-- Heure de début et de fin (remplis automatiquement) -->
+        <!-- Heure de début et de fin -->
         <div class="form-group">
             {{ form.start_time.label_tag }}
             {{ form.start_time }}
             {% if form.start_time.errors %}
-            <div class="text-danger">{{ form.start_time.errors }}</div>
+                <div class="text-danger">{{ form.start_time.errors }}</div>
             {% endif %}
         </div>
 
@@ -81,175 +87,143 @@
             {{ form.end_time.label_tag }}
             {{ form.end_time }}
             {% if form.end_time.errors %}
-            <div class="text-danger">{{ form.end_time.errors }}</div>
+                <div class="text-danger">{{ form.end_time.errors }}</div>
             {% endif %}
         </div>
 
-    </div>
-    <div class="form-check-group">
-        <label>{{ form.available.label }}</label> {{ form.available }}
-        <label>{{ form.expired.label }}</label> {{ form.expired }}
-        <label>{{ form.complet.label }}</label> {{ form.complet }}
-    </div>
-    <br>
-        <!-- Bouton de soumission du formulaire -->
+        <!-- Gestion des états disponibles, expirés, complet -->
+        <div class="form-check-group">
+            <label>{{ form.available.label }}</label> {{ form.available }}
+            <label>{{ form.expired.label }}</label> {{ form.expired }}
+            <label>{{ form.complet.label }}</label> {{ form.complet }}
+        </div>
+        <br>
+
         <button type="submit" class="btn btn-submit">Créer la séance</button>
     </form>
 </div>
 <br><br>
-<style>
-/* Styles CSS améliorés */
-h1.page-title {
-    font-family: 'Playfair Display', serif;
-    font-size: 2rem;
-    font-weight: bold;
-    color: #003366;
-    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
-    letter-spacing: 1px;
-    text-align: center;
-    margin-bottom: 1.5rem;
-}
-
-.workout-form-container {
-    max-width: 700px;
-    margin: 0 auto;
-    padding: 2rem;
-    background-color: #f0f8ff;
-    border-radius: 12px;
-    box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.15);
-    animation: fadeIn 1s ease;
-}
-
-.workout-form .form-group {
-    margin-bottom: 1.5rem;
-}
-
-.form-group label {
-    font-weight: bold;
-    color: #555;
-}
-
-.workout-form .form-group input,
-.workout-form .form-group select {
-    width: 100%;
-    padding: 1rem;
-    font-size: 1.1rem;
-    border: 1px solid #ddd;
-    border-radius: 6px;
-    transition: border-color 0.3s ease;
-}
-
-.workout-form .form-group input:focus,
-.workout-form .form-group select:focus {
-    border-color: #1e90ff;
-    box-shadow: 0 0 8px rgba(30, 144, 255, 0.4);
-    outline: none;
-}
-
-.btn-submit {
-    display: inline-block;
-    width: 100%;
-    padding: 1rem;
-    font-size: 1.2rem;
-    color: #fff;
-    background-color: #28a745;
-    border: none;
-    border-radius: 6px;
-    cursor: pointer;
-    font-weight: bold;
-    transition: background-color 0.3s ease;
-}
-
-.btn-submit:hover {
-    background-color: #218838;
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-}
-
-@media (max-width: 576px) {
-    .workout-form-container {
-        padding: 1.5rem;
-    }
-    
-    .page-title {
-        font-size: 1.8rem;
-    }
-}
-</style>
 
 <script>
-// Fonction de gestion des horaires dynamiques
+// Gestion dynamique des créneaux horaires
 document.addEventListener('DOMContentLoaded', function() {
-    const scheduleSelect = document.querySelector('#id_schedule_choice');
-    const startTimeInput = document.querySelector('#id_start_time');
-    const endTimeInput = document.querySelector('#id_end_time');
+    const scheduleChoiceField = document.getElementById("id_schedule_choice");
+    const startTimeField = document.getElementById("id_start_time");
+    const endTimeField = document.getElementById("id_end_time");
 
-    scheduleSelect.addEventListener('change', function() {
-        const scheduleId = this.value;
-        if (scheduleId) {
-            fetch(`/get_schedule_details/${scheduleId}/`)
-                .then(response => response.json())
-                .then(data => {
-                    if (!data.error) {
-                        startTimeInput.value = data.start_time;
-                        endTimeInput.value = data.end_time;
-                    } else {
-                        alert(data.error);
-                    }
-                });
+    scheduleChoiceField.addEventListener("change", function() {
+        const selectedOption = scheduleChoiceField.options[scheduleChoiceField.selectedIndex];
+        const selectedStartTime = selectedOption.value;
+
+        if (selectedStartTime) {
+            const startDateTime = new Date(selectedStartTime + 'Z');  // UTC correction
+            const endDateTime = new Date(startDateTime);
+            endDateTime.setHours(endDateTime.getHours() + 2);
+
+            startTimeField.value = startDateTime.toISOString().slice(0, 16);
+            endTimeField.value = endDateTime.toISOString().slice(0, 16);
         }
     });
-});
 
-// Fonction de gestion des participants avec les flèches
-$(document).ready(function() {
-    // Initialisation de Select2
-    $('#id_participants').select2({
-        width: '100%',
-        placeholder: 'Sélectionnez des participants',
-        allowClear: true
-    });
-    
-    $('#id_participants_right').select2({
-        width: '100%',
-        placeholder: 'Participants sélectionnés',
-        allowClear: true
-    });
-
-    // Déplacer les participants vers la liste de droite
     $('#move-to-right').click(function() {
-        var selected = $('#id_participants option:selected');
-        $('#id_participants_right').append(selected);
-        $('#id_participants').trigger('change');  // Reajouter l'option dans la liste de gauche
+        $('#id_participants_right').append($('#id_participants option:selected'));
     });
 
-    // Déplacer les participants vers la liste de gauche
     $('#move-to-left').click(function() {
-        var selected = $('#id_participants_right option:selected');
-        $('#id_participants').append(selected);
-        $('#id_participants_right').trigger('change');  // Reajouter l'option dans la liste de droite
+        $('#id_participants').append($('#id_participants_right option:selected'));
     });
 });
-
-// Validation du formulaire côté client pour les créneaux horaires
-const form = document.querySelector('form');
-    form.addEventListener('submit', function(event) {
-        const startTime = startTimeInput.value;
-        const endTime = endTimeInput.value;
-        if (startTime && endTime) {
-            const start = new Date(`1970-01-01T${startTime}Z`);
-            const end = new Date(`1970-01-01T${endTime}Z`);
-            if (start >= end) {
-                event.preventDefault();
-                alert('L\'heure de début doit être avant l\'heure de fin.');
-            }
-        }
-    });
-
-
 </script>
 
+<style>
+    /* Styles CSS améliorés */
+    h1.page-title {
+        font-family: 'Playfair Display', serif;
+        font-size: 2rem;
+        font-weight: bold;
+        color: #003366;
+        text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.2);
+        letter-spacing: 1px;
+        text-align: center;
+        margin-bottom: 1.5rem;
+    }
+    
+    .workout-form-container {
+        max-width: 700px;
+        margin: 0 auto;
+        padding: 2rem;
+        background-color: #f0f8ff;
+        border-radius: 12px;
+        box-shadow: 0px 4px 15px rgba(0, 0, 0, 0.15);
+        animation: fadeIn 1s ease;
+    }
+    
+    .workout-form .form-group {
+        margin-bottom: 1.5rem;
+    }
+    
+    .form-group label {
+        font-weight: bold;
+        color: #555;
+    }
+    
+    .workout-form .form-group input,
+    .workout-form .form-group select {
+        width: 100%;
+        padding: 1rem;
+        font-size: 1.1rem;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        transition: border-color 0.3s ease;
+    }
+    
+    .workout-form .form-group input:focus,
+    .workout-form .form-group select:focus {
+        border-color: #1e90ff;
+        box-shadow: 0 0 8px rgba(30, 144, 255, 0.4);
+        outline: none;
+    }
+    
+    .btn-submit {
+        display: inline-block;
+        width: 100%;
+        padding: 1rem;
+        font-size: 1.2rem;
+        color: #fff;
+        background-color: #28a745;
+        border: none;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: bold;
+        transition: background-color 0.3s ease;
+    }
+    
+    .btn-submit:hover {
+        background-color: #218838;
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+    
+    @media (max-width: 576px) {
+        .workout-form-container {
+            padding: 1.5rem;
+        }
+        
+        .page-title {
+            font-size: 1.8rem;
+        }
+    }
+    </style>
 {% endblock %}
+
+
+
+
+
+
+
+
+

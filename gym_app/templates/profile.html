@@ -29,26 +29,38 @@
             {% if user.role == 'member' %}
                 <a href="{% url 'send_message' staff_id %}" class="btn btn-primary ms-3"><i class="fas fa-users"></i> Contacter le staff</a>
             {% endif %}
-            
-            <!-- Bouton pour souscrire si l'utilisateur n'est pas premium -->
-            {% if not user.is_premium %}
-                <a href="{% url 'home' %}#nos-offres" class="btn btn-success ms-3"><i class="fas fa-file-alt"></i> Souscrire à un Plan</a>
+            {% if user.role == 'member' %}
+                <a href="{% url 'workout_list'  %}" class="btn btn-primary ms-3"><i class="fas fa-calendar-check"></i> Reserver un cours</a>
             {% endif %}
-        </div>
+            
+            
+            <!-- Bouton pour souscrire si l'utilisateur n'est pas premium et n'est pas un administrateur -->
+{% if not user.is_premium and not user.is_staff %}
+<a href="{% url 'home' %}#nos-offres" class="btn btn-success ms-3">
+    <i class="fas fa-file-alt"></i> Souscrire à un Plan
+</a>
+{% endif %}
+</div>
+</div>
+
+<!-- Message pour les utilisateurs premium sauf les administrateurs -->
+{% if user.is_premium and not user.is_staff %}
+<div class="alert alert-success d-flex align-items-center" role="alert" style="font-size: 1.1rem; font-weight: bold;">
+    <i class="fas fa-check-circle me-2"></i>
+    <span>Vous êtes abonné à un Plan Premium. Profitez pleinement de nos services !</span>
+</div>
+<br><br>
+{% elif not user.is_premium and not user.is_staff %}
+<!-- Message pour les utilisateurs non premium (coach et membres) qui n'ont pas encore de plan -->
+<div class="d-flex align-items-center">
+    <div class="card-text-grey alert-link d-flex align-items-center px-3 py-2" role="alert" style="font-size: 1.1rem; font-weight: bold;">
+        <i class="fas fa-exclamation-triangle me-2"></i>
+        <span>Vous n'avez aucun Plan actuellement ... </span> <i class="fas fa-file-alt"></i>
     </div>
-    {% if user.is_premium %}
-        <div class="alert alert-success d-flex align-items-center" role="alert" style="font-size: 1.1rem; font-weight: bold;">
-            <i class="fas fa-check-circle me-2"></i>
-            <span>Vous êtes abonné à un Plan Premium. Profitez pleinement de nos services !</span>
-        </div>
-        <br><br>
-    {% else %}
-        <div class="d-flex align-items-center">
-            <!-- Texte principal avec arrière-plan rouge -->
-            <div class="card-text-grey alert-link d-flex align-items-center px-3 py-2" role="alert" style="font-size: 1.1rem; font-weight: bold;">
-                <i class="fas fa-exclamation-triangle me-2"></i>
-                <span>Vous n'avez aucun Plan actuellement ... </span> <i class="fas fa-file-alt"></i>
-            </div>
+</div>
+<br>
+
+
             <!-- Popup de souscription (affiché si show_subscription_popup est True) -->
     {% if show_subscription_popup %}
     <div id="subscriptionPopup">
@@ -108,6 +120,7 @@
                                 <img src="{% static 'images/default-profile.png' %}" alt="Image du profil" class="img-fluid rounded-circle mb-3 shadow" style="max-width: 150px;">
                             {% endif %}
                             <a href="{% url 'edit_profile' %}" class="btn btn-secondary btn-sm">Modifier</a>
+                            <a href="{% url 'change_password' %}" class="btn btn-warning">Modifier mon mot de passe</a>
                         </div>
                         <!-- Section Informations -->
                         <div class="col-sm-8">
@@ -125,22 +138,31 @@
         </div>
 
         <!-- Abonnement Actuel -->
-        <div class="col-md-6 mb-4">
-            <div class="card shadow-sm">
-                <div class="card-header bg-primary text-white">
-                    <h2 class="h5 mb-0"><i class="fas fa-gem"></i> Abonnement Actuel</h2>
-                </div>
-                <div class="card-body">
-                    {% if current_subscription %}
-                        <p><strong>Plan :</strong> {{ current_subscription.plan.name }}</p>
-                        <p><strong>Date de Début :</strong> {{ current_subscription.start_date|date:"d M Y" }}</p>
-                        <p><strong>Date de Fin :</strong> {{ current_subscription.get_end_date|date:"d M Y" }}</p>
-                    {% else %}
-                        <p class="text-muted">Aucun abonnement actif</p>
-                    {% endif %}
-                </div>
-            </div>
+<div class="col-md-6 mb-4">
+    <div class="card shadow-lg border-0 rounded-xl">
+        <div class="card-header bg-dark text-white">
+            <h2 class="h5 mb-0"><i class="fas fa-crown"></i> Abonnement Actuel</h2>
         </div>
+        <div class="card-body">
+            {% if user.is_staff or user.role == 'coach' %}
+                <!-- Affichage "Illimité" pour les admins et les coachs -->
+                <div class="vip-plan">
+                    <p><strong>Plan :</strong> <span class="vip-plan-text">Illimité <i class="fas fa-infinity vip-infinity-icon"></i></span></p>
+                    <p><strong>Date de Début :</strong> {{ current_subscription.start_date|date:"d M Y" }}</p>
+                    <p><strong>Durée :</strong> <span class="text-muted">Indéterminée</span></p>
+                </div>
+            {% elif current_subscription %}
+                <!-- Affichage normal pour les autres utilisateurs -->
+                <p><strong>Plan :</strong> {{ current_subscription.plan.name }}</p>
+                <p><strong>Date de Début :</strong> {{ current_subscription.start_date|date:"d M Y" }}</p>
+                <p><strong>Date de Fin :</strong> {{ current_subscription.get_end_date|date:"d M Y" }}</p>
+            {% else %}
+                <p class="text-muted">Aucun abonnement actif</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
     </div>
     <div class="row">
         <!-- Réservations Actuelles -->
@@ -319,126 +341,9 @@
         </div>
     </div>
 </div>
-<!-- CSS pour les icônes, le filtre et le lien PDF -->
-<style>
-    .icon {
-        font-size: 24px;
-        flex-shrink: 0;
-    }
-    #purchaseFilter {
-        font-size: 0.9rem;
-        padding: 0.25rem 2rem 0.25rem 0.5rem; /* Augmentation de l'espace à droite */
-    }
-    .text-danger {
-        font-weight: bold;
-        color: #dc3545;
-    }
-    .text-primary {
-        font-weight: bold;
-        color: #007bff;
-    }
-    .text-success {
-        color: #28a745;
-    }
-    .link-pdf {
-        color: #d9534f;
-        font-style: italic;
-        font-weight: bold;
-        text-decoration: none;
-        transition: color 0.3s ease;
-    }
-    .link-pdf:hover {
-        color: #b52a27;
-        text-decoration: underline;
-    }
-    /* Style du fond du popup */
-    #subscriptionPopup {
-        display: none;
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.5);
-        justify-content: center;
-        align-items: center;
-        z-index: 1000;
-    }
 
-   /* Style du contenu du popup */
 
-    #subscriptionPopup {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        backdrop-filter: blur(5px); /* Flou de fond */
-        position: fixed; /* Pour centrer sur l'écran */
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        z-index: 999; /* Assure que le popup soit au-dessus des autres éléments */
-    }
-
-    .popup-content {
-        background: #fff;
-        padding: 30px;
-        border-radius: 15px; /* Coins arrondis plus marqués */
-        max-width: 500px;
-        width: 90%;
-        text-align: center;
-        box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.3); /* Ombre plus prononcée */
-    }
-
-    .popup-content h5 {
-        font-weight: bold;
-        color: #333;
-    }
-
-    .popup-content p {
-        color: #666;
-        margin-bottom: 20px;
-    }
-
-    .popup-content img.admin-photo {
-        width: 150px; /* Taille de l'image agrandie */
-        height: 150px; /* Taille de l'image agrandie */
-        border-radius: 50%; /* Forme ovale */
-        margin-bottom: 15px;
-        object-fit: cover; /* Garde les proportions de l'image */
-    }
-
-    /* Style des boutons */
-    .popup-content .btn {
-        margin: 10px 5px;
-        padding: 10px 20px;
-        font-size: 1rem;
-        font-weight: bold;
-        border-radius: 5px;
-    }
-
-    .popup-content .btn-primary {
-        background-color: #007bff;
-        color: #fff;
-    }
-
-    .popup-content .btn-danger {
-        background-color: #dc3545;
-        color: #fff;
-    }
-
-    /* Alignement des boutons */
-    .button-group {
-        display: flex;
-        justify-content: center;
-    }
-    .profil-title {
-        font-family: 'Great Vibes', cursive; /* Utilise une belle calligraphie */
-        font-weight: bold;
-        font-size: 2.5em; /* Ajustez la taille selon vos préférences */
-        color: #007bff; /* Couleur principale (text-primary) */
-    }
-</style>
+    
 
 
 {% block extra_js %}
