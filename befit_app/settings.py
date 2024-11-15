@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'gym_app',
     'cart',
     'django_q',
+    'cookie_consent',
 ]
 
 MIDDLEWARE = [

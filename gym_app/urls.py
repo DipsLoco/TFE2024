@@ -14,6 +14,7 @@ from django.contrib.auth import views as auth_views
 
 
 
+
 urlpatterns = [
     
     
@@ -61,11 +62,16 @@ urlpatterns = [
     path('add-review/<int:workout_id>/', views.add_review, name='add_review'),
 
     path('conditions-de-vente/', views.conditions_vente, name='conditions_vente'),
-    path('politique-cookies/', views.cookies, name='cookies'),
+    path('cookies_privacy/', views.cookies, name='cookies'),
     path('politique-confidentialite/', views.confidentialite, name='confidentialite'),
     path('mentions-legales/', views.mentions_legales, name='mentions_legales'),
     path('new_workoutSchedule/', views.add_workout_schedule, name='newWorkoutSchedule'),
     path('get_schedule_details/<int:schedule_id>/', views.get_schedule_details, name='get_schedule_details'),
+    # URL pour afficher la bannière de consentement
+    path('cookies/', views.cookie_consent_view, name='cookie_consent'),
+
+    # URL pour afficher et gérer les préférences de cookies
+    path('cookies/preferences/', views.cookie_preferences_view, name='cookie_preferences'),
 
 
 ] 

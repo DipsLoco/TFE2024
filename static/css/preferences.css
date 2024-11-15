@@ -1,0 +1,49 @@
+/* Style pour chaque section de la catégorie de cookies */
+.cookie-category {
+    margin-bottom: 15px;
+}
+
+/* Style pour les flèches déroulantes */
+.toggle-arrow {
+    float: right;
+    font-size: 1.2em;
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+/* Style pour le détail de chaque cookie */
+.cookie-detail {
+    display: none;
+    padding-left: 15px;
+    font-size: 0.9em;
+    color: #666;
+}
+
+/* Style pour les boutons de consentement */
+.btn-cookie {
+    border: none;
+    padding: 10px 20px;
+    border-radius: 50px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.btn-save {
+    background-color: #0056b3; /* Bouton bleu */
+    color: white;
+}
+
+.btn-save:hover {
+    background-color: #004494;
+}
+
+.btn-accept {
+    background-color: #0056b3;
+    color: white;
+}
+
+.btn-accept:hover {
+    background-color: #004494;
+}
+

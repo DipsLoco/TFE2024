@@ -64,9 +64,26 @@ from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth import update_session_auth_hash
 from .forms import UserProfileForm
 from .models import Message 
+from django.shortcuts import render
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
 
+# Vue pour la bannière de consentement (affichée par défaut)
+def cookie_consent_view(request):
+    return render(request, "cookie_consent/banner.html")
 
+def cookies_policy(request):
+    return render(request, 'path/to/cookies.html')
 
+# Vue pour les préférences de cookies
+@csrf_exempt
+def cookie_preferences_view(request):
+    if request.method == "POST":
+        # Traitez et enregistrez les préférences de l'utilisateur
+        preferences = request.POST.get('preferences')
+        # Enregistrez ou mettez à jour les préférences de l'utilisateur ici selon vos besoins
+        return JsonResponse({"status": "preferences saved"})
+    return render(request, "cookie_consent/preferences.html")
 
 
 

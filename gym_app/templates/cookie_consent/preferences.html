@@ -1,0 +1,58 @@
+{% load static %}
+{% load i18n %}
+
+<div class="cookie-preferences" id="cookiePreferences">
+    <div class="cookie-content">
+        <div class="cookie-icon">
+            <img src="{% static 'image/cookie_icon.png' %}" alt="Icône Cookie">
+        </div>
+        
+        <h1 class="cookies-title text-center">BEFIT utilise des cookies</h1>
+        <p>
+            Ce site web utilise des cookies pour améliorer votre expérience utilisateur. Nous traitons les cookies pour :
+            (1) la communication électronique et l'affichage du site web, (2) la poursuite de la conception, (3) la mesure et
+            l'analyse de votre utilisation, et (4) l'affichage de contenus et de publicités adaptés. Vous pouvez choisir d'accepter 
+            ou de refuser l'utilisation de cookies (à l'exception des cookies essentiels) pour chaque catégorie. Refuser certaines catégories 
+            de cookies peut avoir un impact sur votre expérience utilisateur. Le bouton "Préférences" vous permet de définir vos préférences 
+            maintenant ou plus tard.
+        </p>
+        <p>
+            Pour plus d'informations, consultez notre <a href="{% url 'cookies' %}">Politique de Cookies</a>.
+        </p>
+
+        <div class="cookie-category" onclick="toggleDetails(this)">
+            <h2>Cookies essentiels <span>(Toujours actif)</span> <i class="bx bx-chevron-down toggle-arrow"></i></h2>
+            <p class="cookie-detail">Les cookies essentiels sont nécessaires pour assurer le bon fonctionnement du site web, comme la sécurité et l'accessibilité.</p>
+        </div>
+        
+        <div class="cookie-category" onclick="toggleDetails(this)">
+            <h2>Cookies fonctionnels <span>(Toujours actif)</span> <i class="bx bx-chevron-down toggle-arrow"></i></h2>
+            <p class="cookie-detail">Ces cookies assurent votre utilisation optimale de notre site web en personnalisant certaines fonctionnalités. Par exemple, en vous rappelant vos choix, votre langue préférée ou votre localisation.</p>
+        </div>
+        
+        <div class="cookie-category" onclick="toggleDetails(this)">
+            <h2>Cookies analytiques <i class="bx bx-chevron-down toggle-arrow"></i> 
+                <label class="switch">
+                    <input type="checkbox">
+                    <span class="slider round"></span>
+                </label>
+            </h2>
+            <p class="cookie-detail">Ces cookies suivent votre utilisation de notre site pour analyser l'activité et améliorer encore votre expérience.</p>
+        </div>
+        
+        <div class="cookie-category" onclick="toggleDetails(this)">
+            <h2>Cookies de marketing <i class="bx bx-chevron-down toggle-arrow"></i>
+                <label class="switch">
+                    <input type="checkbox">
+                    <span class="slider round"></span>
+                </label>
+            </h2>
+            <p class="cookie-detail">Ces cookies permettent des activités de marketing personnalisées et le reciblage publicitaire.</p>
+        </div>
+
+        <div class="cookie-buttons">
+            <button class="btn-cookie btn-save" onclick="enregistrerPreferences()">Enregistrer mes préférences</button>
+            <button class="btn-cookie btn-accept" onclick="accepterCookies()">Accepter tous</button>
+        </div>
+    </div>
+</div>
