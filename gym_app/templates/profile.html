@@ -2,6 +2,19 @@
 {% load static %}
 {% load i18n %}
 {% block content %}
+
+
+<head>
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Great+Vibes&display=swap" rel="stylesheet">
+
+    <!-- Lier ton fichier CSS principal -->
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+
+    <!-- Lier le fichier CSS spécifique à la page si nécessaire -->
+    <link rel="stylesheet" href="{% static 'css/profile.css' %}">
+</head>
+
 <div class="container my-5">
     <!-- En-tête du profil avec le statut Premium en haut à droite -->
     <div class="d-grid gap-2 d-md-flex justify-content-md-end">
@@ -341,59 +354,7 @@
         </div>
     </div>
 </div>
-
-
-    
-
-
-{% block extra_js %}
-<script>
-    // Gestion de l'affichage du popup de souscription
-const showSubscriptionPopup = "{{ show_subscription_popup|yesno:'true,false' }}" === "true";
-
-if (showSubscriptionPopup) {
-    setTimeout(() => {
-        document.getElementById("subscriptionPopup").style.display = "flex";
-    }, 2000);
-}
-
-// Code pour fermer le popup
-document.getElementById("closePopup").onclick = function() {
-    document.getElementById("subscriptionPopup").style.display = "none";
-};
-
-// Fermer le popup en cliquant en dehors de celui-ci
-window.onclick = function(event) {
-    const popup = document.getElementById("subscriptionPopup");
-    if (event.target === popup) {
-        popup.style.display = "none";
-    }
-};
-
-
-
-    // Filtrage des achats entre les plans et les services
-    document.getElementById('purchaseFilter').addEventListener('change', function() {
-        let filterValue = this.value;
-        let planSection = document.getElementById('planPurchases');
-        let serviceSection = document.getElementById('servicePurchases');
-
-        if (filterValue === 'plans') {
-            planSection.style.display = 'block';
-            serviceSection.style.display = 'none';
-        } else if (filterValue === 'services') {
-            planSection.style.display = 'none';
-            serviceSection.style.display = 'block';
-        } else {
-            planSection.style.display = 'block';
-            serviceSection.style.display = 'block';
-        }
-    });
-</script>
-
 {% endblock %}
-
-
-
-
+{% block scripts %}
+    <script src="{% static 'js/profile.js' %}"></script>
 {% endblock %}

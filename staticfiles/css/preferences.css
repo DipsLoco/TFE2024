@@ -54,12 +54,6 @@ body.preferences-page {
     
 }
 
-/* parametre pour que le modal se ferme apres que j ai accepter mes preferences */
-#cookieModal {
-    display: none !important;
-}
-
-
 /* Header */
 .cookie-modal-header {
     display: flex;

@@ -2,34 +2,67 @@
 {% load i18n %}
 {% block content %}
 <div class="container my-5">
-    <h1 class="text-center">Politique en Matière de Cookies</h1>
+    <h1 class="text-center"><i class="fas fa-cookie"></i> Politique en Matière de Cookies</h1>
     <p>
         Notre site utilise des cookies pour améliorer votre expérience de navigation. Cette politique vous informe sur les types 
         de cookies que nous utilisons, leur utilité et comment vous pouvez les gérer.
     </p>
 
-    <h2>1. Qu'est-ce qu'un cookie ?</h2>
+    <h2><i class="fas fa-info-circle"></i> 1. Qu'est-ce qu'un cookie ?</h2>
     <p>
         Un cookie est un petit fichier texte déposé sur votre appareil lors de votre visite sur notre site. Il permet de stocker 
         des informations relatives à votre navigation et à vos préférences.
     </p>
 
-    <h2>2. Types de cookies utilisés</h2>
+    <h2><i class="fas fa-cookie-bite"></i> 2. Types de cookies utilisés</h2>
     <ul>
         <li><strong>Cookies essentiels :</strong> Nécessaires au bon fonctionnement du site.</li>
         <li><strong>Cookies analytiques :</strong> Utilisés pour analyser le comportement des utilisateurs et améliorer nos services.</li>
         <li><strong>Cookies publicitaires :</strong> Utilisés pour personnaliser les publicités en fonction de vos intérêts.</li>
     </ul>
 
-    <h2>3. Gestion des cookies</h2>
+    <h2><i class="fas fa-sliders-h"></i> 3. Gestion des cookies</h2>
     <p>
         Vous pouvez gérer les cookies via les paramètres de votre navigateur. Vous pouvez également refuser certains cookies directement 
         sur notre site.
     </p>
 
-    <h2>4. Contact</h2>
+    <h2><i class="fas fa-headset"></i> 4. Contact</h2>
     <p>
         Pour toute question concernant notre politique de cookies, contactez-nous à : <a href="mailto:befit@gmail.com">befit@gmail.com</a>.
     </p>
 </div>
+
+<style>
+    .container h1, .container h2 {
+        font-family: 'Arial', sans-serif;
+        color: #f1c40f;
+        margin-top: 20px;
+    }
+
+    .container h2 {
+        font-size: 1.5em;
+        margin-top: 25px;
+    }
+
+    .container p, .container li {
+        font-size: 1.1em;
+        color: #333;
+        line-height: 1.6;
+    }
+
+    .container a {
+        color: #0056b3;
+        text-decoration: none;
+    }
+
+    .container a:hover {
+        text-decoration: underline;
+    }
+
+    .fas {
+        color: #f1c40f;
+        margin-right: 8px;
+    }
+</style>
 {% endblock %}

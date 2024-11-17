@@ -3,470 +3,119 @@
 
 <!DOCTYPE html>
 <html lang="fr">
-
-<!-- <script type="text/javascript" src="https://cdn.weglot.com/weglot.min.js"></script>
-<script>
-    Weglot.initialize({
-        api_key: 'wg_22633f669b388957e701536121d0df713'
-    });
-</script> -->
-
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
     <meta name="description" content="Be-Fit - Application de Calisthenie" />
     <meta name="author" content="Be-Fit" />
     <title>BE-FIT | CALISTHENIE</title>
-    
-    <!-- Variable JavaScript globale pour les messages non lus -->
+
+
+    <!-- CSS et bibliothèques externes -->
+     <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
+
+    <link href="{% static 'css/styles.css' %}" rel="stylesheet" />
+  
+
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js" defer></script>
+
+      <!-- Checker si ok ou prendre celui du dessus--jQuery -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous" defer></script>
+
+    <!-- Select2 -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js" defer></script>
+
+    <!--  A verifier si bonne place ici dans base.html ---Font Awesome Icons -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet">
+
+    <!-- A verifier si bonne place ici dans base.html --Variable JavaScript globale pour les messages non lus -->
     <script type="text/javascript">
         var unreadMessagesCount = "{{ unread_messages_count|default_if_none:0|escapejs }}";
     </script>
 
-    <!-- Favicon -->
-    <link rel="icon" type="image/x-icon" href="{% static 'assets/favicon.ico' %}" />
-    
-    <!-- Bootstrap Icons -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css" rel="stylesheet" />
-    
-    <!-- Boxicons Icons -->
-    <link href="https://cdn.jsdelivr.net/npm/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet">
-    
-    <!-- Core Theme CSS (includes Bootstrap) -->
-    <link href="{% static 'css/styles.css' %}" rel="stylesheet" />
-    
-    <!-- jQuery -->
-    <script src="https://code.jquery.com/jquery-3.7.1.min.js" integrity="sha256-/JqT3SQfawRcv/BIHPThkBvs0OEvtFFmqPF/lYI/Cxo=" crossorigin="anonymous" defer></script>
-    
-    <!-- Ionicons -->
+    <!-- FAVICON -->
+    <link rel="icon" type="image/x-icon" href="{% static 'images/favicon.ico' %}">
+
+
+    <!-- A verifier si bonne place ici base.html ---Ionicons -->
     <script src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.esm.js" type="module" defer></script>
     <script src="https://unpkg.com/ionicons@5.5.2/dist/ionicons/ionicons.js" nomodule defer></script>
-    
-    <!-- Font Awesome Icons -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css" rel="stylesheet">
-    
-    <!-- Google Fonts -->
+
+    <!-- A verifier si bonne place ici dans base.html --Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
-    
-    <!-- Select2 for Styled Dropdowns -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/css/select2.min.css" rel="stylesheet" />
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.13/js/select2.min.js" defer></script>
-    
-    <!-- Cookies CSS -->
-    <link rel="stylesheet" href="{% static 'css/cookies.css' %}">
-    
-    <!-- Custom JavaScript (if needed for cookies) -->
-    <script src="{% static 'js/scripts.js' %}" defer></script>
+
+     <!-- Styles spécifiques pour bannieres et modal cookies -->
+     <link rel="stylesheet" href="{% static 'css/script.css' %}">
+    <link rel="stylesheet" href="{% static 'css/banner.css' %}">
+
+
+
+
+
+
 </head>
 
-
-
 <body>
+    <!-- Navbar -->
     {% include 'navbar.html' %}
-    {% include "cookie_consent/banner.html" %}
 
+    <!-- Bannière Cookies (exclue de /cookies/) -->
+    {% if not request.path == '/cookies/' %}
+        {% include 'cookie_consent/banner.html' %}
+        
+    {% endif %}
+    {% block extra_css %}
+    {% if request.path == '/preferences/' %}
+    {% endif %}
+{% endblock %}
+
+
+    <!-- Messages Flash -->
     {% if messages %}
-    {% for message in messages %}
-    {% if message.tags == 'success' %}
-    <div class="alert alert-success alert-dismissible fade show" role="alert">
-        {{ message }}
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-    </div>
-    {% endif %}
-    {% endfor %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
     {% endif %}
 
-
+    <!-- Contenu principal -->
     {% block content %}
     {% endblock %}
 
-     <!-- Footer-->
-     <footer id="footer" style="background-color: black; color: white; padding: 10px 0; font-size: 0.8rem;">
-        <div class="footer-top" style="padding-bottom: 10px;">
-            <div class="container">
-                <div class="row">
-                    <div class="col-lg-3 col-md-6">
-                        <div class="footer-info">
-                            <h3 style="color: white; font-size: 1.2rem; margin-bottom: 10px;">BE Fit<span>.</span></h3>
-                            <p style="margin-bottom: 10px;">
-                                <strong>Adresse :</strong> 18, Place Eugene Simonis <br>
-                                <strong>Ville :</strong> Bruxelles, BE 1081<br>
-                                <strong>Tél. :</strong> +32 484 86 01 33<br>
-                                <strong>Email :</strong> befit@gmail.com<br>
-                                <strong>Horaires :</strong> Du Lu au Dim de 07h à 19h<br>
-                            </p>
-                            <div class="social-links mt-3">
-                                <a href="#" style="color: white; margin-right: 10px; font-size: 1.2rem;"><i
-                                        class="bx bxl-twitter"></i></a>
-                                <a href="#" style="color: white; margin-right: 10px; font-size: 1.2rem;"><i
-                                        class="bx bxl-facebook"></i></a>
-                                <a href="#" style="color: white; margin-right: 10px; font-size: 1.2rem;"><i
-                                        class="bx bxl-instagram"></i></a>
-                                <a href="#" style="color: white; margin-right: 10px; font-size: 1.2rem;"><i
-                                        class="bx bxl-skype"></i></a>
-                                <a href="#" style="color: white; font-size: 1.2rem;"><i class="bx bxl-linkedin"></i></a>
-                            </div>
-                        </div>
-                    </div>
+    <!-- Footer -->
+    {% include 'footer.html' %}
 
-                    <div class="col-lg-2 col-md-6 footer-links">
-                        <h4 style="color: white; font-size: 1.1rem; margin-bottom: 10px;">Liens Utiles</h4>
-                        <ul style="padding-left: 0;">
-                            <li style="list-style: none; margin-bottom: 5px;">
-                                <i class="bx bx-chevron-right"></i> <a href="{% url 'home' %}" style="color: white;">Accueil</a>
-                            </li>
-                            <li style="list-style: none; margin-bottom: 5px;">
-                                <i class="bx bx-chevron-right"></i> <a href="{% url 'about' %}" style="color: white;">À propos de Nous</a>
-                            </li>
-                            <li style="list-style: none; margin-bottom: 5px;">
-                                <i class="bx bx-chevron-right"></i> <a href="{% url 'conditions_vente' %}" style="color: white;">Conditions Générales de Vente</a>
-                            </li>
-                            <li style="list-style: none; margin-bottom: 5px;">
-                                <i class="bx bx-chevron-right"></i> <a href="{% url 'confidentialite' %}" style="color: white;">Politique de Confidentialité</a>
-                            </li>
-                            <li style="list-style: none; margin-bottom: 5px;">
-                                <i class="bx bx-chevron-right"></i> <a href="{% url 'cookies' %}" style="color: white;">Politique de Cookies</a>
-                            </li>
-                        </ul>
-                    </div>
-                    
+    <!-- Bibliothèques externes et scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js" defer></script>
+    <script src="{% static 'js/scripts.js' %}" defer></script>
+    <script src="{% static 'js/banner.js' %}"></script>
+    <script src="{% static 'js/preferences.js' %}" defer></script>
 
-                    <div class="col-lg-3 col-md-6 footer-links">
-                        <h4 style="color: white; font-size: 1.1rem; margin-bottom: 10px;">Nos Services</h4>
-                        <ul style="padding-left: 0;">
-                            <li style="list-style: none; margin-bottom: 5px;"><i class="bx bx-chevron-right"></i> <a
-                                    href="{% url 'home' %}#catalog-services" style="color: white;">Personal Training</a></li>
-                            <li style="list-style: none; margin-bottom: 5px;"><i class="bx bx-chevron-right"></i> <a
-                                    href="{% url 'home' %}#catalog-services" style="color: white;">Gym_Accessoires</a></li>
-                            <li style="list-style: none; margin-bottom: 5px;"><i class="bx bx-chevron-right"></i> <a
-                                    href="{% url 'home' %}#catalog-services" style="color: white;">Plan diet</a></li>
-                        </ul>
-                    </div>
-
-                    <div class="col-lg-4 col-md-6 footer-newsletter">
-                        <h4 style="color: white; font-size: 1.1rem; margin-bottom: 10px;">Notre Newsletter</h4>
-                        <p style="color: white; margin-bottom: 10px;">Restez en contact pour être averti des événements
-                            futurs et des informations importantes !</p>
-                        <form action="" method="post">
-                            <input type="email" name="email" placeholder="Votre adresse email" required
-                                style="padding: 5px; margin-bottom: 5px; width: 70%; font-size: 0.8rem;">
-                            <input type="submit" value="S'abonner"
-                                style="background-color: white; color: black; padding: 5px 10px; border: none; cursor: pointer; font-size: 0.8rem;">
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="container" style="border-top: 1px solid white; padding-top: 10px;">
-            <p class="m-0 text-center text-white" style="font-size: 0.7rem;">Copyright &copy; BE FIT 2024</p>
-        </div>
-    </footer>
-
-    <!-- Bootstrap core JS-->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.3/dist/js/bootstrap.bundle.min.js"></script>
-    <!-- Core theme JS-->
-    <script src="{% static 'js/scripts.js' %}"></script>
-    <!-- SB Forms JS -->
-    <!-- <script src="https://cdn.startbootstrap.com/sb-forms-latest.js"></script> -->
-
-    <script>
-        const csrfToken = "{{ csrf_token }}";
-    </script>
-    <script>
-        // Gestion de l'affichage du menu latéral
-        window.addEventListener('scroll', () => {
-            const menu = document.getElementById('side-menu');
-            if (window.scrollY > 300) {
-                menu.classList.add('visible');
-            } else {
-                menu.classList.remove('visible');
-            }
-        });
-    </script>    
-
-    <!-- Script pour défilement en douceur -->
-    <script>
-        document.addEventListener("DOMContentLoaded", function() {
-            var links = document.querySelectorAll('a[href*="#contact"]');
-            links.forEach(function(link) {
-                link.addEventListener("click", function(e) {
-                    var url = new URL(this.href);
-                    if (url.pathname === window.location.pathname) {
-                        e.preventDefault();
-                        var targetElement = document.getElementById('contact');
-                        if (targetElement) {
-                            window.scrollTo({
-                                top: targetElement.offsetTop,
-                                behavior: 'smooth'
-                            });
-                        }
-                    } else {
-                        window.location.href = this.href;
-                    }
-                });
-            });
-        });
-        
-    </script>
 <script>
-    document.getElementById('draft-form').addEventListener('input', function() {
-        const subject = document.getElementById('subject').value;
-        const body = document.getElementById('body').value;
-        const recipientId = document.querySelector('input[name="recipient_id"]').value;
-    
-        fetch('{% url "drafts" %}', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'X-CSRFToken': '{{ csrf_token }}'
-            },
-            body: JSON.stringify({ subject, body, recipient_id: recipientId })
-        });
+document.getElementById('draft-form').addEventListener('input', function() {
+    const subject = document.getElementById('subject').value;
+    const body = document.getElementById('body').value;
+    const recipientId = document.querySelector('input[name="recipient_id"]').value;
+
+    fetch('{% url "drafts" %}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}'
+        },
+        body: JSON.stringify({ subject, body, recipient_id: recipientId })
     });
+});
+
     </script>
-    
 </body>
-
 </html>
-<!-- CSS pour les icônes, le filtre et le lien PDF -->
-<style>
-    .icon {
-        font-size: 24px;
-        flex-shrink: 0;
-    }
-    #purchaseFilter {
-        font-size: 0.9rem;
-        padding: 0.25rem 2rem 0.25rem 0.5rem; /* Augmentation de l'espace à droite */
-    }
-    .text-danger {
-        font-weight: bold;
-        color: #dc3545;
-    }
-    .text-primary {
-        font-weight: bold;
-        color: #007bff;
-    }
-    .text-success {
-        color: #28a745;
-    }
-    .link-pdf {
-        color: #d9534f;
-        font-style: italic;
-        font-weight: bold;
-        text-decoration: none;
-        transition: color 0.3s ease;
-    }
-    .link-pdf:hover {
-        color: #b52a27;
-        text-decoration: underline;
-    }
-    /* Style du fond du popup */
-    #subscriptionPopup {
-        display: none;
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.5);
-        justify-content: center;
-        align-items: center;
-        z-index: 1000;
-    }
 
-   /* Style du contenu du popup */
-
-    #subscriptionPopup {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        backdrop-filter: blur(5px); /* Flou de fond */
-        position: fixed; /* Pour centrer sur l'écran */
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        z-index: 999; /* Assure que le popup soit au-dessus des autres éléments */
-    }
-
-    .popup-content {
-        background: #fff;
-        padding: 30px;
-        border-radius: 15px; /* Coins arrondis plus marqués */
-        max-width: 500px;
-        width: 90%;
-        text-align: center;
-        box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.3); /* Ombre plus prononcée */
-    }
-
-    .popup-content h5 {
-        font-weight: bold;
-        color: #333;
-    }
-
-    .popup-content p {
-        color: #666;
-        margin-bottom: 20px;
-    }
-
-    .popup-content img.admin-photo {
-        width: 150px; /* Taille de l'image agrandie */
-        height: 150px; /* Taille de l'image agrandie */
-        border-radius: 50%; /* Forme ovale */
-        margin-bottom: 15px;
-        object-fit: cover; /* Garde les proportions de l'image */
-    }
-    .container {
-    padding-left: 6rem; /* Réduit l'espace à gauche */
-    padding-right: 6rem; /* Réduit l'espace à droite */
-    max-width: 100%; /* Permet de prendre tout l'espace horizontal */
-}
-
-    /* Style des boutons */
-    .popup-content .btn {
-        margin: 10px 5px;
-        padding: 10px 20px;
-        font-size: 1rem;
-        font-weight: bold;
-        border-radius: 5px;
-    }
-
-    .popup-content .btn-primary {
-        background-color: #007bff;
-        color: #fff;
-    }
-
-    .popup-content .btn-danger {
-        background-color: #dc3545;
-        color: #fff;
-    }
-
-    /* Alignement des boutons */
-    .button-group {
-        display: flex;
-        justify-content: center;
-    }
-    .profil-title {
-        font-family: 'Great Vibes', cursive; /* Utilise une belle calligraphie */
-        font-weight: bold;
-        font-size: 2.5em; /* Ajustez la taille selon vos préférences */
-        color: #007bff; /* Couleur principale (text-primary) */
-    }
-    /* Styles des boutons avec effet de survol */
-    .btn-hover {
-        padding: 0.6rem 1.5rem;
-        font-size: 1.2rem;
-        font-weight: bold;
-        border-radius: 0.5rem;
-        transition: all 0.3s ease;
-    }
-
-    .btn-hover:hover {
-        background-color: #0056b3 !important; /* Couleur modifiée */
-        color: #fff !important;
-        box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.2); /* Ombre élégante */
-        transform: translateY(-2px); /* Effet de levée */
-    }
-    .card {
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-    .card:hover {
-        transform: scale(1.05);
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
-    }
-    
-    /* Styles spécifiques aux coachs et admins */
-    .vip-plan-text {
-        font-size: 1.1rem;
-        font-weight: 600;
-        color: #f1c40f; /* Or doré */
-        display: inline-flex;
-        align-items: center;
-    }
-
-    .vip-infinity-icon {
-        color: #f39c12;
-        font-size: 1.5rem;
-        margin-left: 8px;
-        animation: shine 2s infinite alternate;
-    }
-
-    @keyframes shine {
-        0% {
-            text-shadow: 0 0 5px #f39c12, 0 0 10px #f39c12, 0 0 15px #f39c12;
-        }
-        100% {
-            text-shadow: 0 0 20px #f39c12, 0 0 30px #f39c12, 0 0 40px #f39c12;
-        }
-    }
-
-    /* Icône dorée avec un effet de brillance */
-    .vip-plan i {
-        color: #f1c40f;
-        font-size: 1.6rem;
-        margin-left: 10px;
-        text-shadow: 0 0 10px rgba(255, 204, 0, 0.8);
-    }
-
-    .card-header {
-        background-color: #2c3e50; /* Couleur foncée pour un look élégant */
-        padding: 1.25rem;
-        font-size: 1.25rem;
-    }
-
-    .card-body {
-        padding: 1.5rem;
-    }
-
-    .text-muted {
-        color: #7f8c8d;
-    }
-
-    /* Animation sur le plan "Illimité" */
-    .vip-plan-text {
-        font-size: 1.2rem;
-        font-weight: bold;
-        color: #f1c40f;
-        animation: glow 1.5s ease-out infinite alternate;
-    }
-
-    @keyframes glow {
-        0% {
-            text-shadow: 0 0 5px rgba(241, 196, 15, 1), 0 0 10px rgba(241, 196, 15, 0.8), 0 0 15px rgba(241, 196, 15, 0.6);
-        }
-        100% {
-            text-shadow: 0 0 20px rgba(241, 196, 15, 1), 0 0 30px rgba(241, 196, 15, 0.8), 0 0 40px rgba(241, 196, 15, 0.6);
-        }
-    }
-    
-    /* Amélioration de l'ombre du container */
-    .card {
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    }
-
-    .card-header i {
-        color: #f39c12;
-        margin-right: 10px;
-        font-size: 1.8rem;
-    }
-
-    .card-header h2 {
-        font-weight: 600;
-        font-size: 1.25rem;
-        display: flex;
-        align-items: center;
-    }
-    
-    .card-body .vip-plan p {
-        font-size: 1rem;
-        font-weight: 500;
-        margin-bottom: 10px;
-    }
-
-    /* Plan normal pour les autres utilisateurs */
-    .text-muted {
-        color: #bdc3c7;
-    }
-</style>

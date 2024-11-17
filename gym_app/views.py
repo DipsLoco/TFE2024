@@ -67,23 +67,65 @@ from .models import Message
 from django.shortcuts import render
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
+from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import A4
+from datetime import datetime
 
-# Vue pour la bannière de consentement (affichée par défaut)
-def cookie_consent_view(request):
-    return render(request, "cookie_consent/banner.html")
+def test_reportlab():
+    file_path = "test_invoice.pdf"
+    c = canvas.Canvas(file_path, pagesize=A4)
+    width, height = A4
+
+    # Dessiner du texte
+    c.drawString(100, height - 100, "Test ReportLab")
+    c.drawString(100, height - 120, f"Date: {datetime.now()}")
+    c.save()
+
+    print(f"PDF généré avec succès : {file_path}")
+
+test_reportlab()
+
+
+
 
 def cookies_policy(request):
-    return render(request, 'path/to/cookies.html')
+    """
+    Vue pour afficher la politique de cookies.
+    """
+    return render(request, 'cookies.html')
 
-# Vue pour les préférences de cookies
-@csrf_exempt
+def cookie_consent_view(request):
+    action = request.GET.get('action')
+    if action == 'accept':
+        return JsonResponse({"status": "accepted"})
+    elif action == 'decline':
+        return JsonResponse({"status": "declined"})
+    return JsonResponse({"status": "error", "message": "Action invalide"})
+
+
+from django.http import JsonResponse
+from django.shortcuts import render
+from django.views.decorators.csrf import csrf_exempt
+import json
+
+from django.http import JsonResponse
+from django.shortcuts import render
+
 def cookie_preferences_view(request):
     if request.method == "POST":
-        # Traitez et enregistrez les préférences de l'utilisateur
-        preferences = request.POST.get('preferences')
-        # Enregistrez ou mettez à jour les préférences de l'utilisateur ici selon vos besoins
-        return JsonResponse({"status": "preferences saved"})
+        # Récupérer les données envoyées
+        analytics = request.POST.get("analytics", "off") == "on"
+        marketing = request.POST.get("marketing", "off") == "on"
+
+        # Enregistrer les cookies
+        response = JsonResponse({"status": "preferences saved"})
+        response.set_cookie("analytics", analytics, max_age=31536000, samesite="Lax")
+        response.set_cookie("marketing", marketing, max_age=31536000, samesite="Lax")
+        return response
+
     return render(request, "cookie_consent/preferences.html")
+
+
 
 
 

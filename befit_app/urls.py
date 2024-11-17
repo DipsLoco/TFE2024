@@ -13,7 +13,7 @@ app_name = 'gym°app'
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('i18n/', include('django.conf.urls.i18n')),
-    path('gym/', include('gym_app.urls')),
+    # path('gym/', include('gym_app.urls')),
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
 # URLs avec le préfixe de langue

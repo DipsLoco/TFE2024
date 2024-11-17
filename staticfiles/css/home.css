@@ -1,0 +1,441 @@
+
+.search-form {
+    max-width: 300px; /* Limite la largeur de la barre de recherche */
+}
+.search-input {
+    width: 100%; /* Assure que l'input occupe toute la largeur de la zone définie */
+}
+/* Styles pour l'effet visuel */
+/* .header-section { animation: fadeIn 1.5s ease-in; } */
+
+/* Style pour les coachs */
+.coach-image { object-fit: contain; height: 300px; }
+/* Side Menu */
+.side-menu {
+    position: fixed;
+    top: 20%;
+    right: 10px;
+    background-color: rgba(0, 0, 0, 0.8); /* Fond noir transparent pour l'élégance */
+    border-radius: 12px;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    opacity: 0.95; /* Opacité pour un effet doux */
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5); /* Ombre subtile */
+    transition: transform 0.3s ease-out, opacity 0.3s ease-out;
+}
+
+/* Liens du menu */
+.side-menu a {
+    color: #fff;
+    font-size: 16px;
+    font-weight: bold;
+    text-transform: uppercase;
+    padding: 12px 25px;
+    text-decoration: none;
+    border-radius: 30px; /* Coins arrondis pour un effet chic */
+    margin: 10px 0;
+    transition: background-color 0.3s ease, padding 0.3s ease;
+}
+
+/* Changement au survol */
+.side-menu a:hover {
+    background-color: #f1c40f; /* Couleur dorée pour un effet luxe */
+    padding-left: 35px; /* Extension de l'espace à gauche pour plus d'élégance */
+    transition: all 0.3s ease;
+}
+
+/* Bouton retour personnalisé */
+.side-menu .btn-px1 {
+    background-color: #e78f02;
+    color: white;
+    padding: 12px 30px;
+    font-size: 16px;
+    border-radius: 30px;
+    font-weight: bold;
+    transition: background-color 0.3s ease-in-out;
+}
+
+.side-menu .btn-px1:hover {
+    background-color: #e67e22;
+    transform: scale(1.05); /* Effet de zoom au survol */
+}
+
+
+/* Side Menu */
+.side-menu {
+    position: fixed;
+    top: 20%;
+    right: 20px;
+    background-color: rgba(0, 0, 0, 0.7); /* Opacité de fond */
+    border-radius: 10px;
+    padding: 10px;
+    display: flex;
+    flex-direction: column; /* éléments empilés verticalement */
+    align-items: flex-start; /* Alignement à gauche */
+    width: auto;
+    opacity: 0.7; /* Opacité de la barre latérale */
+    transition: all 0.3s;
+}
+
+/* Style des liens dans le menu */
+.side-menu a {
+    color: white;
+    padding: 3px;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 14px; /* Taille du texte */
+    transition: background-color 0.3s;
+    width: 100%; /* Les liens prennent toute la largeur du menu */
+}
+
+/* Couleur de fond au survol de tous les liens sauf le bouton "Retour" */
+.side-menu a:hover {
+    background-color: #1430ff; /* Fond noir au survol pour tous les liens */
+    border-radius: 5px; /* Coins arrondis lors du survol */
+}
+
+/* Spécifique au bouton "Retour" (Accueil) */
+.side-menu .btn-px1 {
+    background-color: #e78f02; /* Couleur dorée/ orange pour le bouton "Retour" */
+    color: white; /* Texte en blanc */
+    padding: 0px;
+    font-size: 14px;
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    border-radius: 5px; /* Coins arrondis pour le bouton */
+    transition: background-color 0.3s; /* Transition pour le changement de couleur */
+}
+
+/* couleur au survol du bouton "Retour" */
+.side-menu .btn-px1:hover {
+    background-color: #000000; 
+}
+
+
+/* Lorsque le menu est visible */
+.side-menu.visible {
+    display: flex !important; /* Assure que le menu reste en flex */
+    flex-direction: column !important; /* Empêche le passage en disposition horizontale */
+    display: block;
+}
+
+    /* Card Hover Effects */
+    /* .workout-card, .coach-card, .plan-card, .service-card, .testimonial-card, .contact-card {
+        border-radius: 10px;
+        transition: transform 0.3s, box-shadow 0.3s;
+    }
+
+    /* Effet de fadeIn */
+    /* @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    } *
+    /* Styles généraux */
+    body, h1, h2, h3, p, a {
+        font-family: 'Roboto', sans-serif;
+    }
+
+    /* Animation de fadeIn */
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    /* Header */
+    /* .header-section {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        text-align: center;
+        animation: fadeIn 1.5s ease-in; /* Animation plus lente pour un fondu doux */
+    /* } */ */
+
+    /* Card Hover Effects */
+    /* .workout-card, .coach-card, .plan-card, .service-card, .testimonial-card, .contact-card {
+        border-radius: 10px;
+        transition: transform 0.3s, box-shadow 0.3s;
+    }
+
+    .workout-card:hover, .coach-card:hover, .plan-card:hover, .service-card:hover, .testimonial-card:hover, .contact-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0px 10px 15px rgba(0, 0, 0, 0.2);
+    } */
+
+    /* Boutons avec effets */
+    .btn-plan, .btn-service, .contact-btn {
+        transition: all 0.3s ease;
+        border-radius: 50px;
+        font-weight: bold;
+    }
+
+    .btn-plan:hover, .btn-service:hover, .contact-btn:hover {
+        background-color: #0056b3;
+        color: white;
+        transform: scale(1.05);
+    }
+
+    /* Images dans les cartes */
+    .workout-image, .coach-image, .service-image {
+        height: 200px;
+        object-fit: cover;
+        border-radius: 10px 10px 0 0;
+    }
+
+    /* Section commentaire */
+    .testimonial-section {
+        padding: 50px 0;
+        background: linear-gradient(to bottom right, #ffffff, #f3f4f6);
+    }
+
+    .testimonial-title {
+        font-family: 'Great Vibes', cursive;
+        font-size: 3em;
+        color: #0056b3;
+        text-shadow: 2px 2px #ddd;
+    }
+
+    .testimonial-card {
+        border: none;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+        background-color: #ffffff;
+        padding: 30px;
+    }
+
+    .testimonial-card h5 {
+        font-size: 1.25rem;
+        font-weight: bold;
+        color: #0056b3;
+    }
+
+    .testimonial-card .card-text {
+        font-size: 1rem;
+        color: #333;
+    }
+
+    .testimonial-card hr {
+        border-top: 2px solid #ddd;
+    }
+
+    /* Section Contact */
+    .contact-section {
+        padding: 50px 0;
+        background: linear-gradient(to bottom right, #f9f9f9, #ffffff);
+    }
+
+    .contact-icon {
+        font-size: 2.5rem;
+        color: #0056b3;
+    }
+
+    .contact-title {
+        font-family: 'Great Vibes', cursive;
+        font-size: 3em;
+        color: #0056b3;
+        text-shadow: 2px 2px #ddd;
+    }
+
+    .contact-form .form-control {
+        border-radius: 10px;
+        border: 1px solid #ddd;
+    }
+
+    .contact-form .form-control:focus {
+        border-color: #0056b3;
+        box-shadow: 0 0 10px rgba(0, 86, 179, 0.1);
+    }
+
+    .contact-btn {
+        border-radius: 50px;
+        background-color: #0056b3;
+        color: #ffffff;
+        transition: background-color 0.3s ease;
+    }
+
+    /* Section Box Styling */
+    .section-box {
+        padding: 50px 0;
+        background: linear-gradient(to bottom, #f0f0f0, #ffffff);
+        border-top: 1px solid #ddd;
+        border-bottom: 1px solid #ddd;
+    }
+    
+    /* Styles généraux */
+    body, h1, h2, h3, p, a {
+        font-family: 'Roboto', sans-serif;
+    }
+
+    /* Animation de fadeIn */
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+
+    /* Header */
+    /* .header-section {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        text-align: center;
+        animation: fadeIn 1.5s ease-in; Animation plus lente pour un fondu doux */
+    /* } */
+
+    /* Card Hover Effects */
+    /* .workout-card, .coach-card, .plan-card, .service-card, .testimonial-card, .contact-card {
+        border-radius: 10px;
+        transition: transform 0.3s, box-shadow 0.3s;
+    }
+
+    .workout-card:hover, .coach-card:hover, .plan-card:hover, .service-card:hover, .testimonial-card:hover, .contact-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0px 10px 15px rgba(0, 0, 0, 0.2);
+    } */
+
+    /* Boutons avec effets */
+    .btn-plan, .btn-service, .contact-btn {
+        transition: all 0.3s ease;
+        border-radius: 50px;
+        font-weight: bold;
+    }
+
+    .btn-plan:hover, .btn-service:hover, .contact-btn:hover {
+        background-color: #0056b3;
+        color: white;
+        transform: scale(1.05);
+    }
+
+    /* Images dans les cartes */
+    .workout-image, .coach-image, .service-image {
+        height: 200px;
+        object-fit: cover;
+        border-radius: 10px 10px 0 0;
+    }
+    
+
+    /* Section commentaire */
+    .testimonial-section {
+        padding: 50px 0;
+        background: linear-gradient(to bottom right, #ffffff, #f3f4f6);
+    }
+
+    .testimonial-title {
+        font-family: 'Great Vibes', cursive;
+        font-size: 3em;
+        color: #0056b3;
+        text-shadow: 2px 2px #ddd;
+    }
+
+    .testimonial-card {
+        border: none;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.15);
+        background-color: #ffffff;
+        padding: 30px;
+    }
+
+    .testimonial-card h5 {
+        font-size: 1.25rem;
+        font-weight: bold;
+        color: #0056b3;
+    }
+
+    .testimonial-card .card-text {
+        font-size: 1rem;
+        color: #333;
+    }
+
+    .testimonial-card hr {
+        border-top: 2px solid #ddd;
+    }
+
+    /* Section Contact */
+    .contact-section {
+        padding: 50px 0;
+        background: linear-gradient(to bottom right, #f9f9f9, #ffffff);
+    }
+
+    .contact-icon {
+        font-size: 2.5rem;
+        color: #0056b3;
+    }
+
+    .contact-title {
+        font-family: 'Great Vibes', cursive;
+        font-size: 3em;
+        color: #0056b3;
+        text-shadow: 2px 2px #ddd;
+    }
+
+    .contact-form .form-control {
+        border-radius: 10px;
+        border: 1px solid #ddd;
+    }
+
+    .contact-form .form-control:focus {
+        border-color: #0056b3;
+        box-shadow: 0 0 10px rgba(0, 86, 179, 0.1);
+    }
+
+    .contact-btn {
+        border-radius: 50px;
+        background-color: #0056b3;
+        color: #ffffff;
+        transition: background-color 0.3s ease;
+    }
+
+    /* Section Box Styling */
+    .section-box {
+        padding: 50px 0;
+        background: linear-gradient(to bottom, #f0f0f0, #ffffff);
+        border-top: 1px solid #ddd;
+        border-bottom: 1px solid #ddd;
+    }
+    /* Pour les images des coachs avec un effet lumineux */
+.coach-image {
+    object-fit: contain;
+    height: 400px;
+    width: 100%;
+    max-width: 100%;
+    border-radius: 15px; /* Coins arrondis */
+    display: block;
+    transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out; /* Ajout de transition */
+    box-shadow: 0 0 15px rgba(255, 165, 0, 0.8); /* Effet lumineux en orange */
+    border: 3px solid rgba(255, 165, 0, 0.6); /* Bordure en orange */
+}
+
+/* Effet de survol */
+.coach-image:hover {
+    transform: scale(1.05); /* Légère augmentation de la taille au survol */
+    box-shadow: 0 0 25px rgba(255, 165, 0, 1); /* Intensification de l'effet lumineux au survol */
+}
+
+/* Pour les images des workouts */
+.workout-image {
+    object-fit: cover;  /* L'image couvre toute la zone sans être déformée mais peut être coupée */
+    height: 300px;  /* Hauteur fixe pour toutes les images de workouts */
+    width: 100%;  /* Largeur à 100% pour occuper toute la largeur du conteneur */
+    border-radius: 10px 10px 0 0;  /* Coins arrondis */
+}
+/* Séparation interne dans les cartes (Workouts, Coachs, etc.) */
+.workout-card, .coach-card {
+    position: relative;
+    overflow: hidden;
+    border-radius: 15px;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+}
+
+.workout-card::before, .coach-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 4px;
+    width: 100%;
+    background: linear-gradient(to right, #f1c40f, #e78f02); /* Ligne dorée */
+}
+

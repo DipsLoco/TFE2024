@@ -10852,27 +10852,6 @@ textarea.form-control-lg {
 .vibrate {
   animation: vibrate 0.5s ease;
 }
-/* <!-- Section Nos Services -->
-<section id="nos-services" class="services-section">
-    <div class="container">
-        <h2 class="section-title">Nos Services</h2>
-        <div class="services-grid">
-            {% for service in services %}
-                <div class="service-card">
-                    <img src="{{ service.image.url }}" alt="{{ service.name }}" class="service-image">
-                    <div class="service-content">
-                        <h3>{{ service.name }}</h3>
-                        <p>{{ service.description }}</p>
-                        <p><strong>Prix:</strong> {{ service.price }} €</p>
-                        <p><strong>Durée:</strong> {{ service.duration }} jours</p>
-                        <a href="#" class="btn btn-primary">Souscrire</a>
-                    </div>
-                </div>
-            {% endfor %}
-        </div>
-    </div>
-</section> */
-
 
     .services-section {
         padding: 50px 0;
@@ -10912,7 +10891,8 @@ textarea.form-control-lg {
     }
 
 /* Styles généraux */
-.catalog-services {
+
+/* .catalog-services {
   padding: 50px 20px;
   text-align: center;
   background-color: #f9f9f9;
@@ -10998,7 +10978,7 @@ textarea.form-control-lg {
   .service-item {
       width: 100%;
   }
-}
+} */
 /* Classes pour les couleurs des barres de progression */
 .progress-bar-green {
   background-color: #28a745 !important;

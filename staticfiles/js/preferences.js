@@ -1,25 +1,32 @@
 document.addEventListener("DOMContentLoaded", function () {
     console.log("DOM chargé.");
 
-    // Éléments nécessaires
     const form = document.getElementById("cookie-preferences-form");
     const successMessage = document.getElementById("successMessage");
     const modal = document.getElementById("cookieModal");
-    const cookieBanner = document.getElementById("cookieBanner");
-    const analyticsStatus = document.getElementById("analyticsStatus");
-    const reopenPreferences = document.getElementById("reopenPreferences");
 
-    if (!form || !successMessage || !cookieBanner || !analyticsStatus) {
-        console.error("Certains éléments nécessaires sont introuvables dans le DOM.");
+    if (!form) {
+        console.error("Formulaire introuvable.");
+        return;
+    }
+
+    if (!successMessage) {
+        console.error("Conteneur du message de succès introuvable.");
         return;
     }
 
     console.log("Formulaire détecté :", form);
     console.log("Conteneur du message de succès détecté :", successMessage);
 
-    // Gestion de l'événement de soumission du formulaire
-    form.addEventListener("submit", function (event) {
-        event.preventDefault(); // Empêche le rechargement automatique du formulaire
+    // Gestion de l'événement du bouton de sauvegarde
+    const saveButton = document.getElementById("savePreferences");
+    if (!saveButton) {
+        console.error("Bouton 'savePreferences' introuvable.");
+        return;
+    }
+
+    saveButton.addEventListener("click", function (event) {
+        event.preventDefault();
         console.log("Tentative d'enregistrement des préférences...");
 
         const analytics = document.querySelector('input[name="analytics"]').checked;
@@ -35,6 +42,7 @@ document.addEventListener("DOMContentLoaded", function () {
             },
             body: JSON.stringify({ analytics, marketing })
         })
+        
             .then(response => {
                 if (!response.ok) {
                     throw new Error(`Erreur réseau (${response.status})`);
@@ -46,13 +54,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 if (data.status === "preferences saved") {
                     console.log("Préférences enregistrées avec succès !");
                     
-                    // Mettre à jour la bannière avec l'état des cookies
-                    analyticsStatus.textContent = analytics ? "Activés" : "Désactivés";
-
-                    // Afficher la bannière
-                    cookieBanner.style.display = "block";
-
-                    // Afficher le message de succès
+                    // Affiche le message de succès
                     successMessage.style.display = "block";
                     successMessage.classList.add("visible");
 
@@ -62,18 +64,9 @@ document.addEventListener("DOMContentLoaded", function () {
                         successMessage.classList.remove("visible");
                     }, 5000);
 
-                    // Masquer la modale
+                    // Masque la modale
                     if (modal) {
-                        console.log("Fermeture du modal détectée.");
                         modal.style.display = "none";
-
-                        setTimeout(() => {
-                            if (modal.style.display === "none") {
-                                console.log("Le modal a été fermé avec succès.");
-                            } else {
-                                console.error("Échec de la fermeture du modal.");
-                            }
-                        }, 100);
                     }
                 } else {
                     alert("Erreur : " + data.message);
@@ -101,17 +94,5 @@ document.addEventListener("DOMContentLoaded", function () {
     if (currentUrl.includes("preferences") && modal) {
         console.log("Affichage de la modale.");
         modal.style.display = "flex";
-    }
-
-    // Rouvrir les préférences depuis la bannière
-    if (reopenPreferences) {
-        reopenPreferences.addEventListener("click", function (event) {
-            event.preventDefault();
-            cookieBanner.style.display = "none"; // Cacher la bannière
-            if (modal) {
-                console.log("Réouverture de la modale...");
-                modal.style.display = "flex"; // Rouvrir la modale
-            }
-        });
     }
 });

@@ -1,121 +1,34 @@
 {% load static %}
 {% load i18n %}
 
+<!-- Bannière de cookies -->
 <div class="cookie-banner" id="cookieBanner">
     <div class="cookie-content">
         <div class="cookie-icon">
             <img src="{% static 'image/cookie_icon.png' %}" alt="Icône Cookie">
         </div>
-        <h1 class="cookies-title text-center">BEFIT utilise des cookies</h1>
+        <h1 class="cookies-title text-center" style="color: #f1c40f;">BEFIT utilise des cookies</h1>
         <p>
-            Ce site web utilise des cookies pour améliorer votre expérience utilisateur. Nous traitons les cookies pour :
-            (1) la communication électronique et l'affichage du site web, (2) la poursuite de la conception, (3) la mesure et
-            l'analyse de votre utilisation, et (4) l'affichage de contenus et de publicités adaptés. Vous pouvez choisir d'accepter 
-            ou de refuser l'utilisation de cookies (à l'exception des cookies essentiels) pour chaque catégorie. Refuser certaines catégories 
-            de cookies peut avoir un impact sur votre expérience utilisateur. Le bouton "Préférences" vous permet de définir vos préférences 
-            maintenant ou plus tard.
+            Ce site web utilise des cookies pour améliorer votre expérience utilisateur. 
+                            <p>Nous les traitons pour :</p>
+                            <div class="cookie-usage">
+                                <div class="cookie-item"> La communication électronique et l'affichage du site web</div>
+                                <div class="cookie-item"> La poursuite de la conception</div>
+                                <div class="cookie-item"> La mesure et l'analyse de votre utilisation</div>
+                                <div class="cookie-item"> L'affichage de contenus et de publicités adaptés</div>
+                            </div>
+                            <br>
+            Vous pouvez choisir d'accepter ou de refuser l'utilisation de cookies (à l'exception des cookies essentiels) pour chaque catégorie. 
+            Refuser certaines catégories de cookies peut avoir un impact sur votre expérience utilisateur. Le bouton "Préférences" vous permet de définir vos préférences maintenant ou plus tard.
         </p>
         <p>
             Pour plus d'informations, consultez notre <a href="{% url 'cookies' %}">Politique de Cookies</a>.
         </p>
         <div class="cookie-buttons">
-            <button class="btn-cookie btn-decline" onclick="refuserCookies()">Refuser tous</button>
-            <button class="btn-cookie btn-preferences">Préférences</button>
-            <button class="btn-cookie btn-accept" onclick="accepterCookies()">Accepter tous</button>
+            <button class="btn-cookie btn-accept" id="acceptCookies">Accepter tous</button>
+            <!-- Redirection vers la page preferences.html -->
+            <a href="{% url 'cookie_preferences' %}" class="btn-cookie btn-lol">Préférences</a>
+            <button class="btn-cookie btn-decline" id="declineCookies">Refuser tous</button>
         </div>
     </div>
 </div>
-
-<div class="cookie-modal" id="cookieModal" style="display: none;">
-    <div class="cookie-modal-content">
-        <span class="close" onclick="fermerPreferences()">&times;</span>
-        <h2>Préférences des cookies</h2>
-        <p>Vous pouvez gérer ici vos préférences de cookies :</p>
-
-        <div class="cookie-category">
-            <h3>Cookies essentiels <span>(Toujours actif)</span></h3>
-            <p>Ces cookies sont nécessaires pour le fonctionnement du site.</p>
-        </div>
-        
-        <div class="cookie-category">
-            <h3>Cookies fonctionnels <span>(Toujours actif)</span></h3>
-            <p>Ils améliorent votre expérience en personnalisant des fonctionnalités.</p>
-        </div>
-        
-        <div class="cookie-category">
-            <h3>Cookies analytiques 
-                <label class="switch">
-                    <input type="checkbox">
-                    <span class="slider round"></span>
-                </label>
-            </h3>
-            <p>Suivent l'utilisation du site pour améliorer l'expérience utilisateur.</p>
-        </div>
-        
-        <div class="cookie-category">
-            <h3>Cookies de marketing 
-                <label class="switch">
-                    <input type="checkbox">
-                    <span class="slider round"></span>
-                </label>
-            </h3>
-            <p>Permettent de vous proposer des publicités personnalisées.</p>
-        </div>
-
-        <div class="cookie-buttons">
-            <button class="btn-cookie btn-save" onclick="enregistrerPreferences()">Enregistrer mes préférences</button>
-        </div>
-    </div>
-</div>
-<script>
-
-document.addEventListener("DOMContentLoaded", function() {
-    if (!localStorage.getItem("cookieConsent")) {
-        document.getElementById("cookieBanner").style.display = "block";
-    }
-
-    document.querySelector(".btn-preferences").addEventListener("click", ouvrirPreferences);
-});
-
-function accepterCookies() {
-    fetch("{% url 'cookie_consent' %}?action=accept", {
-        method: 'POST',
-        headers: {
-            'X-CSRFToken': '{{ csrf_token }}'
-        }
-    }).then(response => {
-        if (response.ok) {
-            document.getElementById("cookieBanner").style.display = "none";
-        }
-    });
-}
-
-function refuserCookies() {
-    fetch("{% url 'cookie_consent' %}?action=decline", {
-        method: 'POST',
-        headers: {
-            'X-CSRFToken': '{{ csrf_token }}'
-        }
-    }).then(response => {
-        if (response.ok) {
-            document.getElementById("cookieBanner").style.display = "none";
-        }
-    });
-}
-
-function ouvrirPreferences() {
-    document.getElementById("cookieModal").style.display = "block";
-}
-
-function fermerPreferences() {
-    document.getElementById("cookieModal").style.display = "none";
-}
-
-document.addEventListener('click', function(event) {
-    const modal = document.getElementById("cookieModal");
-    if (modal.style.display === "block" && !modal.contains(event.target) && !event.target.classList.contains('btn-preferences')) {
-        modal.style.display = "none";
-    }
-});
-
-</script>

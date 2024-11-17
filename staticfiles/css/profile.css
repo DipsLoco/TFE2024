@@ -1,0 +1,239 @@
+<!-- CSS pour les icônes, le filtre et le lien PDF 
+
+    .icon {
+        font-size: 24px;
+        flex-shrink: 0;
+    }
+    #purchaseFilter {
+        font-size: 0.9rem;
+        padding: 0.25rem 2rem 0.25rem 0.5rem; /* Augmentation de l'espace à droite */
+    }
+    .text-danger {
+        font-weight: bold;
+        color: #dc3545;
+    }
+    .text-primary {
+        font-weight: bold;
+        color: #007bff;
+    }
+    .text-success {
+        color: #28a745;
+    }
+    .link-pdf {
+        color: #d9534f;
+        font-style: italic;
+        font-weight: bold;
+        text-decoration: none;
+        transition: color 0.3s ease;
+    }
+    .link-pdf:hover {
+        color: #b52a27;
+        text-decoration: underline;
+    }
+    /* Style du fond du popup */
+    #subscriptionPopup {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        justify-content: center;
+        align-items: center;
+        z-index: 1000;
+    }
+
+   /* Style du contenu du popup */
+
+    #subscriptionPopup {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        backdrop-filter: blur(5px); /* Flou de fond */
+        position: fixed; /* Pour centrer sur l'écran */
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        z-index: 999; /* Assure que le popup soit au-dessus des autres éléments */
+    }
+
+    .popup-content {
+        background: #fff;
+        padding: 30px;
+        border-radius: 15px; /* Coins arrondis plus marqués */
+        max-width: 500px;
+        width: 90%;
+        text-align: center;
+        box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.3); /* Ombre plus prononcée */
+    }
+
+    .popup-content h5 {
+        font-weight: bold;
+        color: #333;
+    }
+
+    .popup-content p {
+        color: #666;
+        margin-bottom: 20px;
+    }
+
+    .popup-content img.admin-photo {
+        width: 150px; /* Taille de l'image agrandie */
+        height: 150px; /* Taille de l'image agrandie */
+        border-radius: 50%; /* Forme ovale */
+        margin-bottom: 15px;
+        object-fit: cover; /* Garde les proportions de l'image */
+    }
+    .container {
+    padding-left: 6rem; /* Réduit l'espace à gauche */
+    padding-right: 6rem; /* Réduit l'espace à droite */
+    max-width: 100%; /* Permet de prendre tout l'espace horizontal */
+}
+
+    /* Style des boutons */
+    .popup-content .btn {
+        margin: 10px 5px;
+        padding: 10px 20px;
+        font-size: 1rem;
+        font-weight: bold;
+        border-radius: 5px;
+    }
+
+    .popup-content .btn-primary {
+        background-color: #007bff;
+        color: #fff;
+    }
+
+    .popup-content .btn-danger {
+        background-color: #dc3545;
+        color: #fff;
+    }
+
+    /* Alignement des boutons */
+    .button-group {
+        display: flex;
+        justify-content: center;
+    }
+    .profil-title {
+        font-family: 'Great Vibes', cursive; /* Utilise une belle calligraphie */
+        font-weight: bold;
+        font-size: 2.5em; /* Ajustez la taille selon vos préférences */
+        color: #007bff; /* Couleur principale (text-primary) */
+    }
+    /* Styles des boutons avec effet de survol */
+    .btn-hover {
+        padding: 0.6rem 1.5rem;
+        font-size: 1.2rem;
+        font-weight: bold;
+        border-radius: 0.5rem;
+        transition: all 0.3s ease;
+    }
+
+    .btn-hover:hover {
+        background-color: #0056b3 !important; /* Couleur modifiée */
+        color: #fff !important;
+        box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.2); /* Ombre élégante */
+        transform: translateY(-2px); /* Effet de levée */
+    }
+    .card {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .card:hover {
+        transform: scale(1.05);
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+    }
+    
+    /* Styles spécifiques aux coachs et admins */
+    .vip-plan-text {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: #f1c40f; /* Or doré */
+        display: inline-flex;
+        align-items: center;
+    }
+
+    .vip-infinity-icon {
+        color: #f39c12;
+        font-size: 1.5rem;
+        margin-left: 8px;
+        animation: shine 2s infinite alternate;
+    }
+
+    @keyframes shine {
+        0% {
+            text-shadow: 0 0 5px #f39c12, 0 0 10px #f39c12, 0 0 15px #f39c12;
+        }
+        100% {
+            text-shadow: 0 0 20px #f39c12, 0 0 30px #f39c12, 0 0 40px #f39c12;
+        }
+    }
+
+    /* Icône dorée avec un effet de brillance */
+    .vip-plan i {
+        color: #f1c40f;
+        font-size: 1.6rem;
+        margin-left: 10px;
+        text-shadow: 0 0 10px rgba(255, 204, 0, 0.8);
+    }
+
+    .card-header {
+        background-color: #2c3e50; /* Couleur foncée pour un look élégant */
+        padding: 1.25rem;
+        font-size: 1.25rem;
+    }
+
+    .card-body {
+        padding: 1.5rem;
+    }
+
+    .text-muted {
+        color: #7f8c8d;
+    }
+
+    /* Animation sur le plan "Illimité" */
+    .vip-plan-text {
+        font-size: 1.2rem;
+        font-weight: bold;
+        color: #f1c40f;
+        animation: glow 1.5s ease-out infinite alternate;
+    }
+
+    @keyframes glow {
+        0% {
+            text-shadow: 0 0 5px rgba(241, 196, 15, 1), 0 0 10px rgba(241, 196, 15, 0.8), 0 0 15px rgba(241, 196, 15, 0.6);
+        }
+        100% {
+            text-shadow: 0 0 20px rgba(241, 196, 15, 1), 0 0 30px rgba(241, 196, 15, 0.8), 0 0 40px rgba(241, 196, 15, 0.6);
+        }
+    }
+    
+    /* Amélioration de l'ombre du container */
+    .card {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .card-header i {
+        color: #f39c12;
+        margin-right: 10px;
+        font-size: 1.8rem;
+    }
+
+    .card-header h2 {
+        font-weight: 600;
+        font-size: 1.25rem;
+        display: flex;
+        align-items: center;
+    }
+    
+    .card-body .vip-plan p {
+        font-size: 1rem;
+        font-weight: 500;
+        margin-bottom: 10px;
+    }
+
+    /* Plan normal pour les autres utilisateurs */
+    .text-muted {
+        color: #bdc3c7;
+    }

@@ -2,49 +2,82 @@
 {% load i18n %}
 {% block content %}
 <div class="container my-5">
-    <h1 class="text-center">Conditions Générales de Vente</h1>
-    <p>
+    <h1 class="text-center"><i class="fas fa-file-contract"></i> Conditions Générales de Vente</h1>
+    <p class="text-center">
         Bienvenue sur le site de BEFIT. Les présentes conditions générales de vente (CGV) régissent l’ensemble des 
         transactions réalisées sur notre site internet et sont applicables à toute souscription de services ou produits 
         offerts par BEFIT.
     </p>
 
-    <h2>1. Informations sur la société</h2>
+    <h2><i class="fas fa-building"></i> 1. Informations sur la société</h2>
     <p>
         <strong>BEFIT S.A.</strong><br>
         Adresse : 18, Place Eugene Simonis, 1081 Bruxelles, Belgique<br>
         Tél. : +32 484 86 01 33<br>
-        Email : befit@gmail.com<br>
+        Email : <a href="mailto:befit@gmail.com">befit@gmail.com</a><br>
         Horaires : Du lundi au dimanche, de 07h à 19h
     </p>
 
-    <h2>2. Commandes</h2>
+    <h2><i class="fas fa-shopping-cart"></i> 2. Commandes</h2>
     <p>
         Toute commande passée sur notre site engage l’utilisateur dès validation. Vous recevrez un email de confirmation. 
         BEFIT se réserve le droit de refuser une commande pour tout motif légitime.
     </p>
 
-    <h2>3. Prix et Paiements</h2>
+    <h2><i class="fas fa-euro-sign"></i> 3. Prix et Paiements</h2>
     <p>
         Tous les prix affichés sont en euros et incluent la TVA. Le paiement se fait en ligne via les plateformes sécurisées 
         et doit être validé avant la livraison ou l'activation de tout service.
     </p>
 
-    <h2>4. Livraison</h2>
+    <h2><i class="fas fa-truck"></i> 4. Livraison</h2>
     <p>
         Les services (abonnements, accès aux installations, etc.) sont activés immédiatement après validation du paiement.
         Pour les produits physiques, la livraison s’effectue à l’adresse renseignée lors de la commande.
     </p>
 
-    <h2>5. Droit de rétractation</h2>
+    <h2><i class="fas fa-undo-alt"></i> 5. Droit de rétractation</h2>
     <p>
         Vous disposez de 14 jours pour exercer votre droit de rétractation, sauf exception prévue par la loi.
     </p>
 
-    <h2>6. Contact</h2>
+    <h2><i class="fas fa-headset"></i> 6. Contact</h2>
     <p>
         Pour toute question, contactez-nous via l'email : <a href="mailto:befit@gmail.com">befit@gmail.com</a> ou par téléphone 
         au +32 484 86 01 33.
     </p>
 </div>
+
+<style>
+    .container h1, .container h2 {
+        font-family: 'Arial', sans-serif;
+        color: #0056b3;
+        margin-top: 20px;
+    }
+
+    .container h2 {
+        font-size: 1.5em;
+        margin-top: 25px;
+    }
+
+    .container p, .container li {
+        font-size: 1.1em;
+        color: #333;
+        line-height: 1.6;
+    }
+
+    .container a {
+        color: #0056b3;
+        text-decoration: none;
+    }
+
+    .container a:hover {
+        text-decoration: underline;
+    }
+
+    .fas {
+        color: #f1c40f;
+        margin-right: 8px;
+    }
+</style>
 {% endblock %}

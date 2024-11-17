@@ -68,10 +68,10 @@ urlpatterns = [
     path('new_workoutSchedule/', views.add_workout_schedule, name='newWorkoutSchedule'),
     path('get_schedule_details/<int:schedule_id>/', views.get_schedule_details, name='get_schedule_details'),
     # URL pour afficher la bannière de consentement
-    path('cookies/', views.cookie_consent_view, name='cookie_consent'),
+    path('cookie/', views.cookie_consent_view, name='cookie_consent'),
 
     # URL pour afficher et gérer les préférences de cookies
-    path('cookies/preferences/', views.cookie_preferences_view, name='cookie_preferences'),
+    path('preferences/', views.cookie_preferences_view, name='cookie_preferences'),
 
 
 ] 

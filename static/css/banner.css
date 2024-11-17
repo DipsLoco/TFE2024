@@ -1,0 +1,92 @@
+/* Masquer la bannière par défaut */
+#cookieBanner {
+    display: none;
+}
+
+/* Bannière de cookies */
+.cookie-banner {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: rgba(43, 43, 43, 0.95);
+    color: white;
+    padding: 15px 20px;
+    border-radius: 10px;
+    width: 90%;
+    max-width: 1000px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+    z-index: 1000;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+/* Icône de la bannière */
+.cookie-icon img {
+    width: 60px;
+    height: 60px;
+    margin-bottom: 5px;
+}
+
+/* Boutons dans la bannière */
+.cookie-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.btn-cookie {
+    padding: 8px 15px;
+    border-radius: 20px;
+    font-weight: bold;
+    cursor: pointer;
+    border: none;
+    transition: transform 0.2s, background-color 0.2s;
+}
+
+.btn-cookie:hover {
+    transform: scale(1.05);
+}
+
+.btn-accept {
+    background-color: #28a745;
+    color: white;
+}
+
+.btn-decline {
+    background-color: #dc3545;
+    color: white;
+}
+
+.btn-lol {
+    background-color: #ffc107;
+    color: black;
+}
+
+/* Liste des clauses */
+.cookie-banner ul {
+    list-style: none;
+    padding: 0;
+    margin: 0 auto;
+    text-align: center;
+}
+
+.cookie-banner ul li {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+    font-style: italic;
+    color: #e0e0e0;
+    margin: 5px 0;
+}
+
+.cookie-banner ul li::before {
+    content: "*";
+    color: #f1c40f;
+    font-size: 1.2rem;
+    margin-right: 10px;
+}
