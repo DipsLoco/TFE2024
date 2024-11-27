@@ -232,20 +232,29 @@
             <h2 class="display-5 fw-bold text-dark">Nos Offres</h2>
             <p class="lead mb-0">Sélectionnez le plan qui vous convient !</p>
         </div>
-        <div class="row gx-5 justify-content-center">
+        <div class="row gy-4 justify-content-center">
             {% for plan in plans %}
-            <div class="col-lg-6 col-xl-4 mb-4">
+            <div class="col-lg-4 col-md-6 d-flex">
                 <div class="card h-100 shadow-sm plan-card">
-                    <div class="card-body p-5">
-                        <div class="small text-uppercase fw-bold mb-3">
-                            <i class="bi bi-star-fill text-warning"></i> {{ plan.name }}
+                    <div class="plan-img-container">
+                        {% if plan.image %}
+                            <img src="{{ plan.image.url }}" class="plan-img" alt="{{ plan.name }}">
+                        {% else %}
+                            <img src="path/to/default/image.jpg" class="plan-img" alt="Image par défaut">
+                        {% endif %}
+                    </div>
+                    <div class="card-body">
+                        <div class="plan-header text-center">
+                            <h3 class="plan-name">{{ plan.name }}</h3>
                         </div>
-                        <div class="mb-3">
-                            <span class="display-4 fw-bold">{{ plan.price }}€</span>
-                            <span class="text-muted">/ mois</span>
+                        <div class="plan-body">
+                            <div class="text-center mb-3">
+                                <span class="display-4 plan-price fw-bold">{{ plan.price }}€</span>
+                                <span class="text-muted">/ mois</span>
+                            </div>
+                            <p class="plan-description text-muted text-center">{{ plan.description|truncatechars:200 }}</p>
                         </div>
-                        <p class="card-text mb-4">{{ plan.description|truncatechars:200 }}</p>
-                        <a class="btn btn-outline-primary d-grid btn-plan" href="{% url 'cart:add_plan_to_cart' plan.id %}">Sélectionner Votre Plan</a>
+                        <a class="btn btn-outline-primary d-grid btn-plan mt-3" href="{% url 'cart:add_plan_to_cart' plan.id %}">Sélectionner Votre Plan</a>
                     </div>
                 </div>
             </div>
@@ -253,6 +262,25 @@
         </div>
     </div>
 </section>
+
+<style>
+
+.plan-card:nth-child(1) .plan-img-container {
+    height: 500px; /* Augmente la hauteur de l'image pour qu'elle prenne plus de place */
+}
+
+.plan-card:nth-child(1) .plan-img {
+    object-fit: cover; /* Assure que l'image s'ajuste sans être déformée */
+    width: 100%;
+    height: 100%; /* Remplit complètement la nouvelle hauteur */
+}
+
+.plan-card:nth-child(1) .plan-body {
+    margin-top: 20px; /* Ajoute de l'espace sous l'image pour que le texte descende */
+}
+
+
+</style>
 
 <!-- Catalog Services avec un effet de zoom et de transition -->
 <section id="catalog-services" class="services-section section-box">

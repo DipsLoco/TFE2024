@@ -56,7 +56,7 @@ def cart_total(self):
 
 
 
-
+@login_required
 def add_plan(self, plan):
         plan_id = f'plan-{plan.id}'
         if plan_id not in self.cart:
@@ -66,7 +66,7 @@ def add_plan(self, plan):
                 'duration': plan.duration,
             }
         self.session.modified = True
-
+@login_required
 def add_service(self, service, image_id=None):
         service_key = f'service-{service.id}-image-{image_id}' if image_id else f'service-{service.id}'
         if service_key not in self.cart:
@@ -111,6 +111,7 @@ def cart_total(self):
         return total
 
 # Ajouter un plan au panier
+@login_required
 def cart_add_plan(request, plan_id):
     cart = Cart(request)
     plan = get_object_or_404(Plan, id=plan_id)
@@ -119,6 +120,7 @@ def cart_add_plan(request, plan_id):
     return redirect('cart:cart_summary')
 
 # Ajouter un service au panier avec une image spécifique si sélectionnée
+@login_required
 def cart_add_service(request, service_id):
     image_id = request.GET.get('image_id')  # Récupère l'image ID depuis la requête GET
     cart = Cart(request)
@@ -135,6 +137,7 @@ def cart_add_service(request, service_id):
     messages.success(request, "Service ajouté au panier avec succès.")
     return redirect('cart:cart_summary')
 
+@login_required
 def cart_add_service(request, service_id):
         image_id = request.GET.get('image_id')  # Récupère l'image ID depuis la requête GET
         cart = Cart(request)

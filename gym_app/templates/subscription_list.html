@@ -1,39 +1,199 @@
 {% extends "base.html" %}
 {% load i18n %}
 {% block content %}
-    <!-- Section de paiement -->
-    {% if subscription %}
-        <h1>Paiement pour {{ subscription.plan.name }}</h1>
-        <p>Prix : {{ subscription.plan.price }}€</p>
-        <p>Statut du paiement : {{ subscription.get_payment_status_display }}</p>
+<header class="subscription-hero">
+    <div class="container">
+        <div class="hero-content">
+            {% if subscription %}
+                <h1 class="hero-title">Complétez Votre Paiement</h1>
+                <p class="hero-subtitle">Souscrivez au plan <strong>{{ subscription.plan.name }}</strong> et commencez votre transformation dès aujourd’hui !</p>
+            {% else %}
+                <h1 class="hero-title">Choisissez un Abonnement</h1>
+                <p class="hero-subtitle">Des plans adaptés à tous les niveaux. Trouvez celui qui vous convient et commencez votre aventure BE-FIT.</p>
+            {% endif %}
+        </div>
+    </div>
+</header>
 
-        <form method="post">
-            {% csrf_token %}
-            <button type="submit">Payer</button>
-        </form>
-    {% else %}
-        <!-- Liste des plans d'abonnement -->
-        <h1>Plans d'abonnement</h1>
-        <div class="row">
-            {% for plan in plans %}
-            <div class="col-md-4">
-                <div class="card mb-3">
-                    <!-- Afficher l'image du plan -->
-                    {% if plan.image %}
-                    <img src="{{ plan.image.url }}" class="card-img-top" alt="{{ plan.name }}">
-                    {% else %}
-                    <img src="path/to/default/image.jpg" class="card-img-top" alt="Image par défaut">
-                    {% endif %}
-                    <div class="card-body">
-                        <h5 class="card-title">{{ plan.name }}</h5>
-                        <p class="card-text">{{ plan.description }}</p>
-                        <p class="card-text"><strong>Prix:</strong> {{ plan.price }}€</p>
-                        <p class="card-text"><strong>Durée:</strong> {{ plan.duration }} jours</p>
-                        <a href="{% url 'subscribe' plan.pk %}" class="btn btn-primary">Souscrire</a>
+<section class="subscription-section py-5">
+    <div class="container">
+        {% if subscription %}
+            <!-- Section de paiement -->
+            <div class="payment-summary text-center">
+                <h2 class="text-primary fw-bold mb-3">Paiement pour {{ subscription.plan.name }}</h2>
+                <p class="text-muted">Prix : <span class="text-success fw-bold">{{ subscription.plan.price }}€</span></p>
+                <p class="text-muted">Statut du paiement : <span class="badge bg-info">{{ subscription.get_payment_status_display }}</span></p>
+                <form method="post" class="mt-4">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-success btn-lg shadow-sm">Payer Maintenant</button>
+                </form>
+            </div>
+        {% else %}
+            <!-- Liste des plans d'abonnement -->
+            <h2 class="section-title text-center mb-4">Découvrez Nos Plans</h2>
+            <p class="section-subtitle text-center mb-5">Tous nos abonnements offrent un accès complet à nos équipements et services exclusifs.</p>
+            <div class="row gy-4">
+                {% for plan in plans %}
+                <div class="col-lg-4 col-md-6">
+                    <div class="plan-card">
+                        {% if plan.image %}
+                            <img src="{{ plan.image.url }}" class="plan-img" alt="{{ plan.name }}">
+                        {% else %}
+                            <img src="path/to/default/image.jpg" class="plan-img" alt="Image par défaut">
+                        {% endif %}
+                        <div class="plan-header">
+                            <h3 class="plan-name">{{ plan.name }}</h3>
+                            <p class="plan-duration">Durée : {{ plan.duration }} jours</p>
+                        </div>
+                        <div class="plan-body">
+                            <h4 class="plan-price">{{ plan.price }}€</h4>
+                            <p class="plan-description text-muted">{{ plan.description }}</p>
+                            <a href="{% url 'subscribe' plan.pk %}" class="btn btn-primary btn-block mt-3 shadow-sm">Souscrire Maintenant</a>
+                        </div>
                     </div>
                 </div>
+                {% endfor %}
             </div>
-            {% endfor %}
-        </div>
-    {% endif %}
+        {% endif %}
+    </div>
+</section>
+
+<footer class="subscription-footer">
+    <div class="container text-center">
+        <p class="mb-0">BE-FIT, votre partenaire pour atteindre vos objectifs. Commencez dès aujourd'hui !</p>
+    </div>
+</footer>
+
+<style>
+
+/* Héros */
+.subscription-hero {
+    background-image: url('/media/background_images/background.jpg');
+    background-size: cover;
+    background-position: center;
+    padding: 100px 0;
+    text-align: center;
+    color: white;
+}
+.hero-content {
+    background: rgba(0, 0, 0, 0.7);
+    padding: 30px;
+    border-radius: 15px;
+    display: inline-block;
+}
+.hero-title {
+    font-size: 3rem;
+    font-weight: 700;
+    margin-bottom: 20px;
+}
+.hero-subtitle {
+    font-size: 1.2rem;
+    margin-bottom: 30px;
+}
+
+/* Section Plans */
+.subscription-section {
+    background-color: #f8f9fa;
+    padding: 50px 0;
+}
+.section-title {
+    font-size: 2.5rem;
+    color: #0056b3;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 10px;
+}
+.section-subtitle {
+    font-size: 1.1rem;
+    color: #6c757d;
+    text-align: center;
+    margin-bottom: 30px;
+}
+.plan-card {
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    background-color: white;
+    box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.plan-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.2);
+}
+.plan-img {
+    width: 100%;
+    height: auto;
+    border-radius: 10px 10px 0 0;
+}
+.plan-header {
+    background-color: #0056b3;
+    color: white;
+    padding: 20px;
+    text-align: center;
+    border-radius: 10px 10px 0 0;
+}
+.plan-name {
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+.plan-duration {
+    font-size: 1rem;
+    margin-top: 5px;
+}
+.plan-price {
+    font-size: 2rem;
+    color: #27ae60;
+    font-weight: bold;
+    text-align: center;
+    margin: 20px 0;
+}
+.plan-description {
+    font-size: 0.95rem;
+    color: #6c757d;
+    text-align: center;
+}
+.btn-block {
+    display: block;
+    width: 100%;
+}
+.subscribe-btn {
+    background-color: #f1c40f;
+    border: none;
+    font-weight: bold;
+    padding: 10px 0;
+    border-radius: 0 0 10px 10px;
+    transition: background-color 0.3s ease;
+}
+.subscribe-btn:hover {
+    background-color: #e78f02;
+}
+
+/* Footer */
+.subscription-footer {
+    background-color: #343a40;
+    color: white;
+    padding: 20px 0;
+    font-size: 0.9rem;
+}
+
+.plan-card:nth-child(2) .plan-img,
+.plan-card:nth-child(3) .plan-img {
+    transform: scale(0.9); /* Réduit l'échelle à 90% */
+    transition: transform 0.3s ease; /* Transition fluide pour éviter des changements brusques */
+}
+
+.plan-card:nth-child(2):hover .plan-img,
+.plan-card:nth-child(3):hover .plan-img {
+    transform: scale(1); /* Restaure l'échelle normale lors du survol */
+}
+
+.plan-img {
+    width: 100%;
+    height: 250px; /* Hauteur fixe */
+    object-fit: cover; /* Assure un cadrage uniforme sans déformation */
+    border-radius: 10px 10px 0 0;
+}
+
+
+</style>
 {% endblock %}

@@ -1,9 +1,10 @@
 from gym_app.models import Plan, CatalogService, ServiceImage
 from django.shortcuts import redirect, render, get_object_or_404
+from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.contrib import messages
 
-
+@login_required
 class Cart:
     def __init__(self, request):
         self.session = request.session
@@ -86,6 +87,7 @@ class Cart:
 
 
 # Vue pour ajouter un service au panier
+@login_required
 def cart_add_service(request, service_id):
     image_id = request.GET.get('image_id')  # Récupère l'image ID depuis la requête GET
     cart = Cart(request)
