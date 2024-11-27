@@ -1,6 +1,18 @@
 {% extends 'base.html' %}
 {% load i18n %}
+{% load static %}
 {% block content %}
+
+<head>
+    <!-- Lien vers la police Google -->
+    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+    <!-- Autres balises, comme les métadonnées, les liens vers les fichiers CSS, etc. -->
+    <link rel="stylesheet" href="styles.css">  <!-- Lien vers ton fichier CSS -->
+</head>
+
+
 <div class="container my-5">
     <h1 class="text-center"><i class="fas fa-cookie"></i> Politique en Matière de Cookies</h1>
     <p>
@@ -17,6 +29,7 @@
     <h2><i class="fas fa-cookie-bite"></i> 2. Types de cookies utilisés</h2>
     <ul>
         <li><strong>Cookies essentiels :</strong> Nécessaires au bon fonctionnement du site.</li>
+        <li><strong>Cookies fonctionnels :</strong> Ils améliorent votre expérience en personnalisant des fonctionnalités..</li>
         <li><strong>Cookies analytiques :</strong> Utilisés pour analyser le comportement des utilisateurs et améliorer nos services.</li>
         <li><strong>Cookies publicitaires :</strong> Utilisés pour personnaliser les publicités en fonction de vos intérêts.</li>
     </ul>
@@ -34,35 +47,180 @@
 </div>
 
 <style>
-    .container h1, .container h2 {
-        font-family: 'Arial', sans-serif;
-        color: #f1c40f;
-        margin-top: 20px;
+    /* Global Settings */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Poppins', sans-serif; /* Police moderne pour le texte général */
+    background-color: #f8f9fa; /* Fond clair et doux */
+    color: #333; /* Texte sombre pour une bonne lisibilité */
+    line-height: 1.6;
+}
+
+a {
+    text-decoration: none;
+}
+
+/* Importer la police calligraphique */
+@import url('https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap');
+
+/* Conteneur Principal */
+.main-container {
+    padding: 40px 20px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.main-container h1, .main-container h2 {
+    font-family: '', cursive; /* Police calligraphique pour les titres */
+    color: #2c3e50; /* Bleu profond pour un effet professionnel */
+    text-align: center;
+    letter-spacing: 2px;
+    margin-bottom: 20px;
+    text-transform: uppercase; /* Pour ajouter un effet de capitalisation élégante */
+}
+
+.main-container h1 {
+    font-size: 3.5em;
+    font-weight: 600;
+    position: relative;
+}
+
+.main-container h1::after {
+    content: "";
+    position: absolute;
+    width: 70px;
+    height: 4px;
+    background-color: #f39c12; /* Accent or sous le titre */
+    left: 50%;
+    transform: translateX(-50%);
+    bottom: -10px;
+}
+
+.main-container h2 {
+    font-size: 1.8em;
+    font-weight: 500;
+    color: #7f8c8d; /* Gris doux pour les sous-titres */
+    margin-top: 10px;
+}
+
+/* Paragraphes & Liens */
+.main-container p, .main-container li {
+    font-size: 1.1em;
+    color: #555; /* Gris clair pour le texte principal */
+    text-align: justify;
+    margin-bottom: 20px;
+}
+
+.main-container a {
+    color: #2980b9; /* Bleu éclatant pour les liens */
+    transition: color 0.3s ease;
+}
+
+.main-container a:hover {
+    color: #f39c12; /* Or au survol pour les liens */
+}
+
+/* Icônes */
+.fas {
+    color: #f39c12;
+    margin-right: 10px;
+    font-size: 1.4em;
+    transition: transform 0.3s ease;
+}
+
+.fas:hover {
+    transform: scale(1.2); /* Effet de survol qui fait grossir les icônes */
+}
+
+/* Navbar */
+.navbar {
+    background-color: #34495e; /* Gris bleu profond pour la navbar */
+    padding: 15px 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.navbar a {
+    color: white;
+    font-size: 1.2em;
+    padding: 12px 20px;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.navbar a:hover {
+    background-color: #1abc9c; /* Couleur turquoise lors du survol */
+    color: #fff;
+    border-radius: 5px;
+}
+
+/* Footer */
+.footer {
+    background-color: #2c3e50;
+    color: #ecf0f1;
+    padding: 40px 20px;
+    text-align: center;
+    box-shadow: 0 -4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.footer a {
+    color: #1abc9c;
+    font-weight: bold;
+    font-size: 1.1em;
+    transition: color 0.3s ease;
+}
+
+.footer a:hover {
+    color: #f39c12;
+}
+
+/* Animations pour une touche moderne */
+@keyframes fadeInUp {
+    0% {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.main-container h1, .main-container h2, .main-container p {
+    animation: fadeInUp 1s ease-out;
+}
+
+/* Responsivité - Mobile First */
+@media (max-width: 768px) {
+    .main-container h1 {
+        font-size: 2.5em;
     }
 
-    .container h2 {
-        font-size: 1.5em;
-        margin-top: 25px;
+    .main-container h2 {
+        font-size: 1.4em;
     }
 
-    .container p, .container li {
-        font-size: 1.1em;
-        color: #333;
-        line-height: 1.6;
+    .navbar {
+        flex-direction: column;
+        align-items: flex-start;
     }
 
-    .container a {
-        color: #0056b3;
-        text-decoration: none;
+    .navbar a {
+        padding: 10px 15px;
+        width: 100%;
+        text-align: left;
     }
 
-    .container a:hover {
-        text-decoration: underline;
+    .footer {
+        padding: 20px;
     }
+}
 
-    .fas {
-        color: #f1c40f;
-        margin-right: 8px;
-    }
 </style>
 {% endblock %}

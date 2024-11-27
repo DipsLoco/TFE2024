@@ -6,7 +6,8 @@ from django.contrib import admin
 from django import forms
 from django.db.models.signals import m2m_changed
 from django.dispatch import receiver
-from .models import User, Workout, Coach, Location, Plan, Subscription, Review, WorkoutImage, WorkoutParticipation, WorkoutSchedule, ServiceImage, Message, CatalogService, PersonalizedCoaching, GymAccessory, DietPlan
+from .models import ServiceImage, Message, CatalogService, PersonalizedCoaching, GymAccessory, DietPlan
+from .models import User, Workout, Coach, Location, Plan, Subscription, Review, WorkoutImage, WorkoutParticipation, WorkoutSchedule
 from django.contrib.admin import AdminSite
 from django.urls import path
 from django.utils.html import format_html

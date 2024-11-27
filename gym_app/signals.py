@@ -1,9 +1,8 @@
-# gym_app/signals.py
+
 from django.db.models.signals import pre_save, post_save
 from django.dispatch import receiver
 from django.contrib.auth import get_user_model
 from .models import Message
-
 
 User = get_user_model()
 
@@ -21,6 +20,8 @@ def store_original_password(sender, instance, **kwargs):
     else:
         # Dans le cas où l'utilisateur est nouveau, pas de mot de passe précédent
         instance.__original_password = instance.password
+
+
 User = get_user_model()
 
 @receiver(pre_save, sender=User)
@@ -37,12 +38,12 @@ def check_password_change(sender, instance, **kwargs):
     else:
         instance._password_changed = False  # Cas d'un nouvel utilisateur
 
+# Signal post_save pour envoyer la notification après changement de mot de passe
 @receiver(post_save, sender=User)
 def send_password_change_notification(sender, instance, created, **kwargs):
     if hasattr(instance, '_password_changed') and instance._password_changed:
         try:
             admin_user = sender.objects.filter(is_staff=True).first()  # Récupère un administrateur
-
             if admin_user:
                 # Création d'un message de notification pour l'utilisateur qui a changé son mot de passe
                 Message.objects.create(
@@ -58,6 +59,11 @@ def send_password_change_notification(sender, instance, created, **kwargs):
                 print("[Erreur] Aucun administrateur trouvé pour envoyer le message.")
         except Exception as e:
             print(f"Erreur lors de l'envoi du message de changement de mot de passe : {e}")
+
+
+
+
+
 
 
 

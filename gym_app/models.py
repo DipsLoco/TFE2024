@@ -36,6 +36,16 @@ class User(AbstractUser):
     user_permissions = models.ManyToManyField(Permission, related_name='custom_user_permissions', blank=True)  # Nom unique pour éviter les conflits
 
 
+    
+    # Project futur Récupérer les absences des 30 derniers jours
+    def recent_absences(self):
+        recent_participations = WorkoutParticipation.objects.filter(
+            participant=self,
+            present=False,
+            workout_schedule__start_time__gte=timezone.now() - timedelta(days=30)
+        )
+        return recent_participations.count()
+
 User = get_user_model()
 
 class Message(models.Model):

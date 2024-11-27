@@ -1,0 +1,93 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container my-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow-lg">
+                <div class="card-header bg-dark text-white text-center">
+                    <h3>Réinitialiser le mot de passe</h3>
+                </div>
+                <div class="card-body">
+                    {% if messages %}
+                        <div class="alert alert-success">
+                            {% for message in messages %}
+                                <p>{{ message }}</p>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                    <form method="POST">
+                        {% csrf_token %}
+                        
+                        <!-- Liste déroulante des utilisateurs -->
+                        <div class="form-group">
+                            <label for="user_select">Sélectionner un utilisateur</label>
+                            <select name="user_select" id="user_select" class="form-control" required>
+                                <option value="" selected disabled>-- Sélectionner un utilisateur --</option>
+                                
+                                <!-- Section Administrateurs -->
+                                <optgroup label="Administrateurs">
+                                    {% for user in users_admin %}
+                                        <option value="{{ user.id }}">{{ user.username }}</option>
+                                    {% endfor %}
+                                </optgroup>
+
+                                <!-- Section Coachs -->
+                                <optgroup label="Coachs">
+                                    {% for user in users_coach %}
+                                        <option value="{{ user.id }}">{{ user.username }}</option>
+                                    {% endfor %}
+                                </optgroup>
+
+                                <!-- Section Membres -->
+                                <optgroup label="Membres">
+                                    {% for user in users_member %}
+                                        <option value="{{ user.id }}">{{ user.username }}</option>
+                                    {% endfor %}
+                                </optgroup>
+                            </select>
+                        </div>
+
+                        <!-- Nouveau mot de passe -->
+                        <div class="form-group">
+                            <label for="new_password1">Nouveau mot de passe</label>
+                            <input type="password" name="new_password1" id="new_password1" class="form-control" required>
+                        </div>
+
+                        <!-- Confirmer le mot de passe -->
+                        <div class="form-group">
+                            <label for="new_password2">Confirmer le mot de passe</label>
+                            <input type="password" name="new_password2" id="new_password2" class="form-control" required>
+                        </div>
+
+                        <!-- Bouton de soumission -->
+                        <button type="submit" class="btn btn-success btn-lg btn-block mt-3">Réinitialiser le mot de passe</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    <br><br><br><br><br><br><br><br><br>
+</div>
+
+<style>
+/* Personnalisation du bouton vert */
+.btn-success {
+    background-color: #4CAF50;  /* Meilleur vert */
+    border-color: #4CAF50;
+}
+
+.btn-lg {
+    font-size: 1.25rem;
+    padding: 10px 20px;
+    width: 100%;
+    text-align: center;
+}
+
+/* Personnalisation des alertes de succès */
+.alert-success {
+    margin-bottom: 20px;
+    font-size: 16px;
+}
+</style>
+
+{% endblock %}

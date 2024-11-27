@@ -4,6 +4,11 @@ from django.contrib.auth.forms import UserCreationForm
 from .models import User, WorkoutSchedule, WorkoutParticipation, Message
 from django.core.exceptions import ValidationError
 from django import forms
+from django.contrib.auth.forms import PasswordChangeForm
+from django import forms
+from django.contrib.auth.models import User
+from django.contrib.auth import authenticate
+from django.contrib.auth.forms import SetPasswordForm
 import re
 
 
@@ -236,13 +241,19 @@ class SignUpForm(UserCreationForm):
 # Formulaire pour la mise à jour du profil utilisateur
 class UserProfileForm(forms.ModelForm):
     """Formulaire pour modifier les informations de profil utilisateur."""
+    
     class Meta:
         model = User
-        fields = ['first_name', 'last_name', 'email', 'phone', 'address', 'postal_code', 'image','social_url','instagram_url']
+        fields = ['first_name', 'last_name', 'email', 'phone', 'address', 'postal_code', 'image', 'social_url', 'instagram_url']
         widgets = {
             'image': forms.ClearableFileInput(attrs={}),  # Retire l'attribut multiple si un seul fichier est nécessaire
         }
-         # Champs pour modifier le mot de passe
+
+
+
+User = get_user_model()
+
+class CustomPasswordChangeForm(forms.Form):
     current_password = forms.CharField(
         widget=forms.PasswordInput(attrs={'class': 'form-control'}),
         label="Mot de passe actuel",
@@ -259,7 +270,6 @@ class UserProfileForm(forms.ModelForm):
         required=True
     )
 
-    # Validation du mot de passe
     def clean(self):
         cleaned_data = super().clean()
         new_password1 = cleaned_data.get("new_password1")
@@ -267,9 +277,32 @@ class UserProfileForm(forms.ModelForm):
 
         if new_password1 != new_password2:
             self.add_error('new_password2', "Les mots de passe ne correspondent pas.")
-    
-        if len(new_password1) < 8:  # Validation de la longueur du mot de passe
+        
+        if len(new_password1) < 8:
             self.add_error('new_password1', "Le mot de passe doit comporter au moins 8 caractères.")
-
+        
         return cleaned_data
 
+
+# Formulaire pour reinitialiser les mot de passe des user membre coach et admin
+
+class PasswordResetForm(forms.Form):
+    # Champ pour sélectionner l'utilisateur à réinitialiser
+    user_select = forms.ModelChoiceField(queryset=User.objects.all(), label="Sélectionner un utilisateur", widget=forms.Select(attrs={'class': 'form-control'}))
+    
+    # Champs pour le nouveau mot de passe
+    new_password1 = forms.CharField(widget=forms.PasswordInput(attrs={'class': 'form-control'}), label="Nouveau mot de passe")
+    new_password2 = forms.CharField(widget=forms.PasswordInput(attrs={'class': 'form-control'}), label="Confirmer le mot de passe")
+
+    def clean(self):
+        cleaned_data = super().clean()
+        new_password1 = cleaned_data.get('new_password1')
+        new_password2 = cleaned_data.get('new_password2')
+
+        # Vérification que les mots de passe correspondent
+        if new_password1 != new_password2:
+            self.add_error('new_password2', "Les mots de passe ne correspondent pas.")
+        elif len(new_password1) < 8:
+            self.add_error('new_password1', "Le mot de passe doit comporter au moins 8 caractères.")
+        
+        return cleaned_data

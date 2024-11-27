@@ -5,11 +5,109 @@
 .search-input {
     width: 100%; /* Assure que l'input occupe toute la largeur de la zone définie */
 }
+
+/* Seances-disponibles cette semaine ---- Carousel mis en place ici */
+#seances-disponibles .carousel-control-prev-icon,
+#seances-disponibles .carousel-control-next-icon {
+    background-color: #0056b3; /* Couleur bleue pour les flèches */
+    border-radius: 50%; /* Forme arrondie pour une meilleure esthétique */
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5); /* Ajout d'une ombre élégante */
+    width: 40px; /* Ajuste la taille de l'icône */
+    height: 40px;
+    background-size: 70%; /* Ajuste la taille interne de la flèche */
+}
+
+#seances-disponibles .carousel-control-prev-icon:hover,
+#seances-disponibles .carousel-control-next-icon:hover {
+    background-color: #003d80; /* Teinte bleue légèrement plus foncée au survol */
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.7); /* Accentuation de l'ombre au survol */
+}
+
+#seances-disponibles .carousel-control-prev,
+#seances-disponibles .carousel-control-next {
+    width: 5%; /* Réduit la largeur des zones cliquables pour un design propre */
+}
+
+
+#seances-disponibles .carousel-item {
+    transition: transform 1s ease, opacity 1s ease;
+}
+
+#seances-disponibles .card {
+    border-radius: 10px;
+    background: linear-gradient(145deg, #f9f9f9, #e8e8e8);
+    box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.2), -5px -5px 15px rgba(255, 255, 255, 0.8);
+}
+
+#seances-disponibles .card-body {
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    background-color: white;
+    border-radius: 10px;
+    box-shadow: inset 2px 2px 8px rgba(0, 0, 0, 0.1), inset -2px -2px 8px rgba(255, 255, 255, 0.6);
+}
+
+#seances-disponibles .card-title {
+    text-align: center;
+    font-size: 18px;
+    margin-bottom: 12px;
+}
+
+#seances-disponibles .text-details p {
+    font-size: 14px;
+    margin-bottom: 6px;
+    line-height: 1.4;
+}
+
+#seances-disponibles .coach-image-large {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border: 3px solid #f1c40f;
+    border-radius: 50%;
+    margin: auto 0;
+    display: block;
+    align-self: center;
+}
+
+#seances-disponibles .badge {
+    font-size: 14px;
+    font-weight: bold;
+    padding: 10px 15px;
+}
+
+.bg-gradient-to-right {
+    background: linear-gradient(to right, #f1c40f, #e78f02);
+    color: white;
+}
+#seances-disponibles .workout-image {
+    width: 100%; /* S'étend sur toute la largeur de la carte */
+    height: 100%; /* S'étend sur toute la hauteur de la carte */
+    object-fit: cover; /* Maintient les proportions de l'image tout en la couvrant */
+    border-radius: 10px; /* Correspond au design arrondi de la carte */
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2); /* Ombre élégante */
+}
+
+#seances-disponibles .workout-title {
+    font-size: 24px; /* Augmente la taille du titre */
+    font-weight: 700; /* Renforce l'épaisseur pour plus d'impact */
+    color: #0056b3; /* Couleur plus vibrante pour attirer l'œil */
+    text-align: center; /* Centre le texte horizontalement */
+    text-transform: uppercase; /* Met en majuscules pour plus de présence */
+    margin-bottom: 15px; /* Ajoute de l'espace sous le titre */
+    letter-spacing: 1px; /* Ajoute un léger espacement entre les lettres */
+}
+
+
 /* Styles pour l'effet visuel */
 /* .header-section { animation: fadeIn 1.5s ease-in; } */
 
 /* Style pour les coachs */
+
 .coach-image { object-fit: contain; height: 300px; }
+
 /* Side Menu */
 .side-menu {
     position: fixed;
@@ -194,8 +292,9 @@
     }
 
     .testimonial-title {
-        font-family: 'Great Vibes', cursive;
-        font-size: 3em;
+        font-size:'', cursive;
+        font-size: 2.5em;
+        padding: 5px 0;
         color: #0056b3;
         text-shadow: 2px 2px #ddd;
     }
@@ -234,8 +333,8 @@
     }
 
     .contact-title {
-        font-family: 'Great Vibes', cursive;
-        font-size: 3em;
+        font-family: '', cursive; 
+        font-size: 2.5em;
         color: #0056b3;
         text-shadow: 2px 2px #ddd;
     }
@@ -324,12 +423,6 @@
         background: linear-gradient(to bottom right, #ffffff, #f3f4f6);
     }
 
-    .testimonial-title {
-        font-family: 'Great Vibes', cursive;
-        font-size: 3em;
-        color: #0056b3;
-        text-shadow: 2px 2px #ddd;
-    }
 
     .testimonial-card {
         border: none;
@@ -362,13 +455,6 @@
     .contact-icon {
         font-size: 2.5rem;
         color: #0056b3;
-    }
-
-    .contact-title {
-        font-family: 'Great Vibes', cursive;
-        font-size: 3em;
-        color: #0056b3;
-        text-shadow: 2px 2px #ddd;
     }
 
     .contact-form .form-control {

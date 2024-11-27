@@ -14,10 +14,10 @@ from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from django.urls import reverse
+from django.urls import reverse, reverse_lazy
 from django.http import HttpResponseForbidden, JsonResponse
 from gym_app.models import CatalogService, Coach, DietPlan, GymAccessory, Message, PersonalizedCoaching, Plan, Review, Subscription, Workout, WorkoutImage, WorkoutSchedule, WorkoutParticipation
-from .forms import SignUpForm, UserProfileForm, WorkoutParticipationForm, WorkoutScheduleForm
+from .forms import CustomPasswordChangeForm, SignUpForm, UserProfileForm, WorkoutParticipationForm, WorkoutScheduleForm
 from datetime import timedelta
 from django.utils import timezone
 from datetime import timedelta
@@ -60,7 +60,6 @@ from django.contrib.auth.decorators import login_required, user_passes_test
 from django.shortcuts import render, redirect
 from django.contrib import messages
 from .forms import WorkoutScheduleForm
-from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth import update_session_auth_hash
 from .forms import UserProfileForm
 from .models import Message 
@@ -69,7 +68,16 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import A4
-from datetime import datetime
+from django.shortcuts import redirect
+from django.contrib.auth.decorators import login_required
+from django.utils.decorators import method_decorator
+from django import forms
+from django.contrib.auth.models import User
+
+
+
+
+
 
 def test_reportlab():
     file_path = "test_invoice.pdf"
@@ -137,21 +145,38 @@ def about(request):
 
 
 
+from datetime import timedelta
+from django.utils import timezone
+from django.db.models import Count
+
 def home(request):
+    # Période de la semaine actuelle
+    now = timezone.now()
+    end_of_week = now + timedelta(days=7)
+
+    # Charger les séances disponibles pour la semaine en cours
+    weekly_schedules = WorkoutSchedule.objects.filter(
+        start_time__gte=now,           # À partir de maintenant
+        start_time__lt=end_of_week     # Jusqu'à la fin de la semaine
+    ).annotate(
+        participants_count=Count('participants')  # Compter les participants inscrits
+    ).select_related('coach', 'workout', 'location')
+
+    # Charger les autres données
     context = {
         'plans': Plan.objects.filter(is_available=True),
         'workouts': Workout.objects.filter(available=True),
         'coachs': Coach.objects.all(),
         'reviews': Review.objects.all(),
-        'workoutschedules': WorkoutSchedule.objects.select_related('coach', 'location').all(),
+        'weekly_schedules': weekly_schedules,  # Ajout des séances filtrées
         'message': _("Restez en forme"),
     }
-    
+
     # Charger les services uniques
     context.update(load_services())
     
-    
     return render(request, 'home.html', context)
+
 
 
 
@@ -461,6 +486,129 @@ def register_user(request):
         form = SignUpForm()
     return render(request, 'administration/register.html', {'form': form})
 
+from django.contrib import messages
+from django.contrib.auth import update_session_auth_hash
+from django.contrib.auth.decorators import login_required
+from .forms import CustomPasswordChangeForm
+
+@login_required
+def change_password(request):
+    """Vue pour la modification du mot de passe"""
+    if request.method == "POST":
+        # Crée le formulaire en excluant 'user' pour les membres
+        form = CustomPasswordChangeForm(request.POST)
+
+        if not request.user.is_staff:
+            # Si ce n'est pas un admin, on supprime le champ 'user' du formulaire
+            if 'user' in form.fields:
+                del form.fields['user']  # Masque ce champ pour les membres
+
+        if form.is_valid():
+            # Si le formulaire est valide, changer le mot de passe
+            new_password = form.cleaned_data.get("new_password1")
+            user = request.user
+            user.set_password(new_password)
+            user.save()
+
+            # Mettre à jour la session de l'utilisateur pour ne pas le déconnecter
+            update_session_auth_hash(request, user)
+
+            # Message de succès affiché à l'utilisateur
+            messages.success(request, "Votre mot de passe a été modifié avec succès.")
+            return redirect('profile')  # Rediriger vers la page de profil de l'utilisateur
+        else:
+            # Si des erreurs existent, on les affiche
+            messages.error(request, "Il y a des erreurs dans le formulaire.")
+    else:
+        form = CustomPasswordChangeForm()
+
+    return render(request, 'change_password.html', {'form': form})
+
+
+from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import user_passes_test
+from django.contrib.auth.models import User
+from django.contrib import messages
+from .forms import PasswordResetForm
+
+# Fonctions pour reinitialiser tout les mot de passes de chaque role user membre, coach, admin
+# Décorateur pour s'assurer que l'utilisateur est un administrateur
+
+from django.contrib import messages
+from django.shortcuts import redirect
+
+@login_required
+def reset_user_password(request):
+    """Réinitialiser le mot de passe pour un utilisateur"""
+    
+    # Récupérer les utilisateurs par rôle
+    users_admin = User.objects.filter(role='admin')
+    users_coach = User.objects.filter(role='coach')
+    users_member = User.objects.filter(role='member')
+
+    if request.method == "POST":
+        form = PasswordResetForm(request.POST)
+
+        if form.is_valid():
+            # Sélectionner l'utilisateur à réinitialiser
+            user = form.cleaned_data['user_select']
+            new_password = form.cleaned_data['new_password1']
+
+            # Vérification de la validité du mot de passe
+            if len(new_password) < 8:
+                messages.error(request, "Le mot de passe doit comporter au moins 8 caractères.")
+                return render(request, 'reset_user_password.html', {
+                    'form': form,
+                    'users_admin': users_admin,
+                    'users_coach': users_coach,
+                    'users_member': users_member
+                })
+            
+            # Réinitialiser le mot de passe
+            user.set_password(new_password)
+            user.save()
+
+            # Mettre à jour la session de l'utilisateur pour qu'il ne soit pas déconnecté
+            update_session_auth_hash(request, user)
+
+            # Ajouter un message de succès pour l'utilisateur
+            messages.success(request, f"Le mot de passe de {user.username} a été réinitialisé avec succès.")
+
+            # Envoi d'une notification interne à l'administrateur
+            admin_user = User.objects.filter(is_staff=True).first()
+            if admin_user:
+                Message.objects.create(
+                    sender=admin_user,
+                    recipient=admin_user,  # Peut-être à un autre utilisateur si je souhaites notifier plusieurs admins
+                    subject="Réinitialisation du mot de passe",
+                    body=f"Le mot de passe de l'utilisateur {user.username} a été réinitialisé avec succès."
+                )
+
+            # Redirection vers le profil de l'utilisateur ou vers une autre page de confirmation
+            return redirect('profile')
+
+        else:
+            # Si le formulaire est invalide, afficher un message d'erreur
+            messages.error(request, "Erreur dans le formulaire. Veuillez vérifier les champs.")
+            print("Form errors:", form.errors)  # Pour déboguer
+
+    else:
+        form = PasswordResetForm()
+
+    return render(request, 'reset_user_password.html', {
+        'form': form,
+        'users_admin': users_admin,
+        'users_coach': users_coach,
+        'users_member': users_member
+    })
+
+
+
+
+
+
+
+
 # Message envoye en auto des qu un user change de mot de passe , il est sauveagarder avec le signal pre save et post save voir le fichier signal.py
 @receiver(post_save, sender=User)
 def send_password_change_notification(sender, instance, created, **kwargs):
@@ -475,7 +623,7 @@ def send_password_change_notification(sender, instance, created, **kwargs):
                 if admin_user:
                     # Créer le message de confirmation uniquement pour un changement de mot de passe
                     Message.objects.create(
-                        sender=admin_user,  # L'administrateur est l'expéditeur
+                        sender=admin_user,  # L'administrateur est l'expéditeur 
                         recipient=instance,  # L'utilisateur qui a changé son mot de passe
                         subject="Modification de votre mot de passe",
                         body="Votre mot de passe a été modifié avec succès. Si vous n'êtes pas à l'origine de ce changement, veuillez contacter l'administrateur."
@@ -587,7 +735,7 @@ def delete_draft(request, draft_id):
     draft.delete()
     return redirect('drafts')  # Redirige vers la page des brouillons
 
-
+@login_required
 def restore_message(request, message_id):
     message = get_object_or_404(Message, id=message_id, recipient=request.user)
     if message.is_deleted:
@@ -631,7 +779,7 @@ def delete_multiple_messages(request):
     # Rediriger vers la boîte de réception après suppression
     return redirect('messages_inbox')
 
-
+@login_required
 def messages_inbox(request):
     # Récupérer la catégorie depuis l'URL
     category = request.GET.get('category', 'received')
@@ -1108,13 +1256,15 @@ def coach_dashboard(request):
     stats = []
     for schedule in schedules:
         total_participants = schedule.participants.count()
-        present_count = WorkoutParticipation.objects.filter(workout_schedule=schedule, present=True).count()
-        stats.append({
-            'schedule': schedule,
-            'total_participants': total_participants,
-            'present_count': present_count,
-            'absence_count': total_participants - present_count,
-        })
+    present_count = WorkoutParticipation.objects.filter(workout_schedule=schedule, present=True).count()
+    absence_count = total_participants - present_count
+    stats.append({
+        'schedule': schedule,
+        'total_participants': total_participants,
+        'present_count': present_count,
+        'absence_count': absence_count,
+    })
+
 
     # Passer toutes les données au template
     return render(request, 'home_dashboard.html', {
@@ -1379,26 +1529,28 @@ def cancel_reservation(request, workoutschedule_id):
 
 @login_required
 def confirmation_reservation(request, scheduleId):
-    # Récupérer le planning de workout avec l'ID fourni
     schedule = get_object_or_404(WorkoutSchedule, id=scheduleId)
 
-    # Vérifier si la séance est complète
-    if schedule.participants.count() >= 10:
-        messages.error(
-            request, "Cette séance est complète. Vous ne pouvez plus réserver.")
+    # Vérification des pénalités dues aux absences
+    if request.user.recent_absences() >= 3:
+        messages.error(request, "Vous avez été marqué absent à plusieurs reprises. Vous ne pouvez pas réserver de cours pour le moment.")
         return redirect(request.META.get('HTTP_REFERER', 'home'))
 
-    # Vérifier si l'utilisateur est déjà participant
+    # Vérification de la disponibilité
+    if schedule.participants.count() >= 10:
+        messages.error(request, "Cette séance est complète. Vous ne pouvez plus réserver.")
+        return redirect(request.META.get('HTTP_REFERER', 'home'))
+
+    # Vérification de la participation existante
     if schedule.participants.filter(id=request.user.id).exists():
         messages.error(request, "Vous avez déjà réservé cette séance.")
         return redirect(request.META.get('HTTP_REFERER', 'home'))
 
-    # Ajouter l'utilisateur à la liste des participants
+    # Ajouter le participant
     schedule.participants.add(request.user)
-    schedule.save()
-
     messages.success(request, "Votre réservation a été confirmée avec succès.")
     return redirect('home')
+
 
 @login_required
 def manage_participation(request, workout_schedule_id):

@@ -3,13 +3,9 @@
 {% load i18n %}
 {% block content %}
 
-
 <head>
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Great+Vibes&display=swap" rel="stylesheet">
-
     <!-- Lier ton fichier CSS principal -->
-    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
 
     <!-- Lier le fichier CSS spécifique à la page si nécessaire -->
     <link rel="stylesheet" href="{% static 'css/profile.css' %}">
@@ -46,35 +42,32 @@
                 <a href="{% url 'workout_list'  %}" class="btn btn-primary ms-3"><i class="fas fa-calendar-check"></i> Reserver un cours</a>
             {% endif %}
             
-            
-            <!-- Bouton pour souscrire si l'utilisateur n'est pas premium et n'est pas un administrateur -->
-{% if not user.is_premium and not user.is_staff %}
-<a href="{% url 'home' %}#nos-offres" class="btn btn-success ms-3">
-    <i class="fas fa-file-alt"></i> Souscrire à un Plan
-</a>
-{% endif %}
-</div>
-</div>
-
-<!-- Message pour les utilisateurs premium sauf les administrateurs -->
-{% if user.is_premium and not user.is_staff %}
-<div class="alert alert-success d-flex align-items-center" role="alert" style="font-size: 1.1rem; font-weight: bold;">
-    <i class="fas fa-check-circle me-2"></i>
-    <span>Vous êtes abonné à un Plan Premium. Profitez pleinement de nos services !</span>
-</div>
-<br><br>
-{% elif not user.is_premium and not user.is_staff %}
-<!-- Message pour les utilisateurs non premium (coach et membres) qui n'ont pas encore de plan -->
-<div class="d-flex align-items-center">
-    <div class="card-text-grey alert-link d-flex align-items-center px-3 py-2" role="alert" style="font-size: 1.1rem; font-weight: bold;">
-        <i class="fas fa-exclamation-triangle me-2"></i>
-        <span>Vous n'avez aucun Plan actuellement ... </span> <i class="fas fa-file-alt"></i>
+            <!-- Bouton pour souscrire si l'utilisateur n'est pas premium, coach, et administrateur -->
+            {% if not user.is_premium and not user.is_staff and not user.role == 'coach' %}
+                <a href="{% url 'home' %}#nos-offres" class="btn btn-success ms-3">
+                    <i class="fas fa-file-alt"></i> Souscrire à un Plan
+                </a>
+            {% endif %}
+        </div>
     </div>
-</div>
-<br>
 
+    <!-- Message pour les utilisateurs premium sauf les administrateurs et les coachs -->
+    {% if user.is_premium and not user.is_staff and user.role != 'coach' %}
+    <div class="alert alert-success d-flex align-items-center" role="alert" style="font-size: 1.1rem; font-weight: bold;">
+        <i class="fas fa-check-circle me-2"></i>
+        <span>Vous êtes abonné à un Plan Premium. Profitez pleinement de nos services !</span>
+    </div>
+    <br><br>
+    {% elif not user.is_premium and not user.is_staff and user.role != 'coach' %}
+    <!-- Message pour les utilisateurs non premium qui n'ont pas encore de plan -->
+    <div class="d-flex align-items-center">
+        <div class="card-text-grey alert-link d-flex align-items-center px-3 py-2" role="alert" style="font-size: 1.1rem; font-weight: bold;">
+            <i class="fas fa-exclamation-triangle me-2"></i>
+            <span>Vous n'avez aucun Plan actuellement ... </span> <i class="fas fa-file-alt"></i>
+        </div>
+    </div>
 
-            <!-- Popup de souscription (affiché si show_subscription_popup est True) -->
+    <!-- Popup de souscription (affiché si show_subscription_popup est True) -->
     {% if show_subscription_popup %}
     <div id="subscriptionPopup">
         <div class="popup-content">
@@ -88,9 +81,9 @@
         </div>
     </div>    
     {% endif %}
-        </div>
-        <br>
     {% endif %}
+</div>
+
     
     
     <!-- Affichage des membres et des séances passées si coach/admin -->
@@ -277,7 +270,7 @@
             <h2 class="h5 mb-0"><ion-icon name="time-outline"></ion-icon> Historique des Achats</h2>
             <!-- Filtre pour afficher les achats -->
             <div>
-                <select id="purchaseFilter" class="form-select form-select-sm" style="width: auto; padding-right: 2.5rem;">
+                <select id="purchaseFilter" class="form-select form-select-sm" style="width: auto; padding-right: 2.5rem;" aria-label="Filtrer les achats par type">
                     <option value="all">Tous</option>
                     <option value="plans">Plans</option>
                     <option value="services">Services</option>
@@ -354,7 +347,11 @@
         </div>
     </div>
 </div>
+
 {% endblock %}
+
 {% block scripts %}
-    <script src="{% static 'js/profile.js' %}"></script>
+<script src="{% static 'js/filter.js' %}"></script> //* Filtrage des achats entre les plans et les services //
+<script src="{% static 'js/poppup.js' %}"></script>
 {% endblock %}
+

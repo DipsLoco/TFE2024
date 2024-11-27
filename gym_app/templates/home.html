@@ -6,13 +6,12 @@
 
 <!-- Lier  fichiers CSS dans <head> -->
     <head>
-        <!-- Google Fonts -->
-        <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Great+Vibes&display=swap" rel="stylesheet">
     
         <!-- Lier ton fichier CSS principal -->
         <link rel="stylesheet" href="{% static 'css/style.css' %}">
     
         <!-- Lier le fichier CSS spécifique à la page si nécessaire -->
+         
         <link rel="stylesheet" href="{% static 'css/home.css' %}">
     </head>
 
@@ -59,6 +58,116 @@
         </div>
     </div>
 </nav>
+
+<!-- Section Carrousel des séances disponibles -->
+<section id="seances-disponibles" class="py-5 bg-light">
+    <div class="container px-5 my-5">
+        <div class="text-center mb-5">
+            <h2 class="display-5 fw-bold text-dark">Séances Disponibles Cette Semaine</h2>
+            <p class="lead text-muted">Planifiez votre semaine sportive dès aujourd'hui&nbsp;!</p>
+        </div>
+        <!-- Carrousel des séances disponibles -->
+        <div id="carouselSeances" class="carousel slide" data-bs-ride="carousel">
+            <div class="carousel-inner">
+                {% for schedule in weekly_schedules %}
+                <div class="carousel-item {% if forloop.first %}active{% endif %}">
+                    <div class="row justify-content-center align-items-stretch">
+                        <!-- Image du cours -->
+                        <div class="col-lg-4 col-md-5 mb-4 d-flex justify-content-center">
+                            {% if schedule.workout.images.exists %}
+                                {% with schedule.workout.images.first as main_image %}
+                                    <img src="{{ main_image.image.url }}" class="img-fluid mb-2 shadow workout-image" alt="{{ main_image.description|default:schedule.workout.title }}">
+                                {% endwith %}
+                            {% else %}
+                                <img src="path/to/default/image.jpg" class="img-fluid shadow workout-image" alt="Image par défaut">
+                            {% endif %}
+                        </div>
+                        <!-- Contenu du cours -->
+                        <div class="col-lg-6 col-md-7 mb-4">
+                            <div class="card h-100 shadow rounded-4 bg-gradient-to-right">
+                                <div class="card-body p-4 d-flex flex-column justify-content-between">
+                                    <!-- Titre du Workout centré -->
+                                    <h5 class="card-title text-primary fw-bold workout-title text-center">{{ schedule.workout.title }}</h5>
+                                    
+                                    <!-- Image et nom du coach -->
+                                    <div class="d-flex align-items-center mb-3">
+                                        {% if schedule.coach.image %}
+                                            <img src="{{ schedule.coach.image.url }}" class="coach-image-large shadow-lg" alt="Coach {{ schedule.coach.username }}">
+                                        {% else %}
+                                            <img src="path/to/default/coach_image.jpg" class="coach-image-large shadow-lg" alt="Coach {{ schedule.coach.username }}">
+                                        {% endif %}
+                                        <div class="ms-3">
+                                            <p class="mb-1 text-muted"><strong>Coach :</strong> {{ schedule.coach.username }}</p>
+                                            <p class="mb-0 text-muted"><strong>Spécialités :</strong> 
+                                                {% for specialty in schedule.coach.coach.specialties.all %}
+                                                    {{ specialty.title }}{% if not forloop.last %}, {% endif %}
+                                                {% empty %}
+                                                    Aucune spécialité
+                                                {% endfor %}
+                                            </p>                                                                                       
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Détails -->
+                                    <div class="text-details">
+                                        <p class="mb-2 text-muted"><strong>Durée :</strong> {{ schedule.workout.duration }}</p>
+                                        <p class="mb-2 text-muted"><strong>Description :</strong> {{ schedule.workout.description|truncatechars:60 }}</p>
+                                        <p class="mb-2 text-muted"><strong>Localisation :</strong> {{ schedule.location }}</p>
+                                        <p class="mb-3 text-muted"><strong>Date et Heure :</strong> {{ schedule.start_time|date:"d M Y H:i" }}</p>
+                                    </div>
+
+                                    <!-- Statut de disponibilité -->
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <span class="badge {% if schedule.participants_count >= 10 %}bg-danger{% else %}bg-success{% endif %}">
+                                            {% if schedule.participants_count >= 10 %} Complet {% else %} Disponible {% endif %}
+                                        </span>
+                                        {% if schedule.participants_count < 10 %}
+                                            <p class="text-success mb-0" style="font-weight: bold;">
+                                                Participants : {{ schedule.participants_count }}/10 inscrits
+                                            </p>
+                                        {% endif %}
+                                    </div>
+
+                                    <!-- Bouton de réservation -->
+                                    <div class="mt-4">
+                                        {% if schedule.participants_count >= 10 %}
+                                            <button class="btn btn-danger btn-lg w-100" disabled>Séance complète</button>
+                                        {% else %}
+                                        {% if schedule.workout %}
+                                        <a href="{% url 'workout_detail' schedule.workout.id %}" class="btn btn-primary btn-lg w-100" style="background-color: #6a1b9a; border-color: #6a1b9a;">
+                                            Réserver cette séance
+                                        </a>
+                                        {% else %}
+                                        <button class="btn btn-danger btn-lg w-100" disabled>Aucun workout associé</button>
+                                        {% endif %}
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <!-- Contrôles du carrousel -->
+            <button class="carousel-control-prev" type="button" data-bs-target="#carouselSeances" data-bs-slide="prev">
+                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Précédent</span>
+            </button>
+            <button class="carousel-control-next" type="button" data-bs-target="#carouselSeances" data-bs-slide="next">
+                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                <span class="visually-hidden">Suivant</span>
+            </button>
+        </div>
+    </div>
+    
+</section>
+
+
+
+
+
 
 <!-- Section pour Nos Workouts avec un léger arrière-plan et effets visuels -->
 <section id="workouts" class="py-5 bg-light section-box">

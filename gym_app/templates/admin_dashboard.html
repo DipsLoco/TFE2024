@@ -10,6 +10,24 @@
 
 <div class="container my-5">
     <h1 class="mb-4 text-center" style="color: #007bff; font-weight: bold;">Tableau de Bord Admin</h1>
+    
+    <style>
+        .btn-success {
+    background-color: #28a745;  /* Vert */
+    border-color: #28a745;  /* Bordure verte */
+}
+
+.btn-lg {
+    font-size: 1.25rem;
+    padding: 10px 20px;  /* Ajuste la taille du bouton */
+    margin: 15px 0;  /* Ajouter un peu d'espace autour du bouton */
+}
+
+    </style>
+<!-- Bouton pour accéder à la réinitialisation du mot de passe -->
+<a href="{% url 'reset_user_password' %}" class="btn btn-success btn-lg">
+    Réinitialiser le mot de passe d'un utilisateur
+</a>
 
     <!-- Section Statistiques Globales -->
     <h2 class="h4 mt-5 mb-4" style="color: #343a40; font-weight: bold;">Statistiques Globales</h2>

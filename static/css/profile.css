@@ -116,12 +116,7 @@
         display: flex;
         justify-content: center;
     }
-    .profil-title {
-        font-family: 'Great Vibes', cursive; /* Utilise une belle calligraphie */
-        font-weight: bold;
-        font-size: 2.5em; /* Ajustez la taille selon vos préférences */
-        color: #007bff; /* Couleur principale (text-primary) */
-    }
+    
     /* Styles des boutons avec effet de survol */
     .btn-hover {
         padding: 0.6rem 1.5rem;

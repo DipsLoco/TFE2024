@@ -51,7 +51,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
 
      <!-- Styles spécifiques pour bannieres et modal cookies -->
-     <link rel="stylesheet" href="{% static 'css/script.css' %}">
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
     <link rel="stylesheet" href="{% static 'css/banner.css' %}">
 
 
@@ -67,24 +67,24 @@
 
     <!-- Bannière Cookies (exclue de /cookies/) -->
     {% if not request.path == '/cookies/' %}
-        {% include 'cookie_consent/banner.html' %}
+    {% include 'cookie_consent/banner.html' %}
         
     {% endif %}
     {% block extra_css %}
     {% if request.path == '/preferences/' %}
     {% endif %}
-{% endblock %}
+    {% endblock %}
 
 
     <!-- Messages Flash -->
-    {% if messages %}
+    <!-- {% if messages %}
         {% for message in messages %}
             <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
                 {{ message }}
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
         {% endfor %}
-    {% endif %}
+    {% endif %} -->
 
     <!-- Contenu principal -->
     {% block content %}
@@ -98,6 +98,10 @@
     <script src="{% static 'js/scripts.js' %}" defer></script>
     <script src="{% static 'js/banner.js' %}"></script>
     <script src="{% static 'js/preferences.js' %}" defer></script>
+
+    <script src="{% static 'js/filter.js' %}"></script> <!-- Filtrage des achats entre les plans et les services-->
+    <script src="{% static 'js/poppup.js' %}"></script>
+
 
 <script>
 document.getElementById('draft-form').addEventListener('input', function() {
@@ -116,6 +120,7 @@ document.getElementById('draft-form').addEventListener('input', function() {
 });
 
     </script>
+    
 </body>
 </html>
 
