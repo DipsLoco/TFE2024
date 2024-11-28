@@ -6,26 +6,27 @@ document.addEventListener("DOMContentLoaded", function () {
     const successMessage = document.getElementById("successMessage");
     const modal = document.getElementById("cookieModal");
     const cookieBanner = document.getElementById("cookieBanner");
+    const analyticsCheckbox = document.querySelector('input[name="analytics"]');
+    const marketingCheckbox = document.querySelector('input[name="marketing"]');
     const analyticsStatus = document.getElementById("analyticsStatus");
     const reopenPreferences = document.getElementById("reopenPreferences");
 
-    if (!form || !successMessage || !cookieBanner || !analyticsStatus) {
-        console.error("Certains éléments nécessaires sont introuvables dans le DOM.");
+    if (!form) {
+        console.error("Formulaire introuvable.");
         return;
     }
 
     console.log("Formulaire détecté :", form);
-    console.log("Conteneur du message de succès détecté :", successMessage);
 
     // Gestion de l'événement de soumission du formulaire
     form.addEventListener("submit", function (event) {
-        event.preventDefault(); // Empêche le rechargement automatique du formulaire
+        event.preventDefault(); // Empêche le rechargement automatique
         console.log("Tentative d'enregistrement des préférences...");
 
-        const analytics = document.querySelector('input[name="analytics"]').checked;
-        const marketing = document.querySelector('input[name="marketing"]').checked;
+        const analytics = analyticsCheckbox.checked;
+        const marketing = marketingCheckbox.checked;
 
-        console.log("Données à envoyer :", { analytics, marketing });
+        console.log("Valeurs envoyées :", { analytics, marketing });
 
         fetch("/fr/gym/preferences/", {
             method: "POST",
@@ -35,48 +36,68 @@ document.addEventListener("DOMContentLoaded", function () {
             },
             body: JSON.stringify({ analytics, marketing })
         })
-            .then(response => {
-                if (!response.ok) {
-                    throw new Error(`Erreur réseau (${response.status})`);
-                }
-                return response.json();
-            })
+            .then(response => response.json())
             .then(data => {
-                console.log("Réponse du serveur :", data);
                 if (data.status === "preferences saved") {
                     console.log("Préférences enregistrées avec succès !");
-                    
-                    // Mettre à jour la bannière avec l'état des cookies
-                    analyticsStatus.textContent = analytics ? "Activés" : "Désactivés";
 
-                    // Afficher la bannière
-                    cookieBanner.style.display = "block";
-
-                    // Afficher le message de succès
-                    successMessage.style.display = "block";
-                    successMessage.classList.add("visible");
-
-                    // Cache le message après 5 secondes
-                    setTimeout(() => {
-                        successMessage.style.display = "none";
-                        successMessage.classList.remove("visible");
-                    }, 5000);
-
-                    // Masquer la modale
-                    if (modal) {
-                        console.log("Fermeture du modal détectée.");
-                        modal.style.display = "none";
-
-                        setTimeout(() => {
-                            if (modal.style.display === "none") {
-                                console.log("Le modal a été fermé avec succès.");
-                            } else {
-                                console.error("Échec de la fermeture du modal.");
-                            }
-                        }, 100);
+                    // Met à jour l'état de la bannière
+                    if (analyticsStatus) {
+                        analyticsStatus.textContent = analytics ? "Activés" : "Désactivés";
                     }
+
+                    // Affiche le message de succès
+                    if (successMessage) {
+                        successMessage.style.display = "block";
+                        successMessage.classList.add("visible");
+                    }
+
+                    // Transition douce et suppression du fade-in
+                    setTimeout(() => {
+                        if (successMessage) {
+                            successMessage.style.opacity = 0;
+                            setTimeout(() => {
+                                successMessage.style.display = "none";
+                                successMessage.classList.remove("visible");
+                            }, 500);
+                        }
+
+                        // Ferme doucement le modal
+                        if (modal) {
+                            modal.style.transition = "transform 0.8s ease, opacity 0.8s ease";
+                            modal.style.transform = "scale(0.9)";
+                            modal.style.opacity = 0;
+                            setTimeout(() => {
+                                modal.style.display = "none";
+                                console.log("Modal fermé avec transition.");
+                            }, 800);
+                        }
+
+                        // Affiche immédiatement la bannière avec une transition Slide-In
+                        if (cookieBanner) {
+                            cookieBanner.style.display = "block"; // Affiche immédiatement
+                            cookieBanner.style.transform = "translateY(-50px)";
+                            cookieBanner.style.opacity = 0;
+                            cookieBanner.style.transition = "transform 0.8s ease, opacity 0.8s ease";
+                            setTimeout(() => {
+                                cookieBanner.style.transform = "translateY(0)";
+                                cookieBanner.style.opacity = 1;
+                                console.log("Bannière affichée avec Slide-In.");
+                            }, 500);
+                        }
+
+                        // Transition vers la page d'accueil avec zoom-in
+                        setTimeout(() => {
+                            console.log("Redirection vers la page d'accueil avec Zoom-In...");
+                            document.body.style.transition = "transform 0.8s ease";
+                            document.body.style.transform = "scale(0.9)";
+                            setTimeout(() => {
+                                window.location.href = "/";
+                            }, 800);
+                        }, 2000);
+                    }, 2000);
                 } else {
-                    alert("Erreur : " + data.message);
+                    alert("Erreur : " + (data.message || "Impossible d'enregistrer vos préférences."));
                 }
             })
             .catch(error => {
@@ -85,33 +106,38 @@ document.addEventListener("DOMContentLoaded", function () {
             });
     });
 
-    // Gestion des basculeurs
-    document.querySelectorAll('.toggle-arrow').forEach(arrow => {
-        arrow.addEventListener('click', function () {
-            const detail = this.parentElement.nextElementSibling;
-            const isHidden = detail.style.display === 'none' || !detail.style.display;
-            detail.style.display = isHidden ? 'block' : 'none';
-            this.classList.toggle('open', isHidden);
-            console.log("Détail basculé :", isHidden ? "Ouvert" : "Fermé");
-        });
-    });
-
-    // Affichage de la modale uniquement sur la page des préférences
-    const currentUrl = window.location.pathname;
-    if (currentUrl.includes("preferences") && modal) {
-        console.log("Affichage de la modale.");
-        modal.style.display = "flex";
-    }
-
     // Rouvrir les préférences depuis la bannière
     if (reopenPreferences) {
         reopenPreferences.addEventListener("click", function (event) {
             event.preventDefault();
-            cookieBanner.style.display = "none"; // Cacher la bannière
-            if (modal) {
-                console.log("Réouverture de la modale...");
-                modal.style.display = "flex"; // Rouvrir la modale
-            }
+            if (cookieBanner) cookieBanner.style.display = "none"; // Cacher la bannière
+            if (modal) modal.style.display = "flex"; // Rouvrir la modale
         });
+    }
+
+    // Gestion des flèches pour afficher/masquer les descriptions
+    const toggleArrows = document.querySelectorAll(".toggle-arrow");
+    toggleArrows.forEach(arrow => {
+        arrow.addEventListener("click", function () {
+            const detail = this.parentElement.nextElementSibling;
+            const isHidden = detail.style.display === "none" || !detail.style.display;
+            detail.style.display = isHidden ? "block" : "none";
+            this.classList.toggle("open", isHidden);
+            console.log("Détail basculé :", isHidden ? "Ouvert" : "Fermé");
+        });
+    });
+
+    // Afficher dynamiquement la bannière sur la page d'accueil avec Slide-In
+    const currentUrl = window.location.pathname;
+    if (currentUrl === "/" && cookieBanner) {
+        cookieBanner.style.display = "block";
+        cookieBanner.style.transform = "translateY(-50px)";
+        cookieBanner.style.opacity = 0;
+        cookieBanner.style.transition = "transform 0.8s ease, opacity 0.8s ease";
+        setTimeout(() => {
+            cookieBanner.style.transform = "translateY(0)";
+            cookieBanner.style.opacity = 1;
+            console.log("Bannière affichée dynamiquement sur la page d'accueil.");
+        }, 500);
     }
 });

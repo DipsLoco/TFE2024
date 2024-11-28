@@ -265,18 +265,7 @@
         box-shadow: 0px 10px 15px rgba(0, 0, 0, 0.2);
     } */
 
-    /* Boutons avec effets */
-    .btn-plan, .btn-service, .contact-btn {
-        transition: all 0.3s ease;
-        border-radius: 50px;
-        font-weight: bold;
-    }
-
-    .btn-plan:hover, .btn-service:hover, .contact-btn:hover {
-        background-color: #0056b3;
-        color: white;
-        transform: scale(1.05);
-    }
+    
 
     /* Images dans les cartes */
     .workout-image, .coach-image, .service-image {
@@ -524,4 +513,5 @@
     width: 100%;
     background: linear-gradient(to right, #f1c40f, #e78f02); /* Ligne dorée */
 }
+
 

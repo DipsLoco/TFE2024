@@ -70,6 +70,10 @@ urlpatterns = [
     path('get_schedule_details/<int:schedule_id>/', views.get_schedule_details, name='get_schedule_details'),
     # URL pour afficher la bannière de consentement
     path('cookie/', views.cookie_consent_view, name='cookie_consent'),
+    path('banner/', views.banner_view, name='banner'),
+
+   
+
 
     # URL pour afficher et gérer les préférences de cookies
     path('preferences/', views.cookie_preferences_view, name='cookie_preferences'),

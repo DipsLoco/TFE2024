@@ -11,23 +11,25 @@
 /* Pour ma section Plan
 
 /* Section "Nos Offres" alignée avec Subscription */
-.subscription-section {
-    background-color: #f8f9fa;
-    padding: 50px 0;
+
+
+/* CSS Pour Section plan */
+
+.plan-card:nth-child(1) .plan-img-container {
+    height: 500px; /* Augmente la hauteur de l'image pour qu'elle prenne plus de place */
 }
-.section-title {
-    font-size: 2.5rem;
-    color: #0056b3;
-    font-weight: bold;
-    text-align: center;
-    margin-bottom: 10px;
+
+.plan-card:nth-child(1) .plan-img {
+    object-fit: cover; /* Assure que l'image s'ajuste sans être déformée */
+    width: 100%;
+    height: 100%; /* Remplit complètement la nouvelle hauteur */
 }
-.section-subtitle {
-    font-size: 1.1rem;
-    color: #6c757d;
-    text-align: center;
-    margin-bottom: 30px;
+
+.plan-card:nth-child(1) .plan-body {
+    margin-top: 20px; /* Ajoute de l'espace sous l'image pour que le texte descende */
 }
+
+/* Uniformité et effet de survol pour les cartes */
 .plan-card {
     border: 1px solid #ddd;
     border-radius: 10px;
@@ -40,51 +42,80 @@
 }
 .plan-card:hover {
     transform: translateY(-5px);
-    box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.2);
+    box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.3);
 }
+
+/* Images dans les plans */
 .plan-img-container {
     width: 100%;
-    height: 250px; /* Assure une hauteur fixe */
+    height: 250px;
     overflow: hidden;
     border-radius: 10px 10px 0 0;
 }
 .plan-img {
     width: 100%;
     height: 100%;
-    object-fit: cover; /* Remplit l'espace sans déformation */
-    display: block;
+    object-fit: cover;
 }
-.plan-header {
-    background-color: #0056b3;
+
+/* Couleurs dynamiques pour chaque plan */
+.plan-card.plan-blue .plan-header {
+    background-color: #0056b3; /* Bleu pour le premier plan */
     color: white;
-    padding: 20px;
-    text-align: center;
-    border-radius: 0;
 }
-.plan-name {
-    font-size: 1.5rem;
-    font-weight: bold;
+.plan-card.plan-green .plan-header {
+    background-color: #27ae60; /* Vert pour le deuxième plan */
+    color: white;
 }
+.plan-card.plan-orange .plan-header {
+    background-color: #e67e22; /* Orange pour le troisième plan */
+    color: white;
+}
+
+/* Icônes devant le nom */
+
+
+/* Texte "Durée" stylisé */
 .plan-duration {
-    font-size: 1rem;
-    margin-top: 5px;
+    font-size: 0.9rem;
+    font-style: italic;
 }
+
+/* Prix */
 .plan-price {
     font-size: 2rem;
-    color: #27ae60;
+    color: black; /* Couleur noire pour le prix */
     font-weight: bold;
-    text-align: center;
-    margin: 20px 0;
+    margin-bottom: 10px;
 }
-.plan-description {
-    font-size: 0.95rem;
-    color: #6c757d;
-    text-align: justify;
+
+/* Astérisque sous le prix */
+.ast-icon {
+    font-size: 1.5rem; /* Plus grand pour une meilleure visibilité */
+    margin-left: 5px;
+    text-decoration: none;
 }
-.btn-block {
-    display: block;
-    width: 100%;
+.ast-icon:hover {
+    text-decoration: underline;
 }
+
+/* Bouton "Sélectionner Votre Plan" */
+.btn-plan {
+    background-color: white;
+    border: 2px solid #0056b3;
+    color: #0056b3;
+    font-weight: bold;
+    text-transform: uppercase;
+    transition: all 0.3s ease;
+}
+.btn-plan:hover {
+    background-color: #0056b3;
+    color: white;
+    transform: scale(1.05);
+}
+
+
+
 
 
 /* Styles pour l'effet visuel */

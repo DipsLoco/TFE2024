@@ -46,9 +46,11 @@
                             <p class="plan-duration">Durée : {{ plan.duration }} jours</p>
                         </div>
                         <div class="plan-body">
-                            <h4 class="plan-price">{{ plan.price }}€</h4>
+                            <h4 class="plan-price"><a href="{% url 'conditions_vente' %}" class="text-warning ast-icon" title="Conditions générales de vente">*</a>
+                            {{ plan.price }}€</h4>
                             <p class="plan-description text-muted">{{ plan.description }}</p>
-                            <a href="{% url 'subscribe' plan.pk %}" class="btn btn-primary btn-block mt-3 shadow-sm">Souscrire Maintenant</a>
+                            <a href="{% url 'subscribe' plan.pk %}" class="btn btn-primary btn-block mt-3 shadow-sm">En savoir Plus</a>
+
                         </div>
                     </div>
                 </div>
@@ -65,6 +67,16 @@
 </footer>
 
 <style>
+
+/* Astérisque sous le prix */
+.ast-icon {
+    font-size: 1.5rem; /* Plus grand pour une meilleure visibilité */
+    margin-left: 5px;
+    text-decoration: none;
+}
+.ast-icon:hover {
+    text-decoration: underline;
+}
 
 /* Héros */
 .subscription-hero {
@@ -142,7 +154,7 @@
 }
 .plan-price {
     font-size: 2rem;
-    color: #27ae60;
+    color: #000000;
     font-weight: bold;
     text-align: center;
     margin: 20px 0;

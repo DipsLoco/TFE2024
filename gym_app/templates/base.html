@@ -14,6 +14,8 @@
     <!-- CSS et bibliothèques externes -->
      <!-- Bootstrap Icons -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.4.1/font/bootstrap-icons.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+
     <link href="https://cdn.jsdelivr.net/npm/boxicons@2.1.4/css/boxicons.min.css" rel="stylesheet" />
 
     <link href="{% static 'css/styles.css' %}" rel="stylesheet" />
@@ -62,6 +64,13 @@
 </head>
 
 <body>
+    <!-- Bannière de confirmation avec lien pour rouvrir la fenêtre de préférences -->
+<!-- <div id="cookieBanner" class="cookie-banner" style="display: none;">
+    <p>🎉 Vos préférences ont bien été sauvegardées et prises en compte. Bonne navigation ! 😊
+        Cookies analytiques : <strong id="analyticsStatus">Désactivés</strong>.</p>
+    <a href="#" id="reopenPreferences">Modifier mes préférences</a>
+</div> -->
+
     <!-- Navbar -->
     {% include 'navbar.html' %}
 

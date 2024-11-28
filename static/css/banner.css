@@ -5,6 +5,8 @@
 
 /* Bannière de cookies */
 .cookie-banner {
+    opacity: 0; /* Bannière masquée initialement */
+    transition: opacity 1.5s ease-in-out; /* Transition fluide */
     position: fixed;
     bottom: 20px;
     left: 50%;

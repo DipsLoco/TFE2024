@@ -8,10 +8,14 @@
     <head>
     
         <!-- Lier ton fichier CSS principal -->
+         
         <link rel="stylesheet" href="{% static 'css/style.css' %}">
     
         <!-- Lier le fichier CSS spécifique à la page si nécessaire -->
-         
+         <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+         <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" rel="stylesheet">
+
+
         <link rel="stylesheet" href="{% static 'css/home.css' %}">
     </head>
 
@@ -230,12 +234,12 @@
     <div class="container px-5 my-5">
         <div class="text-center mb-5">
             <h2 class="display-5 fw-bold text-dark">Nos Offres</h2>
-            <p class="lead mb-0">Sélectionnez le plan qui vous convient !</p>
+            <p class="lead mb-0">Sélectionnez le plan qui vous convient !</p>
         </div>
         <div class="row gy-4 justify-content-center">
             {% for plan in plans %}
             <div class="col-lg-4 col-md-6 d-flex">
-                <div class="card h-100 shadow-sm plan-card">
+                <div class="card h-100 shadow-sm plan-card {% if forloop.first %}plan-blue{% elif forloop.counter == 2 %}plan-green{% else %}plan-orange{% endif %}">
                     <div class="plan-img-container">
                         {% if plan.image %}
                             <img src="{{ plan.image.url }}" class="plan-img" alt="{{ plan.name }}">
@@ -243,18 +247,19 @@
                             <img src="path/to/default/image.jpg" class="plan-img" alt="Image par défaut">
                         {% endif %}
                     </div>
-                    <div class="card-body">
-                        <div class="plan-header text-center">
-                            <h3 class="plan-name">{{ plan.name }}</h3>
+                    <div class="plan-header text-center">
+                        <h3 class="plan-name mb-1">{{ plan.name }}</h3>
+                        <i class="plan-icon {% if forloop.first %}fas fa-dumbbell{% elif forloop.counter == 2 %}fas fa-weight-hanging{% else %}fas fa-trophy{% endif %} my-2"></i>
+                        <p class="plan-duration"><em>Durée : {{ plan.duration }} jours</em></p>
+                    </div>
+                    <div class="plan-body">
+                        <div class="text-center mb-3">
+                            <span class="display-4 plan-price fw-bold text-dark">{{ plan.price }}€</span>
+                            <a href="{% url 'conditions_vente' %}" class="text-warning ast-icon" title="Conditions générales de vente">*</a>
                         </div>
-                        <div class="plan-body">
-                            <div class="text-center mb-3">
-                                <span class="display-4 plan-price fw-bold">{{ plan.price }}€</span>
-                                <span class="text-muted">/ mois</span>
-                            </div>
-                            <p class="plan-description text-muted text-center">{{ plan.description|truncatechars:200 }}</p>
-                        </div>
+                        <p class="plan-description text-muted text-center">{{ plan.description|truncatechars:200 }}</p>
                         <a class="btn btn-outline-primary d-grid btn-plan mt-3" href="{% url 'cart:add_plan_to_cart' plan.id %}">Sélectionner Votre Plan</a>
+                        <a href="{% url 'subscribe' plan.pk %}" class="btn btn-primary btn-block mt-3 shadow-sm">En savoir Plus</a>
                     </div>
                 </div>
             </div>
@@ -265,48 +270,141 @@
 
 <style>
 
-.plan-card:nth-child(1) .plan-img-container {
-    height: 500px; /* Augmente la hauteur de l'image pour qu'elle prenne plus de place */
-}
+/* CSS Pour Section plan */
 
-.plan-card:nth-child(1) .plan-img {
-    object-fit: cover; /* Assure que l'image s'ajuste sans être déformée */
+/* Images dans les plans */
+.plan-img-container {
     width: 100%;
-    height: 100%; /* Remplit complètement la nouvelle hauteur */
+    height: 250px;
+    overflow: hidden;
+    border-radius: 10px 10px 0 0;
+    margin-bottom: 10px; /* Espacement entre la photo et la section du nom */
+}
+.plan-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
 }
 
-.plan-card:nth-child(1) .plan-body {
-    margin-top: 20px; /* Ajoute de l'espace sous l'image pour que le texte descende */
+/* Réduction des tailles des cartes tout en maintenant la qualité */
+.plan-card {
+    width: 95%; /* Réduction globale de la largeur */
+    max-width: 360px; /* Taille maximale pour éviter des cartes trop grandes */
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    background-color: white;
+    box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.plan-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.3);
 }
 
+/* Couleurs dynamiques pour chaque plan */
+.plan-card.plan-blue .plan-header {
+    background-color: #0056b3; /* Bleu pour le premier plan */
+    color: white;
+}
+.plan-card.plan-green .plan-header {
+    background-color: #27ae60; /* Vert pour le deuxième plan */
+    color: white;
+}
+.plan-card.plan-orange .plan-header {
+    background-color: #e67e22; /* Orange pour le troisième plan */
+    color: white;
+}
+
+/* Icônes alignées à gauche */
+.plan-header .small {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start; /* Alignement complet à gauche */
+    gap: 10px; /* Espacement entre l'icône et le texte */
+}
+.plan-icon {
+    font-size: 1.5rem;
+    vertical-align: middle;
+    color: white;
+}
+
+/* Recentrement du nom et de la durée */
+.plan-name {
+    text-align: center; /* Centre le nom du plan */
+    font-size: 1.2rem;
+    margin-bottom: 5px;
+}
+.plan-duration {
+    text-align: center; /* Centre également la durée */
+    font-size: 0.9rem;
+    font-style: italic;
+}
+
+/* Prix */
+.plan-price {
+    font-size: 2rem;
+    color: black; /* Couleur noire pour le prix */
+    font-weight: bold;
+    margin-bottom: 10px;
+}
+
+/* Astérisque sous le prix */
+.ast-icon {
+    font-size: 1.5rem; /* Plus grand pour une meilleure visibilité */
+    margin-left: 5px;
+    text-decoration: none;
+}
+.ast-icon:hover {
+    text-decoration: underline;
+}
+
+/* Bouton "Sélectionner Votre Plan" */
+.btn-plan {
+    background-color: white;
+    border: 2px solid #0056b3;
+    color: #0056b3;
+    font-weight: bold;
+    text-transform: uppercase;
+    transition: all 0.3s ease;
+}
+.btn-plan:hover {
+    background-color: #0056b3;
+    color: white;
+    transform: scale(1.05);
+}
 
 </style>
 
-<!-- Catalog Services avec un effet de zoom et de transition -->
+
 <section id="catalog-services" class="services-section section-box">
     <div class="container px-5 my-5">
         <div class="text-center mb-5">
             <h2 class="display-5 fw-bold text-dark">Nos Services</h2>
         </div>
-        <div class="row">
+        <div class="row g-4">
             {% for item in all_services %}
-            <div class="col-md-4 mb-4">
-                <div class="card h-100 shadow-sm service-card">
+            <div class="col-lg-4 col-md-6">
+                <div class="card service-card h-100 border-0 shadow-lg">
                     {% if item.service.image %}
                     <img src="{{ item.service.image.url }}" alt="Image de {{ item.service.name }}" class="card-img-top service-image">
                     {% else %}
                     <img src="{% static 'default/image/path.jpg' %}" alt="Image par défaut" class="card-img-top service-image">
                     {% endif %}
+                    <!-- Bannière pour le titre -->
+                    <div class="card-title-banner">
+                        <h4 class="card-title fw-bold">{{ item.service.name }}</h4>
+                    </div>
                     <div class="card-body text-center">
-                        <h4 class="card-title">{{ item.service.name }}</h4>
-                        <p class="card-text">{{ item.service.description|truncatechars:40 }}</p>
-                        <p><strong>Prix :</strong> {{ item.service.price }}€</p>
+                        <p class="card-text text-muted">{{ item.service.description|truncatechars:46 }}</p>
+                        <p><strong><a href="{% url 'conditions_vente' %}" class="text-warning ast-icon" title="Conditions générales de vente">*</a>
+                        Prix : </strong> <span class="text-success">{{ item.service.price }}€</span></p>
                         {% if item.type != 'gym_accessory' and item.service.duration %}
                         <p><strong>Durée :</strong> {{ item.service.duration }} jours</p>
                         {% endif %}
-                        <div class="d-grid">
-                            <a href="{% url 'service_detail' item.service.id %}" class="btn btn-primary btn-service">En savoir plus</a>
-                        </div>
+                        <a href="{% url 'service_detail' item.service.id %}" class="btn btn-outline-primary rounded-pill mt-3">En savoir plus</a>
                     </div>
                 </div>
             </div>
@@ -314,6 +412,100 @@
         </div>
     </div>
 </section>
+
+
+<style>
+
+/* Catalog-service */
+
+/* Bannière bleue pour le titre */
+.card-title-banner {
+    background-color: #0056b3;
+    color: white;
+    padding: 10px 0;
+    text-align: center;
+    border-top-left-radius: 15px;
+    border-top-right-radius: 15px;
+}
+
+/* Service Card */
+.service-card {
+    border-radius: 15px;
+    transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+    overflow: hidden;
+    position: relative;
+    background: linear-gradient(to bottom, #ffffff, #f9f9f9);
+    height: 380px; /* Réduction de la hauteur de la carte */
+}
+
+/* Animation au survol */
+.service-card:hover {
+    transform: scale(1.05);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+}
+
+/* Image des services */
+.service-image {
+    height: 180px; /* Hauteur ajustée pour réduire l'espace total */
+    object-fit: cover;
+    border-top-left-radius: 15px;
+    border-top-right-radius: 15px;
+    transition: transform 0.3s ease-in-out;
+}
+
+.service-image:hover {
+    transform: scale(1.1);
+}
+
+/* Texte des cartes */
+.card-title {
+    font-size: 1.1rem;
+    text-transform: uppercase; /* Mise en majuscules pour le style des titres */
+    margin: 0; /* Supprime l'espacement interne */
+}
+
+.card-text {
+    font-size: 0.9rem;
+    color: #6c757d;
+    margin-bottom: 8px; /* Réduction de l'espace blanc */
+}
+
+/* Prix */
+.card-body p strong {
+    margin-right: 5px; /* Espace léger après l'astérisque */
+}
+
+/* Bouton */
+.btn-outline-primary {
+    border: 2px solid #0056b3;
+    font-weight: bold;
+    transition: all 0.3s ease-in-out;
+}
+
+.btn-outline-primary:hover {
+    background-color: #0056b3;
+    color: white;
+    box-shadow: 0 5px 15px rgba(0, 86, 179, 0.4);
+}
+
+/* Ombre pour les cartes */
+.shadow-lg {
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+}
+
+/* Astérisque pour le prix */
+.ast-icon {
+    font-size: 1.5rem;
+    margin-left: 5px;
+    text-decoration: none;
+}
+
+.ast-icon:hover {
+    text-decoration: underline;
+}
+
+
+</style>
 
 <!-- Section Commentaires -->
 <section class="testimonial-section">

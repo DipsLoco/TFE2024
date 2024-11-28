@@ -116,9 +116,6 @@ from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
 import json
 
-from django.http import JsonResponse
-from django.shortcuts import render
-
 def cookie_preferences_view(request):
     if request.method == "POST":
         # Récupérer les données envoyées
@@ -133,6 +130,9 @@ def cookie_preferences_view(request):
 
     return render(request, "cookie_consent/preferences.html")
 
+
+def banner_view(request):
+    return render(request, 'cookie_consent/banner.html')
 
 
 
@@ -411,20 +411,24 @@ def subscription(request, pk):
 
 # Souscription Abonnement
 
+from django.shortcuts import render, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from .models import Plan, Subscription
 
 @login_required
-def subscribe(request, pk):
-    plan = get_object_or_404(Plan, pk=pk)
+def subscribe(request, pk=None):
+    plan = get_object_or_404(Plan, pk=pk)  # Récupérer uniquement le plan correspondant au pk fourni
+
     if request.method == 'POST':
-        # Créer une nouvelle souscription pour l'utilisateur connecté
         subscription = Subscription.objects.create(
             user=request.user,
             plan=plan,
             payment_status='pending'
         )
-        # Rediriger vers une page de paiement (à implémenter)
-        return redirect('payment', subscription.id)
+    
+
     return render(request, 'subscription.html', {'plan': plan})
+
 
 
 

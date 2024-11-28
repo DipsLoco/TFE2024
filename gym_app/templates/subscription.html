@@ -7,39 +7,48 @@
         <div class="row gx-5 justify-content-center">
             <div class="col-lg-8 col-md-10" style="background-color: rgba(0, 0, 0, 0.7); padding: 30px; border-radius: 15px;">
                 <h1 class="display-3 fw-bold text-white mb-3 animate__animated animate__fadeInDown">Rejoignez BE-FIT</h1>
-                <p class="lead text-white-50 mb-4 animate__animated animate__fadeInUp">Découvrez un nouveau style de vie avec nos plans d'abonnement conçus pour répondre à vos besoins. Transformez votre bien-être dès aujourd'hui !</p>
-                <a href="#plans-section" class="btn btn-warning btn-lg px-4 py-2 text-dark fw-bold shadow animate__animated animate__pulse animate__infinite">Explorez nos plans</a>
+                <p class="lead text-white-50 mb-4 animate__animated animate__fadeInUp">Découvrez un nouveau style de vie avec nos plans d'abonnement conçus pour répondre à vos besoins. Transformez votre bien-être dès aujourd'hui !</p>
             </div>
         </div>
     </div>
 </header>
 
 <section id="plans-section" class="py-5" style="background-color: #f8f9fa;">
-    <div class="container text-center">
-        <h2 class="text-primary fw-bold mb-4">Choisissez le plan parfait pour vous</h2>
-        <p class="text-muted mb-5">Que vous soyez débutant ou expert, nous avons un plan adapté à vos besoins. Chaque abonnement inclut un accès complet à nos installations, des cours personnalisés, et bien plus encore.</p>
-        <div class="row gy-4">
-            {% for plan in plans %}
-            <div class="col-lg-4 col-md-6">
-                <div class="card border-0 shadow-lg">
-                    <div class="card-header bg-primary text-white text-center py-4" style="border-radius: 10px 10px 0 0;">
-                        <h5 class="card-title mb-0 fw-bold">{{ plan.name }}</h5>
-                        <p class="card-text mt-2">Durée : <strong>{{ plan.duration }} jours</strong></p>
-                    </div>
-                    <div class="card-body">
-                        <h3 class="card-price text-center text-success fw-bold mb-4">{{ plan.price }} €</h3>
-                        <ul class="list-unstyled text-muted">
-                            <li><i class="bi bi-check-circle-fill text-success"></i> Accès complet aux équipements</li>
-                            <li><i class="bi bi-check-circle-fill text-success"></i> Plans de coaching personnalisés</li>
-                            <li><i class="bi bi-check-circle-fill text-success"></i> Sessions de groupe incluses</li>
-                        </ul>
-                        <button class="btn btn-primary btn-block mt-4 shadow-sm fw-bold" id="checkout-button-{{ plan.id }}" data-plan="{{ plan.id }}">
-                            Souscrire avec Stripe
-                        </button>
-                    </div>
+    <div class="container">
+        <div class="row gy-4 animate__animated animate__fadeIn">
+            <!-- Colonne image -->
+            <div class="col-lg-5">
+                <div class="plan-img-container">
+                    {% if plan.image %}
+                        <img src="{{ plan.image.url }}" class="plan-img" alt="{{ plan.name }}">
+                    {% else %}
+                        <img src="path/to/default/image.jpg" class="plan-img" alt="Image par défaut">
+                    {% endif %}
                 </div>
             </div>
-            {% endfor %}
+            <!-- Colonne description -->
+            <div class="col-lg-7">
+                <h2 class="text-primary fw-bold mb-3">{{ plan.name }}</h2>
+                <!-- Icônes spécifiques -->
+                <div class="mb-3">
+                    <i class="fas {% if plan.pk == 1 %}fa-dumbbell{% elif plan.pk == 2 %}fa-weight-hanging{% else %}fa-trophy{% endif %}" 
+                       style="font-size: 2rem; color: #0056b3;"></i>
+                </div>
+                <h3 class="card-price text-dark fw-bold mb-4">
+                    <a href="{% url 'conditions_vente' %}" class="text-warning ast-icon" title="Conditions générales de vente">*</a>
+                    {{ plan.price }} €
+                </h3>
+                <p class="text-muted mb-4" style="font-size: 1.1rem;">{{ plan.description }}</p>
+                <ul class="list-unstyled text-muted">
+                    <li><i class="bi bi-check-circle-fill text-success"></i> Accès complet aux équipements</li>
+                    <li><i class="bi bi-check-circle-fill text-success"></i> Alertes pour séances disponibles</li>
+                    <li><i class="bi bi-check-circle-fill text-success"></i> Sessions de groupe incluses</li>
+                </ul>
+                <div class="d-flex justify-content-start mt-4">
+                    <a href="{% url 'cart:add_plan_to_cart' plan.id %}" class="btn btn-success me-3">Souscrire</a>
+                    <a href="{% url 'subscription_list' %}" class="btn btn-secondary me-3">Voir les autres plans</a>
+                </div>
+            </div>
         </div>
     </div>
 </section>
@@ -47,157 +56,82 @@
 <footer class="bg-dark text-white py-4">
     <div class="container text-center">
         <p class="mb-0">Rejoignez des milliers de membres satisfaits qui ont déjà transformé leur vie avec BE-FIT.</p>
-        <small>© {{ current_year }} BE-FIT. Tous droits réservés.</small>
     </div>
 </footer>
 
-<!-- Stripe Checkout script -->
-<script src="https://js.stripe.com/v3/"></script>
-<script>
-    const stripe = Stripe('{{ stripe_public_key }}');
-
-    document.querySelectorAll('button[id^="checkout-button"]').forEach(button => {
-        button.addEventListener('click', function () {
-            const planId = this.dataset.plan;
-            fetch("{% url 'create_checkout_session' %}?plan_id=" + planId, {
-                method: "POST",
-                headers: {
-                    "X-CSRFToken": "{{ csrf_token }}"
-                }
-            })
-            .then(response => response.json())
-            .then(data => {
-                return stripe.redirectToCheckout({ sessionId: data.id });
-            })
-            .then(result => {
-                if (result.error) {
-                    alert(result.error.message);
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-            });
-        });
-    });
-</script>
 <style>
 
-/* Héros */
-.subscription-hero {
-    background-image: url('/media/background_images/background.jpg');
-    background-size: cover;
-    background-position: center;
-    padding: 100px 0;
-    text-align: center;
-    color: white;
+/* Astérisque sous le prix */
+.ast-icon {
+    font-size: 1.5rem; /* Plus grand pour une meilleure visibilité */
+    margin-left: 5px;
+    text-decoration: none;
 }
-.hero-content {
-    background: rgba(0, 0, 0, 0.7);
-    padding: 30px;
-    border-radius: 15px;
-    display: inline-block;
-}
-.hero-title {
-    font-size: 3rem;
-    font-weight: 700;
-    margin-bottom: 20px;
-}
-.hero-subtitle {
-    font-size: 1.2rem;
-    margin-bottom: 30px;
-}
-.explore-btn {
-    background-color: #f1c40f;
-    border: none;
-    font-weight: bold;
-    padding: 15px 30px;
+.ast-icon:hover {
+    text-decoration: underline;
 }
 
-/* Section Plans */
-.subscription-plans {
-    background-color: #f8f9fa;
-    padding: 50px 0;
-}
-.section-title {
-    font-size: 2.5rem;
-    color: #0056b3;
-    font-weight: bold;
-    text-align: center;
-    margin-bottom: 10px;
-}
-.section-subtitle {
-    font-size: 1.1rem;
-    color: #6c757d;
-    text-align: center;
-    margin-bottom: 30px;
-}
-.plan-card {
-    border: 1px solid #ddd;
-    border-radius: 10px;
-    background-color: white;
-    box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.1);
-    transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
-.plan-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.2);
-}
-.plan-header {
-    background-color: #0056b3;
-    color: white;
-    padding: 20px;
-    text-align: center;
-    border-radius: 10px 10px 0 0;
-}
-.plan-name {
-    font-size: 1.5rem;
-    font-weight: bold;
-}
-.plan-duration {
-    font-size: 1rem;
-    margin-top: 5px;
-}
-.plan-price {
-    font-size: 2rem;
-    color: #27ae60;
-    font-weight: bold;
-    text-align: center;
-    margin: 20px 0;
-}
-.plan-benefits {
-    list-style: none;
-    padding: 0;
-    color: #6c757d;
-    font-size: 0.95rem;
-}
-.plan-benefits li {
-    margin-bottom: 10px;
-}
-.plan-benefits i {
-    color: #27ae60;
-    margin-right: 10px;
-}
-.subscribe-btn {
-    background-color: #f1c40f;
-    border: none;
-    font-weight: bold;
+/* Section image */
+.plan-img-container {
     width: 100%;
-    padding: 10px 0;
-    border-radius: 0 0 10px 10px;
-    transition: background-color 0.3s ease;
+    height: auto;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.2);
+    transition: box-shadow 0.3s ease-in-out;
 }
-.subscribe-btn:hover {
-    background-color: #e78f02;
+.plan-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+.plan-img-container:hover {
+    box-shadow: 0px 10px 20px rgba(0, 0, 0, 0.4);
 }
 
-/* Footer */
-.subscription-footer {
-    background-color: #343a40;
-    color: white;
-    padding: 20px 0;
-    font-size: 0.9rem;
+/* Section description */
+h2 {
+    font-size: 2.5rem;
+    font-weight: bold;
+}
+.card-price {
+    font-size: 2rem;
+    color: black; /* Prix en noir */
+    font-weight: bold;
+}
+.text-muted {
+    font-size: 1.1rem;
+    line-height: 1.6;
 }
 
+/* Boutons */
+.btn {
+    font-size: 1.2rem;
+    font-weight: bold;
+    padding: 10px 20px;
+    border-radius: 10px;
+    transition: transform 0.3s ease, background-color 0.3s ease;
+}
+.btn-success:hover {
+    background-color: #218838;
+    transform: scale(1.05);
+}
+.btn-secondary:hover {
+    background-color: #6c757d;
+    transform: scale(1.05);
+}
 
+/* Effets d'animation */
+.animate__fadeIn {
+    animation: fadeIn 1.5s ease-in-out;
+}
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
 </style>
 {% endblock %}

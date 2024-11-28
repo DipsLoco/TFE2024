@@ -1,16 +1,16 @@
 {% extends 'base.html' %}
 {% load i18n %}
 {% block content %}
-<div class="container my-5">
-    <h1 class="text-center"><i class="fas fa-file-contract"></i> Conditions Générales de Vente</h1>
-    <p class="text-center">
+<div class="terms-container my-5">
+    <h1 class="terms-title text-center"><i class="fas fa-file-contract"></i> Conditions Générales de Vente</h1>
+    <p class="terms-text text-center">
         Bienvenue sur le site de BEFIT. Les présentes conditions générales de vente (CGV) régissent l’ensemble des 
         transactions réalisées sur notre site internet et sont applicables à toute souscription de services ou produits 
         offerts par BEFIT.
     </p>
 
-    <h2><i class="fas fa-building"></i> 1. Informations sur la société</h2>
-    <p>
+    <h2 class="terms-subtitle"><i class="fas fa-building"></i> 1. Informations sur la société</h2>
+    <p class="terms-text">
         <strong>BEFIT S.A.</strong><br>
         Adresse : 18, Place Eugene Simonis, 1081 Bruxelles, Belgique<br>
         Tél. : +32 484 86 01 33<br>
@@ -18,66 +18,110 @@
         Horaires : Du lundi au dimanche, de 07h à 19h
     </p>
 
-    <h2><i class="fas fa-shopping-cart"></i> 2. Commandes</h2>
-    <p>
+    <h2 class="terms-subtitle"><i class="fas fa-shopping-cart"></i> 2. Commandes</h2>
+    <p class="terms-text">
         Toute commande passée sur notre site engage l’utilisateur dès validation. Vous recevrez un email de confirmation. 
         BEFIT se réserve le droit de refuser une commande pour tout motif légitime.
     </p>
 
-    <h2><i class="fas fa-euro-sign"></i> 3. Prix et Paiements</h2>
-    <p>
+    <h2 class="terms-subtitle"><i class="fas fa-euro-sign"></i> 3. Prix et Paiements</h2>
+    <p class="terms-text">
         Tous les prix affichés sont en euros et incluent la TVA. Le paiement se fait en ligne via les plateformes sécurisées 
         et doit être validé avant la livraison ou l'activation de tout service.
     </p>
 
-    <h2><i class="fas fa-truck"></i> 4. Livraison</h2>
-    <p>
+    <h2 class="terms-subtitle"><i class="fas fa-truck"></i> 4. Livraison</h2>
+    <p class="terms-text">
         Les services (abonnements, accès aux installations, etc.) sont activés immédiatement après validation du paiement.
         Pour les produits physiques, la livraison s’effectue à l’adresse renseignée lors de la commande.
     </p>
 
-    <h2><i class="fas fa-undo-alt"></i> 5. Droit de rétractation</h2>
-    <p>
+    <h2 class="terms-subtitle"><i class="fas fa-undo-alt"></i> 5. Droit de rétractation</h2>
+    <p class="terms-text">
         Vous disposez de 14 jours pour exercer votre droit de rétractation, sauf exception prévue par la loi.
     </p>
 
-    <h2><i class="fas fa-headset"></i> 6. Contact</h2>
-    <p>
+    <h2 class="terms-subtitle"><i class="fas fa-headset"></i> 6. Contact</h2>
+    <p class="terms-text">
         Pour toute question, contactez-nous via l'email : <a href="mailto:befit@gmail.com">befit@gmail.com</a> ou par téléphone 
         au +32 484 86 01 33.
     </p>
 </div>
 
 <style>
-    .container h1, .container h2 {
+    /* Conteneur principal */
+    .terms-container {
+        padding: 40px 20px;
+        max-width: 1200px;
+        margin: 0 auto;
+        background-color: #f9f9f9;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+    }
+
+    /* Titre principal */
+    .terms-title {
         font-family: 'Arial', sans-serif;
         color: #0056b3;
         margin-top: 20px;
     }
 
-    .container h2 {
+    /* Sous-titres */
+    .terms-subtitle {
         font-size: 1.5em;
+        font-family: 'Arial', sans-serif;
+        color: #0056b3;
         margin-top: 25px;
     }
 
-    .container p, .container li {
+    /* Texte général */
+    .terms-text {
         font-size: 1.1em;
         color: #333;
         line-height: 1.6;
     }
 
-    .container a {
+    /* Liens */
+    .terms-container a {
         color: #0056b3;
         text-decoration: none;
     }
 
-    .container a:hover {
+    .terms-container a:hover {
         text-decoration: underline;
     }
 
-    .fas {
+    /* Icônes */
+    .terms-container .fas {
         color: #f1c40f;
         margin-right: 8px;
+    }
+
+    /* Animation pour une touche moderne */
+    @keyframes fadeInUp {
+        0% {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        100% {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    .terms-title, .terms-subtitle, .terms-text {
+        animation: fadeInUp 1s ease-out;
+    }
+
+    /* Responsivité */
+    @media (max-width: 768px) {
+        .terms-title {
+            font-size: 2.5em;
+        }
+
+        .terms-subtitle {
+            font-size: 1.4em;
+        }
     }
 </style>
 {% endblock %}
