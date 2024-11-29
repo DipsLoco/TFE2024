@@ -1,12 +1,14 @@
 from django.urls import path
 from django.conf.urls.static import static
 from befit_app import settings
-from .views import ( admin_dashboard, cancel_reservation, affiche_workout, coach_dashboard, delete_draft, delete_message, mark_important, send_message, messages_inbox, subscribe, subscription_list, validate_username, validate_password, profile, edit_profile, workout_list, subscription, coach_dashboard, contact_coach, contact_member, add_workout_schedule, remind_subscription)
+from .views import ( HelloWorldAPIView, admin_dashboard, cancel_reservation, affiche_workout, coach_dashboard, delete_draft, delete_message, mark_important, send_message, messages_inbox, subscribe, subscription_list, validate_username, validate_password, profile, edit_profile, workout_list, subscription, coach_dashboard, contact_coach, contact_member, add_workout_schedule, remind_subscription)
 from gym_app import views
 from django_q.tasks import schedule
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib.auth import views as auth_views
+from rest_framework.routers import DefaultRouter
+# from .views import CatalogServiceViewSet
 
 
 
@@ -71,8 +73,8 @@ urlpatterns = [
     # URL pour afficher la bannière de consentement
     path('cookie/', views.cookie_consent_view, name='cookie_consent'),
     path('banner/', views.banner_view, name='banner'),
-
-   
+    # URL pour Api rest
+    path('api/hello/', HelloWorldAPIView.as_view(), name='hello-world'),
 
 
     # URL pour afficher et gérer les préférences de cookies

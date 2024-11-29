@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'cart',
     'django_q',
     'cookie_consent',
+    'rest_framework',
 ]
 
 LOGGING = {
