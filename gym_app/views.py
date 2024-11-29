@@ -73,25 +73,9 @@ from django.contrib.auth.decorators import login_required
 from django.utils.decorators import method_decorator
 from django import forms
 from django.contrib.auth.models import User
-from rest_framework.response import Response
-from rest_framework.views import APIView
-from rest_framework import viewsets
-from rest_framework.permissions import IsAuthenticated
-from .models import CatalogService
-# from .serializers import CatalogServiceSerializer
 
-# class SecureCatalogServiceViewSet(viewsets.ModelViewSet):
-#     queryset = CatalogService.objects.all()
-#     serializer_class = CatalogServiceSerializer
-#     permission_classes = [IsAuthenticated]  # Restreint l'accès
-
-
-
-class HelloWorldAPIView(APIView):
-    def get(self, request):
-        return Response({"message": "Hello, World!"})
-
-
+from django.contrib.auth import get_user_model
+User = get_user_model()
 
 
 def test_reportlab():

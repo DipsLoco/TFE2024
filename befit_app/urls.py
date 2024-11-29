@@ -3,25 +3,17 @@ from django.urls import path, include
 from . import settings
 from django.conf.urls.static import static
 from django.conf.urls.i18n import i18n_patterns
-from rest_framework.routers import DefaultRouter
-# from .views import SecureCatalogServiceViewSet
 
-
-app_name = 'cart'
-app_name = 'gym°app'
-
-
-# URLs non dépendantes de la langue (comme l'administration)
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('i18n/', include('django.conf.urls.i18n')),
-    path('api/', include('gym_app.urls')),  # Inclut les routes API de gym_app
-    # path('gym/', include('gym_app.urls')),
+    path('i18n/', include('django.conf.urls.i18n')),  # Inclure les chemins de langue
+    # path('api/', include('api.urls')),  # Inclut les URLs de l'application API sans prefixe de langue ex : http://127.0.0.1:8000/api
 ] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
 
-# URLs avec le préfixe de langue
+# URLs avec préfixe linguistique
 urlpatterns += i18n_patterns(
-    path('', include('gym_app.urls')),  # Application principale
-    path('gym/', include('gym_app.urls')),
-    path('cart/', include('cart.urls', namespace='cart')),  # Inclut les URLs de l'application cart avec le namespace 'cart'  # Application du panier
+    path('api/', include('api.urls')),  # Inclut les URLs de l'application API avec le prefixe de langue devant ex en local : http://127.0.0.1:8000/fr/api
+    path('', include('gym_app.urls')),  # Inclut l'application principale 'gym_app' avec préfixe de langue
+    path('gym/', include('gym_app.urls')),  # Même pour la route gym/
+    path('cart/', include('cart.urls', namespace='cart')),  # Inclut 'cart' avec son propre namespace
 )

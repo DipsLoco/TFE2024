@@ -1,38 +1,46 @@
 from django.urls import path
 from django.conf.urls.static import static
 from befit_app import settings
-from .views import ( HelloWorldAPIView, admin_dashboard, cancel_reservation, affiche_workout, coach_dashboard, delete_draft, delete_message, mark_important, send_message, messages_inbox, subscribe, subscription_list, validate_username, validate_password, profile, edit_profile, workout_list, subscription, coach_dashboard, contact_coach, contact_member, add_workout_schedule, remind_subscription)
-from gym_app import views
+from . import views
 from django_q.tasks import schedule
-from django.conf import settings
-from django.conf.urls.static import static
 from django.contrib.auth import views as auth_views
-from rest_framework.routers import DefaultRouter
-# from .views import CatalogServiceViewSet
-
-
-
-
-
-
-
-
+from .views import (
+    admin_dashboard, cancel_reservation, affiche_workout, coach_dashboard, 
+    delete_draft, delete_message, mark_important, send_message, messages_inbox, 
+    subscribe, subscription_list, validate_username, validate_password, profile, 
+    edit_profile, workout_list, subscription, contact_coach, contact_member, 
+    add_workout_schedule, remind_subscription, workout_detail, download_invoice,
+    service_detail, register_user, change_password, reset_user_password, add_review,
+    conditions_vente, cookies, confidentialite, mentions_legales, 
+    cookie_consent_view, banner_view, cookie_preferences_view
+)
 
 urlpatterns = [
-    
-    
+    # Pages statiques
     path('about/', views.about, name='about'),
     path('faq/', views.faq, name='faq'),
+
+    # Accueil et recherche
     path('', views.home, name='home'),
     path('search/', views.search, name='search'),
+
+    # Authentification
     path('login/', views.login_user, name='login'),
     path('logout/', views.logout_user, name='logout'),
+
+    # Profil
     path('profile/', profile, name='profile'),
     path('edit_profile/', edit_profile, name='edit_profile'),
+
+    # Dashboards
     path('coach_dashboard/', views.coach_dashboard, name='coach_dashboard'),
     path('admin_dashboard/', views.admin_dashboard, name='admin_dashboard'),
+
+    # Contact
     path('contact_coach/<int:coach_id>/', contact_coach, name='contact_coach'),  
     path('contact_member/<int:member_id>/', contact_member, name='contact_member'),
+
+    # Messages
     path('archive_message/<int:message_id>/', views.archive_message, name='archive_message'),
     path('messages/mark_important/<int:message_id>/', views.mark_important, name='mark_important'),
     path('messages/drafts/', views.drafts, name='drafts'),
@@ -43,12 +51,16 @@ urlpatterns = [
     path('messages/send/<int:recipient_id>/', views.send_message, name='send_message'),
     path('messages/read/<int:message_id>/', views.read_message, name='read_message'),
     path('messages/inbox/', views.messages_inbox, name='messages_inbox'),
-    path('plan/<int:pk>', views.plan, name='plan'),
+
+    # Plans & Abonnement
+    path('plan/<int:pk>/', views.plan, name='plan'),
     path('remind_subscription/<int:user_id>/', views.remind_subscription, name='remind_subscription'),
     path('subscription/<int:pk>/', views.subscribe, name='subscription'),
     path('subscriptions/', subscription_list, name='subscription_list'),
     path('subscribe/<int:pk>/', subscribe, name='subscribe'),
     path('download_invoice/<int:purchase_id>/', views.download_invoice, name='download_invoice'),
+
+    # Services & Entraînements
     path('service/<int:catalog_service_id>/', views.service_detail, name='service_detail'),
     path('register/', views.register_user, name='register'),
     path('change-password/', views.change_password, name='change_password'),
@@ -60,35 +72,26 @@ urlpatterns = [
     path('reserve/<int:workout_id>/', views.affiche_workout, name='affiche_workout'),
     path('cancel_reservation/<int:workoutschedule_id>/', cancel_reservation, name='cancel_reservation'),
     path('workout_list/', views.workout_list, name='workout_list'),  
-    path('subscription/', views.subscription, name='subscription'),  # Si nécessaire
     path('confirmation_reservation/<int:scheduleId>/', views.confirmation_reservation, name='confirmation_reservation'),
     path('add-review/<int:workout_id>/', views.add_review, name='add_review'),
 
+    # Conditions légales et politique de confidentialité
     path('conditions-de-vente/', views.conditions_vente, name='conditions_vente'),
     path('cookies_privacy/', views.cookies, name='cookies'),
     path('politique-confidentialite/', views.confidentialite, name='confidentialite'),
     path('mentions-legales/', views.mentions_legales, name='mentions_legales'),
-    path('new_workoutSchedule/', views.add_workout_schedule, name='newWorkoutSchedule'),
-    path('get_schedule_details/<int:schedule_id>/', views.get_schedule_details, name='get_schedule_details'),
-    # URL pour afficher la bannière de consentement
+
+    # Cookie consent
     path('cookie/', views.cookie_consent_view, name='cookie_consent'),
     path('banner/', views.banner_view, name='banner'),
-    # URL pour Api rest
-    path('api/hello/', HelloWorldAPIView.as_view(), name='hello-world'),
-
-
-    # URL pour afficher et gérer les préférences de cookies
     path('preferences/', views.cookie_preferences_view, name='cookie_preferences'),
 
+    # URL supplémentaires
+    path('new_workoutSchedule/', views.add_workout_schedule, name='newWorkoutSchedule'),
+    path('get_schedule_details/<int:schedule_id>/', views.get_schedule_details, name='get_schedule_details'),
+]
 
-] 
-
+# Serve static and media files in development
 if settings.DEBUG:
     urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
     urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
-
-# static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT) : 
-# permet de servir les fichiers médias (comme les images téléchargées) pendant le développement lorsque le mode debug est activé.
-
-# if settings.DEBUG: : Cela garantit que les fichiers médias sont uniquement servis par Django lorsque je suis en mode développement.
-#  En production, un serveur web comme Nginx ou Apache s'occupera de cette tâche.

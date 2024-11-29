@@ -32,8 +32,9 @@ class User(AbstractUser):
     instagram_url = models.URLField(blank=True, null=True)  # URL d'Instagram de l'utilisateur
     image = models.ImageField(upload_to='membre_images/', blank=True, null=True)  # Image du membre
 
-    groups = models.ManyToManyField(Group, related_name='custom_user_groups', blank=True)  # Nom unique pour éviter les conflits
-    user_permissions = models.ManyToManyField(Permission, related_name='custom_user_permissions', blank=True)  # Nom unique pour éviter les conflits
+    groups = models.ManyToManyField(Group, related_name='gym_app_user_groups', blank=True)
+    user_permissions = models.ManyToManyField(Permission, related_name='gym_app_user_permissions', blank=True)
+
 
 
     

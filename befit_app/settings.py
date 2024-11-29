@@ -39,7 +39,16 @@ INSTALLED_APPS = [
     'django_q',
     'cookie_consent',
     'rest_framework',
+    'api',
 ]
+
+
+REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.AllowAny',  # Autorise tous les utilisateurs
+    ],
+}
+
 
 LOGGING = {
     'version': 1,
