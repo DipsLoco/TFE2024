@@ -15,14 +15,14 @@
                     <a class="nav-link" aria-current="page" href="{% url 'coach_dashboard' %}">Dashboard</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" aria-current="page" href="{% url 'newWorkoutSchedule' %}">Planifier Workout</a>
+                    <a class="nav-link" aria-current="page" href="{% url 'newWorkoutSchedule' %}">{% trans "Planifier" %} Workout</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#">Commentaires</a>
+                    <a class="nav-link" href="#">{% trans "Commentaires" %}</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link btn-logout" href="{% url 'logout' %}">
-                        <i class="fas fa-sign-out-alt"></i> Déconnexion
+                        <i class="fas fa-sign-out-alt"></i>{% trans "Déconnexion" %} 
                     </a>
                 </li>
             </ul>

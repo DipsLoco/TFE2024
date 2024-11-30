@@ -26,9 +26,9 @@
             <div class="col-lg-10 text-center my-5">
                 <br><br><br>
                 <p class="lead text-white-50 mb-4" style="font-size: 1.5rem; font-weight: 400;">{% trans "Restez en forme" %}</p>
-                <p class="card-text text-white h4 mb-4">Repoussez vos limites, devenez la meilleure version de vous-même avec BeFit. Votre transformation commence ici maintenant.</p>
+                <p class="card-text text-white h4 mb-4">{% blocktrans %} Repoussez vos limites, devenez la meilleure version de vous-même avec BeFit. Votre transformation commence ici maintenant.{% endblocktrans %} </p>
                 <a class="btn btn-outline-warning btn-lg px-4 py-2" href="#nos-offres" style="border-radius: 50px; font-weight: bold; transition: 0.3s;">
-                    Nos Formules
+                    {% trans "Nos Formules" %}
                 </a>
             </div>
         </div>
@@ -51,7 +51,7 @@
             <!-- Barre de recherche -->
             <form class="d-flex ms-auto search-form" action="{% url 'search' %}" method="get" onsubmit="clearSearchField()">
                 <input id="navbarSearchInput" class="form-control me-2" type="search" name="q" placeholder="Recherche" aria-label="Search" value="{{ request.GET.q|default:'' }}">
-                <button class="btn btn-outline-light" type="submit">Recherche</button>
+                <button class="btn btn-outline-light" type="submit">{% trans "Recherche" %}</button>
                 
                 <!-- Bouton de rafraîchissement -->
                 <button class="btn btn-outline-light ms-2" type="button" onclick="window.location.reload();">
@@ -67,8 +67,8 @@
 <section id="seances-disponibles" class="py-5 bg-light">
     <div class="container px-5 my-5">
         <div class="text-center mb-5">
-            <h2 class="display-5 fw-bold text-dark">Séances Disponibles Cette Semaine</h2>
-            <p class="lead text-muted">Planifiez votre semaine sportive dès aujourd'hui&nbsp;!</p>
+            <h2 class="display-5 fw-bold text-dark">{% trans "Séances Disponibles Cette Semaine" %}</h2>
+            <p class="lead text-muted">{% trans "Planifiez votre semaine sportive dès aujourd'hui&nbsp;!"%}</p>
         </div>
         <!-- Carrousel des séances disponibles -->
         <div id="carouselSeances" class="carousel slide" data-bs-ride="carousel">
@@ -106,7 +106,7 @@
                                                 {% for specialty in schedule.coach.coach.specialties.all %}
                                                     {{ specialty.title }}{% if not forloop.last %}, {% endif %}
                                                 {% empty %}
-                                                    Aucune spécialité
+                                                {% trans "Aucune spécialité" %}
                                                 {% endfor %}
                                             </p>                                                                                       
                                         </div>
@@ -114,20 +114,20 @@
                                     
                                     <!-- Détails -->
                                     <div class="text-details">
-                                        <p class="mb-2 text-muted"><strong>Durée :</strong> {{ schedule.workout.duration }}</p>
-                                        <p class="mb-2 text-muted"><strong>Description :</strong> {{ schedule.workout.description|truncatechars:60 }}</p>
-                                        <p class="mb-2 text-muted"><strong>Localisation :</strong> {{ schedule.location }}</p>
-                                        <p class="mb-3 text-muted"><strong>Date et Heure :</strong> {{ schedule.start_time|date:"d M Y H:i" }}</p>
+                                        <p class="mb-2 text-muted"><strong>{% trans "Durée" %} :</strong> {{ schedule.workout.duration }}</p>
+                                        <p class="mb-2 text-muted"><strong>{% trans "Description " %}:</strong> {{ schedule.workout.description|truncatechars:60 }}</p>
+                                        <p class="mb-2 text-muted"><strong>{% trans "Localisation" %} :</strong> {{ schedule.location }}</p>
+                                        <p class="mb-3 text-muted"><strong>{% trans "Date et Heure" %} :</strong> {{ schedule.start_time|date:"d M Y H:i" }}</p>
                                     </div>
 
                                     <!-- Statut de disponibilité -->
                                     <div class="d-flex justify-content-between align-items-center">
                                         <span class="badge {% if schedule.participants_count >= 10 %}bg-danger{% else %}bg-success{% endif %}">
-                                            {% if schedule.participants_count >= 10 %} Complet {% else %} Disponible {% endif %}
+                                            {% if schedule.participants_count >= 10 %} {% trans "Complet" %} {% else %} Disponible {% endif %}
                                         </span>
                                         {% if schedule.participants_count < 10 %}
                                             <p class="text-success mb-0" style="font-weight: bold;">
-                                                Participants : {{ schedule.participants_count }}/10 inscrits
+                                                {% trans "Participants" %} : {{ schedule.participants_count }}/10 {% trans "inscrits" %}
                                             </p>
                                         {% endif %}
                                     </div>
@@ -139,7 +139,7 @@
                                         {% else %}
                                         {% if schedule.workout %}
                                         <a href="{% url 'workout_detail' schedule.workout.id %}" class="btn btn-primary btn-lg w-100" style="background-color: #6a1b9a; border-color: #6a1b9a;">
-                                            Réserver cette séance
+                                            {% trans "En savoir Plus" %}
                                         </a>
                                         {% else %}
                                         <button class="btn btn-danger btn-lg w-100" disabled>Aucun workout associé</button>
@@ -157,11 +157,11 @@
             <!-- Contrôles du carrousel -->
             <button class="carousel-control-prev" type="button" data-bs-target="#carouselSeances" data-bs-slide="prev">
                 <span class="carousel-control-prev-icon" aria-hidden="true"></span>
-                <span class="visually-hidden">Précédent</span>
+                <span class="visually-hidden">{% trans "Précédent" %}</span>
             </button>
             <button class="carousel-control-next" type="button" data-bs-target="#carouselSeances" data-bs-slide="next">
                 <span class="carousel-control-next-icon" aria-hidden="true"></span>
-                <span class="visually-hidden">Suivant</span>
+                <span class="visually-hidden">{% trans "Suivant" %}</span>
             </button>
         </div>
     </div>
@@ -177,7 +177,7 @@
 <section id="workouts" class="py-5 bg-light section-box">
     <div class="container px-5 my-5">
         <div class="text-center mb-5">
-            <h2 class="display-5 fw-bold text-dark">Nos Workouts</h2>
+            <h2 class="display-5 fw-bold text-dark">{% trans "Nos Workouts" %}</h2>
         </div>
         <div class="row gx-5 gy-5">
             {% for workout in workouts %}
@@ -191,7 +191,7 @@
                     <div class="card-body">
                         <h4 class="card-title">{{ workout.title }}</h4>
                         <p class="card-text">{{ workout.description|truncatechars:200 }}</p>
-                        <a class="text-decoration-none fw-bold" href="{% url 'workout_detail' workout.id %}">Voir les détails <i class="bi bi-arrow-right"></i></a>
+                        <a class="text-decoration-none fw-bold" href="{% url 'workout_detail' workout.id %}">{% trans "Voir les détails" %} <i class="bi bi-arrow-right"></i></a>
                     </div>
                 </div>
             </div>
@@ -204,7 +204,7 @@
 <section id="coachs" class="py-5 section-box">
     <div class="container px-5 my-5">
         <div class="text-center mb-5">
-            <h2 class="display-5 fw-bold text-dark">Nos Coachs</h2>
+            <h2 class="display-5 fw-bold text-dark">{% trans "Nos Coachs" %}</h2>
         </div>
         <div class="row gx-5 gy-5">
             {% for coach in coachs %}
@@ -217,10 +217,10 @@
                     {% endif %}
                     <div class="card-body">
                         <h4 class="card-title">{{ coach.username }}</h4>
-                        <p class="card-text">Spécialités : {{ coach.specialties.all|join:", " }}</p>
-                        <p class="card-text"><strong>Disponible :</strong> {{ coach.available|yesno:"Oui,Non" }}</p>
-                        <p class="card-text"><strong>Expérience :</strong> {{ coach.exp }} ans</p>
-                        <p class="card-text"><strong>Mon parcours :</strong> {{ coach.about }}</p>
+                        <p class="card-text">{% trans "Spécialités" %} : {{ coach.specialties.all|join:", " }}</p>
+                        <p class="card-text"><strong>{% trans "Disponible" %} :</strong> {{ coach.available|yesno:"Oui,Non" }}</p>
+                        <p class="card-text"><strong>{% trans "Expérience" %} :</strong> {{ coach.exp }} ans</p>
+                        <p class="card-text"><strong>{% trans "Mon parcours" %} :</strong> {{ coach.about }}</p>
                     </div>
                 </div>
             </div>
@@ -233,8 +233,8 @@
 <section id="nos-offres" class="py-5 bg-light section-box">
     <div class="container px-5 my-5">
         <div class="text-center mb-5">
-            <h2 class="display-5 fw-bold text-dark">Nos Offres</h2>
-            <p class="lead mb-0">Sélectionnez le plan qui vous convient !</p>
+            <h2 class="display-5 fw-bold text-dark">{% trans "Nos Offres" %}</h2>
+            <p class="lead mb-0">{% trans "Sélectionnez le plan qui vous convient " %}!</p>
         </div>
         <div class="row gy-4 justify-content-center">
             {% for plan in plans %}
@@ -250,7 +250,7 @@
                     <div class="plan-header text-center">
                         <h3 class="plan-name mb-1">{{ plan.name }}</h3>
                         <i class="plan-icon {% if forloop.first %}fas fa-dumbbell{% elif forloop.counter == 2 %}fas fa-weight-hanging{% else %}fas fa-trophy{% endif %} my-2"></i>
-                        <p class="plan-duration"><em>Durée : {{ plan.duration }} jours</em></p>
+                        <p class="plan-duration"><em>{% trans "Durée" %} : {{ plan.duration }} {% trans "jours" %}</em></p>
                     </div>
                     <div class="plan-body">
                         <div class="text-center mb-3">
@@ -258,8 +258,8 @@
                             <a href="{% url 'conditions_vente' %}" class="text-warning ast-icon" title="Conditions générales de vente">*</a>
                         </div>
                         <p class="plan-description text-muted text-center">{{ plan.description|truncatechars:200 }}</p>
-                        <a class="btn btn-outline-primary d-grid btn-plan mt-3" href="{% url 'cart:add_plan_to_cart' plan.id %}">Sélectionner Votre Plan</a>
-                        <a href="{% url 'subscribe' plan.pk %}" class="btn btn-primary btn-block mt-3 shadow-sm">En savoir Plus</a>
+                        <a class="btn btn-outline-primary d-grid btn-plan mt-3" href="{% url 'cart:add_plan_to_cart' plan.id %}">{% trans "Sélectionner Votre Plan" %}</a>
+                        <a href="{% url 'subscribe' plan.pk %}" class="btn btn-primary btn-block mt-3 shadow-sm">{% trans "En savoir Plus" %}</a>
                     </div>
                 </div>
             </div>
@@ -382,7 +382,7 @@
 <section id="catalog-services" class="services-section section-box">
     <div class="container px-5 my-5">
         <div class="text-center mb-5">
-            <h2 class="display-5 fw-bold text-dark">Nos Services</h2>
+            <h2 class="display-5 fw-bold text-dark">{% trans "Nos Services" %}</h2>
         </div>
         <div class="row g-4">
             {% for item in all_services %}
@@ -400,11 +400,11 @@
                     <div class="card-body text-center">
                         <p class="card-text text-muted">{{ item.service.description|truncatechars:46 }}</p>
                         <p><strong><a href="{% url 'conditions_vente' %}" class="text-warning ast-icon" title="Conditions générales de vente">*</a>
-                        Prix : </strong> <span class="text-success">{{ item.service.price }}€</span></p>
+                            {% trans "Prix" %} : </strong> <span class="text-success">{{ item.service.price }}€</span></p>
                         {% if item.type != 'gym_accessory' and item.service.duration %}
-                        <p><strong>Durée :</strong> {{ item.service.duration }} jours</p>
+                        <p><strong>{% trans "Durée" %} :</strong> {{ item.service.duration }} jours</p>
                         {% endif %}
-                        <a href="{% url 'service_detail' item.service.id %}" class="btn btn-outline-primary rounded-pill mt-3">En savoir plus</a>
+                        <a href="{% url 'service_detail' item.service.id %}" class="btn btn-outline-primary rounded-pill mt-3">{% trans "En savoir plus" %}</a>
                     </div>
                 </div>
             </div>
@@ -511,8 +511,8 @@
 <section class="testimonial-section">
     <div class="container px-5 my-5">
         <div class="text-center mb-5">
-            <h2 class="testimonial-title">Témoignages Clients</h2>
-            <p class="lead text-secondary">Ce que disent nos membres</p>
+            <h2 class="testimonial-title">{% trans "Témoignages Clients" %}</h2>
+            <p class="lead text-secondary">{% trans "Ce que disent nos membres" %}</p>
         </div>
         <div class="row gx-5 justify-content-center">
             {% for review in reviews %}
@@ -531,9 +531,9 @@
                             </div>
                             <div class="ms-3">
                                 <h5 class="card-title mb-1">{{ review.user.username }}</h5>
-                                <p class="text-muted mb-1"><strong>Cours :</strong> {{ review.workout.title }}</p>
-                                <p class="text-muted mb-1"><strong>Date :</strong> {{ review.datetime|date:"d M Y H:i" }}</p>
-                                <p class="text-muted mb-1"><strong>Membre depuis :</strong> {{ review.user.date_joined|date:"d M Y" }}</p>
+                                <p class="text-muted mb-1"><strong>{% trans "Cours" %} :</strong> {{ review.workout.title }}</p>
+                                <p class="text-muted mb-1"><strong>{% trans "Date" %} :</strong> {{ review.datetime|date:"d M Y H:i" }}</p>
+                                <p class="text-muted mb-1"><strong>{% trans "Membre depuis" %} :</strong> {{ review.user.date_joined|date:"d M Y" }}</p>
                             </div>
                         </div>
                         <hr>
@@ -553,8 +553,8 @@
             <div class="feature bg-primary bg-gradient text-white rounded-circle p-4 mb-3">
                 <i class="bi bi-envelope contact-icon"></i>
             </div>
-            <h2 class="contact-title">Formulaire de Contact</h2>
-            <p class="lead text-secondary">Nous aimerions recevoir de vos nouvelles !</p>
+            <h2 class="contact-title">{% trans "Formulaire de Contact" %}</h2>
+            <p class="lead text-secondary">{% trans "Nous aimerions recevoir de vos nouvelles !" %}</p>
         </div>
         <div class="row gx-5 justify-content-center">
             <div class="col-lg-6">
@@ -563,34 +563,34 @@
                     <div class="form-floating mb-3">
                         <input class="form-control" id="name" type="text" placeholder="Enter your name..."
                                data-sb-validations="required" />
-                        <label for="name">Votre nom complet</label>
-                        <div class="invalid-feedback" data-sb-feedback="name:required">Un nom est requis.</div>
+                        <label for="name">{% trans "Votre nom complet" %}</label>
+                        <div class="invalid-feedback" data-sb-feedback="name:required">{% trans "Un nom est requis" %}.</div>
                     </div>
                     <!-- Email address input-->
                     <div class="form-floating mb-3">
                         <input class="form-control" id="email" type="email" placeholder="name@example.com"
                                data-sb-validations="required,email" />
                         <label for="email">Adresse email</label>
-                        <div class="invalid-feedback" data-sb-feedback="email:required">Un email est requis.</div>
-                        <div class="invalid-feedback" data-sb-feedback="email:email">L'email n'est pas valide.</div>
+                        <div class="invalid-feedback" data-sb-feedback="email:required">{% trans "Un email est requis." %}</div>
+                        <div class="invalid-feedback" data-sb-feedback="email:email">{% trans "L'email n'est pas valide." %}</div>
                     </div>
                     <!-- Phone number input-->
                     <div class="form-floating mb-3">
                         <input class="form-control" id="phone" type="tel" placeholder="(123) 456-7890"
                                data-sb-validations="required" />
                         <label for="phone">Numéro de téléphone</label>
-                        <div class="invalid-feedback" data-sb-feedback="phone:required">Un numéro de téléphone est requis.</div>
+                        <div class="invalid-feedback" data-sb-feedback="phone:required">{% trans "Un numéro de téléphone est requis." %}</div>
                     </div>
                     <!-- Message input-->
                     <div class="form-floating mb-3">
                         <textarea class="form-control" id="message" placeholder="Enter your message here..."
                                   style="height: 10rem" data-sb-validations="required"></textarea>
-                        <label for="message">Message</label>
-                        <div class="invalid-feedback" data-sb-feedback="message:required">Un message est requis.</div>
+                        <label for="message">{% trans "Message" %}</label>
+                        <div class="invalid-feedback" data-sb-feedback="message:required">{% trans "Un message est requis." %}</div>
                     </div>
                     <!-- Submit Button-->
                     <div class="d-grid">
-                        <button class="btn contact-btn btn-lg" id="submitButton" type="submit">Soumettre</button>
+                        <button class="btn contact-btn btn-lg" id="submitButton" type="submit">{% trans "Soumettre" %}</button>
                     </div>
                 </form>
             </div>
@@ -600,17 +600,17 @@
 
 <!-- Menu latéral défilant -->
 <div id="side-menu" class="side-menu">
-    <a href="#nos-offres">Nos Formules</a>
-    <a href="#coachs">Nos Coachs</a>
-    <a href="#workouts">Nos Workouts</a>
+    <a href="#nos-offres">{% trans "Nos Formules" %}</a>
+    <a href="#coachs">{% trans "Nos Coachs" %}</a>
+    <a href="#workouts">{% trans "Nos Workouts" %}</a>
     <a href="{% url 'home' %}" class="btn btn-px1 sm">
     <a href="{% url 'home' %}" class="btn btn-px1 sm">
-        <span>retour <i class="fas fa-home"></i> Accueil</span>
+        <span>retour <i class="fas fa-home"></i>{% trans "Accueil" %} </span>
     </a>
         
-    <a href="#catalog-services">Catalogue Services</a>
-    <a href="#contact">Contact</a>
-    <a href="#footer">Nos Coordonnées</a>
+    <a href="#catalog-services">{% trans "Catalogue Services" %}</a>
+    <a href="#contact">{% trans "Contact" %}</a>
+    <a href="#footer">{% trans "Nos Coordonnées" %}</a>
 </div>
 
 {% endblock %}

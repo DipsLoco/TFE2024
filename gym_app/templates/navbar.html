@@ -23,7 +23,6 @@
                 <li class="nav-item">
                     <a class="nav-link" href="{% url 'home' %}#catalog-services">{{ _('Services') }}</a>
                 </li>
-                
                 <li class="nav-item">
                     <a class="nav-link" href="{% url 'faq' %}">{{ _('Faq') }}</a>
                 </li>
@@ -32,7 +31,7 @@
             <ul class="navbar-nav mb-2 mb-lg-0 ms-auto d-flex align-items-center">
                 {% if user.is_authenticated %}
                 <li class="nav-item">
-                    <a class="nav-link" href="{% url 'profile' %}">Mon profil</a>
+                    <a class="nav-link" href="{% url 'profile' %}">{{ _('Mon profil') }}</a>
                 </li>
                 <!-- messagerie boite de reception avec chiffre si plus qu un message -->
                 <li class="nav-item">
@@ -44,32 +43,31 @@
                         {% endif %}
                     </a>
                 </li>
-                        {% if user.is_superuser %}
-                        <li class="nav-item">
-                        <a class="nav-link" href="/admin">Admin</a>
-                        </li>
-                        {% endif %}
-                        <li class="nav-item">
-                        <a class="nav-link" href="{% url 'logout' %}">Se déconnecter</a>
-                        </li>
-                        <li class="nav-item">
-                        <a href="{% url 'cart:cart_summary' %}" class="btn btn-outline-light btn-sm" type="submit" style="padding: 5px 8px;">
-                        <i class="bi-cart-fill me-1"></i> Cart
-                        <span class="badge bg-white text-dark ms-1 rounded-pill" id="cart-count">{{ cart|length }}</span>
-                        </a>                    
-                        </li>
-                 {% endif %}
-
-                <!-- fonctionnais bien  -->
+                {% if user.is_superuser %}
+                <li class="nav-item">
+                    <a class="nav-link text-success" href="/admin">{{ user.username }} ( {{ _('Admin') }} )</a>
+                </li>
+                {% endif %}
+                <li class="nav-item">
+                    {% if not user.is_superuser %}
+                    <span class="navbar-text text-primary me-3" title="{{ user.username }}">
+                        {{ user.username }}
+                    </span>
+                    {% endif %}
+                </li>
                 
-                <!-- <li class="nav-item">
+                <li class="nav-item">
+                    <a class="nav-link text-white" href="{% url 'logout' %}">{{ _('Se déconnecter') }}</a>
+                </li>
+                
+                <li class="nav-item">
                     <a href="{% url 'cart:cart_summary' %}" class="btn btn-outline-light btn-sm" type="submit" style="padding: 5px 8px;">
                         <i class="bi-cart-fill me-1"></i> Cart
-                        <span class="badge bg-white text-dark ms-1 rounded-pill" id="cart_quantity">{{ cart | length }}</span>
-                    </a>                     -->
-              
-               
-                
+                        <span class="badge bg-white text-dark ms-1 rounded-pill" id="cart-count">{{ cart|length }}</span>
+                    </a>                    
+                </li>
+                {% endif %}
+
                 <!-- Sélecteur de langue visible pour tous les utilisateurs -->
                 <form action="{% url 'set_language' %}" method="post" id="languageForm" class="d-inline-block language-form">
                     {% csrf_token %}
@@ -85,13 +83,12 @@
                     </div>
                 </form>
                 
-                
                 {% if not user.is_authenticated %}
                 <li class="nav-item">
-                    <a class="nav-link" href="{% url 'login' %}">Se connecter</a>
+                    <a class="nav-link" href="{% url 'login' %}">{{ _('Se connecter') }}</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{% url 'register' %}">S'inscrire</a>
+                    <a class="nav-link" href="{% url 'register' %}">{{ _('S\'inscrire') }}</a>
                 </li>
                 {% endif %}
             </ul>
@@ -112,17 +109,37 @@
     }
 
     /* Bouton Cart plus petit */
-    .btn-outline-light {
-        font-size: 12px;
-        padding: 5px 8px;  /* Ajustement de la taille du bouton Cart */
-    }
+.btn-outline-light {
+    font-size: 12px; /* Taille du texte du bouton */
+    padding: 5px 8px; /* Ajustement de la taille du bouton */
+    margin-right: 15px; /* Ajuste l'espacement entre les éléments */
+    margin-left: 5px;
+}
+
+/* Réduire la taille de l'icône dans le bouton Cart */
+.btn-outline-light .bi-cart-fill {
+    font-size: 14px; /* Ajuste la taille de l'icône (plus petit) */
+}
+
+/* Réduire la taille du badge du chiffre du panier */
+#cart-count {
+    font-size: 10px; /* Réduit la taille du chiffre */
+    padding: 2px 5px; /* Ajuste le padding pour que le badge soit plus petit */
+}
+
 
     /* Aligner le sélecteur de langue à droite */
     .language-form {
-        margin-left: auto;
+        margin-left: auto; /* Utiliser 'auto' pour pousser le sélecteur vers la droite */
+        margin-right: 1px; 
         display: flex;
         justify-content: flex-end;
         align-items: center;
+    }
+
+    /* Espacement entre Cart et le sélecteur de langue */
+    .language-selector {
+    margin-left: 5px; /* Espace entre le sélecteur de langue et l'élément Cart */
     }
 
     /* Alignement et espacement général des éléments de la navigation */
@@ -134,6 +151,48 @@
 
     /* Éviter le chevauchement des éléments */
     .nav-item {
-        padding: 0 10px;
+        padding: 5 15px;
+        white-space: nowrap; /* Ajouté pour éviter le chevauchement de texte sur une seule ligne */
+    }
+
+    /* Alignement de "Equipe_BeFit" et de l'icône Cart */
+    .nav-item a.nav-link {
+        display: flex;
+        align-items: center;
+    }
+
+    /* Positionnement de l'icône enveloppe et du badge */
+    .nav-item .badge {
+        margin-left: 5px;
+        font-size: 0.85rem;
+    }
+
+    /* Ajustement de la disposition */
+    /* décaler les éléments à gauche ou à droite, ajuste les propriétés suivantes */
+    /* Exemple : Pour déplacer tous les éléments à gauche de la navbar : */
+    .navbar-nav {
+        justify-content: flex-start;
+    }
+
+    /* Exemple : Pour déplacer tous les éléments à droite de la navbar : */
+    /* .navbar-nav {
+        justify-content: flex-end;
+    } */
+
+    .navbar-text.text-primary {
+        color: #007bff; /* Bleu */
+    }
+
+    .navbar-text.text-success {
+    color: #28a745; /* Vert */
+}
+
+    /* Alignement du nom d'utilisateur */
+    .navbar-text {
+        font-weight: bold;
+        font-size: 16px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
     }
 </style>
