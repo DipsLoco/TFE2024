@@ -131,7 +131,9 @@ def cookie_preferences_view(request):
 
 
 def banner_view(request):
+    print("Affichage de la bannière de cookies")
     return render(request, 'cookie_consent/banner.html')
+
 
 
 

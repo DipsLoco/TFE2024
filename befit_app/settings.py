@@ -76,6 +76,10 @@ MIDDLEWARE = [
      'django.middleware.locale.LocaleMiddleware',
 ]
 
+# LOCALE_PATHS = [BASE_DIR / 'locale']
+
+
+
 ROOT_URLCONF = 'befit_app.urls'
 
 TEMPLATES = [
@@ -174,6 +178,7 @@ AUTH_PASSWORD_VALIDATORS = [
 sys.stdout.reconfigure(encoding='utf-8')  # Forcer l'encodage UTF-8
 
 LANGUAGE_CODE = 'fr' 
+PREFIX_DEFAULT_LANGUAGE = True
 
 DEFAULT_CHARSET = 'utf-8'
 

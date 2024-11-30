@@ -1,6 +1,7 @@
 from django.urls import path
 from django.conf.urls.static import static
 from befit_app import settings
+from django.conf import settings
 from . import views
 from django_q.tasks import schedule
 from django.contrib.auth import views as auth_views

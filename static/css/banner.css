@@ -1,12 +1,8 @@
-/* Masquer la bannière par défaut */
-#cookieBanner {
-    display: none;
-}
-
 /* Bannière de cookies */
 .cookie-banner {
     opacity: 0; /* Bannière masquée initialement */
-    transition: opacity 1.5s ease-in-out; /* Transition fluide */
+    visibility: hidden; /* Invisible */
+    transition: opacity 1.5s ease-in-out, visibility 0s linear 1.5s; /* Transition fluide */
     position: fixed;
     bottom: 20px;
     left: 50%;
@@ -23,6 +19,12 @@
     display: flex;
     flex-direction: column;
     align-items: center;
+}
+
+/* Classe pour afficher la bannière */
+.cookie-banner.show {
+    opacity: 1; /* Apparition */
+    visibility: visible; /* Visible */
 }
 
 /* Icône de la bannière */
@@ -68,7 +70,7 @@
     color: black;
 }
 
-/* Liste des clauses */
+Liste des clauses
 .cookie-banner ul {
     list-style: none;
     padding: 0;
