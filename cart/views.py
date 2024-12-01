@@ -21,9 +21,11 @@ def cart_summary(request):
     cart = Cart(request)
     cart_plans = cart.get_plans()
     cart_services = cart.get_services()
+
+    # Calcul du total avec les quantités
     totaltvac = cart.cart_total()
 
-    # Ajouter la date du jour et calculer la date d'échéance
+    # Ajouter la date du jour et calculer la date d'échéance pour les plans
     for plan in cart_plans:
         plan.start_date = datetime.now()
         plan.end_date = plan.start_date + timedelta(days=plan.duration)
@@ -33,6 +35,7 @@ def cart_summary(request):
         "cart_services": cart_services,
         "totaltvac": totaltvac,
     })
+
 
 # Stripe configuration
 stripe.api_key = settings.STRIPE_SECRET_KEY
@@ -120,13 +123,18 @@ def cart_add_plan(request, plan_id):
     return redirect('cart:cart_summary')
 
 # Ajouter un service au panier avec une image spécifique si sélectionnée
+
 @login_required
 def cart_add_service(request, service_id):
-    image_id = request.GET.get('image_id')  # Récupère l'image ID depuis la requête GET
+    image_id = request.GET.get('image_id')  # ID de l'image sélectionnée
+    quantity = int(request.GET.get('quantity', 1))  # Quantité par défaut : 1
     cart = Cart(request)
     service = get_object_or_404(CatalogService, id=service_id)
-    cart.add_service(service=service, image_id=image_id)
+
+    # Ajout au panier
+    cart.add_service(service=service, image_id=image_id, quantity=quantity)
     
+    # Vérifie si AJAX est utilisé
     if request.headers.get('x-requested-with') == 'XMLHttpRequest':
         return JsonResponse({
             'success': True,
@@ -137,14 +145,9 @@ def cart_add_service(request, service_id):
     messages.success(request, "Service ajouté au panier avec succès.")
     return redirect('cart:cart_summary')
 
-@login_required
-def cart_add_service(request, service_id):
-        image_id = request.GET.get('image_id')  # Récupère l'image ID depuis la requête GET
-        cart = Cart(request)
-        service = get_object_or_404(CatalogService, id=service_id)
-        cart.add_service(service=service, image_id=image_id)
-        messages.success(request, "Service ajouté au panier avec succès.")
-        return redirect('cart:cart_summary')
+
+
+
 
 # Supprimer un élément du panier
 def cart_delete(request, item_type, item_id):

@@ -1,5 +1,6 @@
 from difflib import get_close_matches
 import json
+import locale
 from urllib import request
 import stripe
 from django.conf import settings
@@ -78,19 +79,19 @@ from django.contrib.auth import get_user_model
 User = get_user_model()
 
 
-def test_reportlab():
-    file_path = "test_invoice.pdf"
-    c = canvas.Canvas(file_path, pagesize=A4)
-    width, height = A4
+# def test_reportlab():
+#     file_path = "test_invoice.pdf"
+#     c = canvas.Canvas(file_path, pagesize=A4)
+#     width, height = A4
 
-    # Dessiner du texte
-    c.drawString(100, height - 100, "Test ReportLab")
-    c.drawString(100, height - 120, f"Date: {datetime.now()}")
-    c.save()
+#     # Dessiner du texte
+#     c.drawString(100, height - 100, "Test ReportLab")
+#     c.drawString(100, height - 120, f"Date: {datetime.now()}")
+#     c.save()
 
-    print(f"PDF généré avec succès : {file_path}")
+#     print(f"PDF généré avec succès : {file_path}")
 
-test_reportlab()
+# test_reportlab()
 
 
 
@@ -248,6 +249,22 @@ def get_suggestions(query):
         "Conditions de Vente", "Cookies", "À propos", "Mentions Légales", "Confidentialité"
     ]
     return get_close_matches(query, keywords, n=3, cutoff=0.6)
+
+from django.http import JsonResponse
+from django.shortcuts import get_object_or_404
+from .models import ServiceImage  # Assurez-vous que le modèle ServiceImage est importé.
+
+def get_product_price(request, service_id):
+    image_id = request.GET.get('image_id')
+    if not image_id:
+        return JsonResponse({'success': False, 'message': 'Image ID manquant.'})
+    
+    # Récupérer l'image et son prix
+    try:
+        image = get_object_or_404(ServiceImage, id=image_id, service_id=service_id)
+        return JsonResponse({'success': True, 'price': image.price})
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': str(e)})
 
 def load_services():
     # Services disponibles
@@ -1048,6 +1065,12 @@ def profile(request):
 
 
 def download_invoice(request, purchase_id):
+    # Définir la localisation en français pour les dates
+    try:
+        locale.setlocale(locale.LC_TIME, 'fr_FR.UTF-8')  # Pour Linux/Mac
+    except locale.Error:
+        locale.setlocale(locale.LC_TIME, '')  # Utilise la localisation par défaut si FR non disponible
+
     # Récupérer l'achat et l'utilisateur
     purchase = get_object_or_404(PurchaseHistory, id=purchase_id, user=request.user)
     user = request.user
@@ -1059,6 +1082,8 @@ def download_invoice(request, purchase_id):
     # Créer un PDF avec reportlab
     p = canvas.Canvas(response, pagesize=A4)
     width, height = A4
+
+    
 
     # Coordonnées de BE Fit en haut à droite
     p.setFont("Helvetica", 10)

@@ -26,18 +26,51 @@ class Cart:
             }
         print(f"[DEBUG] Plan ajouté : {plan_id} avec image : {plan_image_url}")  # Point de débogage
         self.session.modified = True
-
-    def add_service(self, service, image_id=None):
+    
+    def add_service(self, service, image_id=None, quantity=1):
+        # Clé unique basée sur service ID et image ID
         service_key = f'service-{service.id}-image-{image_id}' if image_id else f'service-{service.id}'
-        if service_key not in self.cart:
-            try:
-                image_price = service.price  # Prix général de CatalogService
-                self.cart[service_key] = {'prix': str(image_price), 'type': 'service', 'image_id': image_id}
-                print(f"[DEBUG] Service ajouté : {service_key}")  # Point de débogage
-            except CatalogService.DoesNotExist:
-                print(f"[ERROR] Service avec ID {service.id} introuvable.")
-                return
+        
+        if service_key in self.cart:
+            # Si le service existe déjà, on met à jour la quantité
+            self.cart[service_key]['quantity'] += quantity
+        else:
+            # Ajouter un nouveau service
+            image_price = None
+            if image_id:
+                try:
+                    image = ServiceImage.objects.get(id=image_id)
+                    image_price = image.price
+                except ServiceImage.DoesNotExist:
+                    image_price = service.price  # Fallback au prix par défaut
+                
+            self.cart[service_key] = {
+                'prix': str(image_price if image_price else service.price),
+                'type': 'service',
+                'image_id': image_id,
+                'quantity': quantity,
+            }
         self.session.modified = True
+
+    def get_services(self):
+        services = []
+        for key, item in self.cart.items():
+            if item['type'] == 'service':
+                service_id = int(key.split('-')[1])
+                service = get_object_or_404(CatalogService, id=service_id)
+                item['name'] = service.name
+                item['prix'] = item['prix']
+                item['quantity'] = item.get('quantity', 1)  # Par défaut à 1
+                if 'image_id' in item and item['image_id']:
+                    try:
+                        image = ServiceImage.objects.get(id=item['image_id'])
+                        item['image_url'] = image.image.url
+                    except ServiceImage.DoesNotExist:
+                        item['image_url'] = None
+                services.append(item)
+        return services
+
+
 
     def __len__(self):
         return len(self.cart)
@@ -82,28 +115,8 @@ class Cart:
         print("[DEBUG] Panier vidé.")  # Point de débogage
 
     def cart_total(self):
-        total = sum(float(item['prix']) for item in self.cart.values())
+        total = sum(float(item['prix']) * item.get('quantity', 1) for item in self.cart.values())
         return total
 
 
-# Vue pour ajouter un service au panier
-@login_required
-def cart_add_service(request, service_id):
-    image_id = request.GET.get('image_id')  # Récupère l'image ID depuis la requête GET
-    cart = Cart(request)
-    service = get_object_or_404(CatalogService, id=service_id)
 
-    # Ajoute le service au panier
-    cart.add_service(service=service, image_id=image_id)
-    
-    # Vérifie si c'est une requête AJAX
-    if request.headers.get('x-requested-with') == 'XMLHttpRequest':
-        return JsonResponse({
-            'success': True,
-            'message': "Service ajouté au panier avec succès.",
-            'cart_count': len(cart)  # Ajoute le nombre d'éléments dans le panier
-        })
-    
-    # Si ce n'est pas une requête AJAX, redirige vers le résumé du panier
-    messages.success(request, "Service ajouté au panier avec succès.")
-    return redirect('cart:cart_summary')

@@ -4,6 +4,8 @@
 
 {% block content %}
 
+<!DOCTYPE html>
+
 <!-- Lier  fichiers CSS dans <head> -->
     <head>
     
@@ -389,22 +391,50 @@
             <div class="col-lg-4 col-md-6">
                 <div class="card service-card h-100 border-0 shadow-lg">
                     {% if item.service.image %}
-                    <img src="{{ item.service.image.url }}" alt="Image de {{ item.service.name }}" class="card-img-top service-image">
+                    <img src="{{ item.service.image.url }}" 
+                         alt="{% blocktrans %} Image de {{ item.service.name }} {% endblocktrans %}" 
+                         class="card-img-top service-image">
                     {% else %}
-                    <img src="{% static 'default/image/path.jpg' %}" alt="Image par défaut" class="card-img-top service-image">
+                    <img src="{% static 'default/image/path.jpg' %}" 
+                         alt="{% trans 'Image par défaut' %}" 
+                         class="card-img-top service-image">
                     {% endif %}
                     <!-- Bannière pour le titre -->
                     <div class="card-title-banner">
-                        <h4 class="card-title fw-bold">{{ item.service.name }}</h4>
+                        <h4 class="card-title fw-bold text-white text-center py-2">{{ item.service.name }}</h4>
                     </div>
                     <div class="card-body text-center">
-                        <p class="card-text text-muted">{{ item.service.description|truncatechars:46 }}</p>
-                        <p><strong><a href="{% url 'conditions_vente' %}" class="text-warning ast-icon" title="Conditions générales de vente">*</a>
-                            {% trans "Prix" %} : </strong> <span class="text-success">{{ item.service.price }}€</span></p>
-                        {% if item.type != 'gym_accessory' and item.service.duration %}
-                        <p><strong>{% trans "Durée" %} :</strong> {{ item.service.duration }} jours</p>
+                        <p class="card-text text-muted">
+                            {{ item.service.description|truncatechars:46 }}
+                        </p>
+
+                        {% if item.type != 'gym_accessory' %}
+                        <p>
+                            <strong>
+                                <a href="{% url 'conditions_vente' %}" 
+                                   class="text-warning ast-icon" 
+                                   title="{% trans 'Voir les conditions générales de vente' %}">
+                                    *
+                                </a> 
+                                {% trans "Prix" %} :
+                            </strong> 
+                            <span class="text-success">
+                                {{ item.service.price }}€
+                            </span>
+                        </p>
                         {% endif %}
-                        <a href="{% url 'service_detail' item.service.id %}" class="btn btn-outline-primary rounded-pill mt-3">{% trans "En savoir plus" %}</a>
+
+                        {% if item.type != 'gym_accessory' and item.service.duration %}
+                        <p>
+                            <strong>{% trans "Durée" %} :</strong> 
+                            {{ item.service.duration }} jours
+                        </p>
+                        {% endif %}
+
+                        <a href="{% url 'service_detail' item.service.id %}" 
+                           class="btn btn-outline-primary rounded-pill mt-3">
+                            {% trans "En savoir plus" %}
+                        </a>
                     </div>
                 </div>
             </div>
@@ -412,6 +442,7 @@
         </div>
     </div>
 </section>
+
 
 
 <style>

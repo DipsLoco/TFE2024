@@ -1,4 +1,4 @@
-from datetime import datetime, time, timedelta
+from datetime import date, datetime, time, timedelta
 from django.db import models
 from django.core.exceptions import ValidationError
 from django.db.models.signals import post_save
@@ -235,13 +235,25 @@ class WorkoutParticipation(models.Model):
 
 
 class Coach(models.Model):
-    username = models.CharField(max_length=50, unique=True)  # Nom d'utilisateur du coach
-    user = models.OneToOneField(User, on_delete=models.CASCADE)  # ID de l'utilisateur
-    specialties = models.ManyToManyField(Workout, related_name='specialties')  # Spécialités du coach
-    available = models.BooleanField(default=False)  # Disponibilités du coach
-    image = models.ImageField(upload_to='coach_images/', blank=True, null=True)  # Image du coach
-    exp = models.PositiveIntegerField(default=0)  # Expérience du coach en années
-    about = models.TextField(null=True, blank=True)  # A propos de moi
+    username = models.CharField(max_length=50, unique=True)
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    specialties = models.ManyToManyField(Workout, related_name='specialties')
+    available = models.BooleanField(default=True)  # Disponibilités générales
+    unavailable_reason = models.CharField(max_length=255, blank=True, null=True)  # Raison d'indisponibilité
+    unavailable_from = models.DateField(blank=True, null=True)  # Début de l'absence
+    unavailable_until = models.DateField(blank=True, null=True)  # Fin de l'absence
+    image = models.ImageField(upload_to='coach_images/', blank=True, null=True)
+    exp = models.PositiveIntegerField(default=0)
+    about = models.TextField(null=True, blank=True)
+
+    def is_currently_available(self):
+        """Vérifie si le coach est disponible à l'instant présent."""
+        if not self.available:
+            return False  # Coach non disponible (statut général)
+        if self.unavailable_from and self.unavailable_until:
+            today = date.today()
+            return not (self.unavailable_from <= today <= self.unavailable_until)
+        return True
 
     def __str__(self):
         return self.username

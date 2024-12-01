@@ -1,0 +1,45 @@
+Style de la bannière de rupture de stock
+.rupture-de-stock-banner {
+background-color: rgba(254, 108, 108, 0.958);  /* Fond rouge */
+color: black;  /* Texte noir */
+padding: 10px 20px;  /* Un peu de padding */
+text-align: center;  /* Centrer le texte */
+position: relative;  /* Position relative pour le pseudo-élément oblique */
+margin-bottom: 20px;  /* Espacement en bas */
+}
+
+.rupture-de-stock-banner p {
+margin: 0;  /* Enlever les marges autour du texte */
+font-weight: bold;  /* Mettre le texte en gras */
+}
+
+/* Pseudo-élément pour l'effet oblique */
+.rupture-de-stock-banner::before {
+content: "";  /* Aucun texte, juste l'effet */
+position: absolute;  /* Position absolue pour couvrir la bannière */
+top: 0;
+left: 0;
+width: 100%;
+height: 100%;
+background: #ff6565fc;  /* Rouge pour la bannière */
+transform: skewY(-10deg);  /* Effet oblique */
+z-index: -1;  /* Mettre l'élément derrière le texte */
+}
+
+/* Style du bouton "Commander" */
+.btn-commander {
+background-color: white;  /* Fond blanc pour le bouton */
+color: red;  /* Texte rouge */
+padding: 8px 15px;  /* Espacement du bouton */
+border: none;  /* Enlever la bordure */
+text-decoration: none;  /* Enlever le souligné */
+font-weight: bold;  /* Mettre en gras */
+border-radius: 5px;  /* Coins arrondis */
+display: inline-block;  /* Alignement du bouton */
+margin-top: 10px;  /* Espacement au-dessus du bouton */
+}
+
+.btn-commander:hover {
+background-color: #ff0000;  /* Couleur de fond au survol */
+color: white;  /* Texte en blanc au survol */
+}

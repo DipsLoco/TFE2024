@@ -59,6 +59,7 @@ urlpatterns = [
     path('subscription/<int:pk>/', views.subscribe, name='subscription'),
     path('subscriptions/', subscription_list, name='subscription_list'),
     path('subscribe/<int:pk>/', subscribe, name='subscribe'),
+    path('get-product-price/<int:service_id>/', views.get_product_price, name='get_product_price'),
     path('download_invoice/<int:purchase_id>/', views.download_invoice, name='download_invoice'),
 
     # Services & Entraînements

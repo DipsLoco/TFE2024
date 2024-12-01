@@ -1,0 +1,293 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+
+
+<head>
+    <!-- Lier ton fichier CSS principal -->
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+
+    <!-- Lier le fichier CSS spécifique à la page si nécessaire -->
+    <link rel="stylesheet" href="{% static 'css/service_detail.css' %}">
+</head>
+<div class="container mt-5">
+    <div class="row mb-5">
+        <div class="col-md-6">
+            <h3 class="section-title">Choisissez un produit :</h3>
+            <ul class="list-group product-list">
+                {% for image in service_data.images %}
+                <li class="list-group-item d-flex align-items-center product-item">
+                    <input type="radio" name="selected_product" value="{{ image.id }}" id="product_{{ image.id }}" {% if forloop.first %}checked{% endif %} class="product-radio">
+                    <label for="product_{{ image.id }}" class="d-flex align-items-center product-label">
+                        <img src="{{ image.image.url }}" alt="Image de {{ service_data.service.name }}" class="product-image">
+                        <div class="product-info">
+                            <p class="product-description">{{ image.description|truncatewords:15 }}</p>
+                            <span class="product-price">Prix : {{ image.price }}€</span>
+                        </div>
+                    </label>
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+        
+        <div class="col-md-6">
+            <h1 class="display-5 fw-bold text-primary">{{ service_data.service.name }}</h1>
+            <p class="lead">{{ service_data.service.description }}</p>
+            
+            {% if service_data.type != 'gym_accessory' and service_data.service.duration %}
+                <p><strong>Durée :</strong> {{ service_data.service.duration }} jours</p>
+            {% endif %}
+            
+            {% if service_data.type == 'diet_plan' %}
+                <p><strong>Partenaire :</strong> <a href="{{ service_data.partner_company }}" target="_blank" class="text-decoration-none">{{ service_data.partner_company }}</a></p>
+            {% elif service_data.type == 'gym_accessory' %}
+                {% if request.user.is_staff %}
+                <div class="rupture-de-stock-banner">
+                    <p><strong>Rupture de Stock :</strong> {{ service_data.stock }}</p>
+                    <a href="/commander" class="btn-commander">Commander</a> <!-- Le lien pour commander -->
+                </div>
+                {% endif %}
+            {% elif service_data.type == 'personalized_coaching' %}
+                <p><strong>Coach :</strong> {{ service_data.coach.username }}</p>
+            {% endif %}
+            
+            <div class="action-buttons mt-4">
+                <a  id="addToCartLink" class="btn btn-lg btn-primary mt-1 px-1 py-1" style= "font-size: 15px;"><i class="bi-cart-fill me-1"></i>Ajouter au panier</a>
+
+            <button type="button" class="btn btn-lg btn-primary mt-1 px-1 py-1"  data-bs-toggle="modal" data-bs-target="#paiementModal" style=  "font-size: 14px; background-color: rgb(13, 161, 0);">
+                <i class="bi bi-credit-card me-2"></i>Confirmer et Payer
+            </button>
+            <a href="{% url 'home' %}#catalog-services" class="btn btn-lg btn-secondary mt-1 px-1 px-4 py-1"style= "font-size: 15px;">Retour aux services</a>
+            </div>
+        </div>
+    </div>
+    <br><br><br><br><br><br><br><br><br><br><br><br>
+</div>
+
+<div class="modal fade" id="paiementModal" tabindex="-1" aria-labelledby="paiementModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="paiementModalLabel">Détails du paiement</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Êtes-vous sûr de vouloir procéder au paiement pour <strong>{{ service_data.service.name }}</strong> ?</p>
+            </div>
+            <div class="modal-footer">
+                <a href="{% url 'cart:checkout_session' %}" class="btn btn-primary">PAYER</a>
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Styles améliorés -->
+<style>
+    .section-title {
+        font-size: 1.5rem;
+        color: #2c3e50;
+        font-weight: 600;
+    }
+
+    .product-list {
+        margin-top: 1.5rem;
+    }
+
+    .product-item {
+        padding: 15px;
+        border-radius: 8px;
+        transition: transform 0.3s, box-shadow 0.3s;
+        cursor: pointer;
+    }
+
+    .product-item:hover {
+        transform: scale(1.02);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .product-radio {
+        margin-right: 15px;
+    }
+
+    .product-label {
+        display: flex;
+        align-items: center;
+        cursor: pointer;
+    }
+
+    .product-image {
+        height: 100px;
+        width: 100px;
+        object-fit: cover;
+        border-radius: 8px;
+        margin-right: 15px;
+    }
+
+    .product-info {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .product-description {
+        font-size: 0.9rem;
+        color: #555;
+        margin: 0;
+    }
+
+    .product-price {
+        font-size: 1rem;
+        color: #152ae3;
+        font-weight: bold;
+        margin-top: 5px;
+    }
+
+    .action-buttons {
+        display: flex;
+        gap: 10px;
+    }
+
+    .action-button {
+        padding: 12px 20px;
+        border-radius: 5px;
+        font-weight: 500;
+    }
+
+    .action-button:hover {
+        transform: scale(1.05);
+    }
+
+    .modal-content {
+        border-radius: 8px;
+        padding: 20px;
+    }
+
+    .modal-title {
+        color: #34495e;
+        font-weight: bold;
+    }
+
+    /* Style de la bannière de rupture de stock */
+.rupture-de-stock-banner {
+    background-color: rgba(254, 108, 108, 0.958);  /* Fond rouge */
+    color: black;  /* Texte noir */
+    padding: 10px 20px;  /* Un peu de padding */
+    text-align: center;  /* Centrer le texte */
+    position: relative;  /* Position relative pour le pseudo-élément oblique */
+    margin-bottom: 20px;  /* Espacement en bas */
+}
+
+.rupture-de-stock-banner p {
+    margin: 0;  /* Enlever les marges autour du texte */
+    font-weight: bold;  /* Mettre le texte en gras */
+}
+
+/* Pseudo-élément pour l'effet oblique */
+.rupture-de-stock-banner::before {
+    content: "";  /* Aucun texte, juste l'effet */
+    position: absolute;  /* Position absolue pour couvrir la bannière */
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #ff6565fc;  /* Rouge pour la bannière */
+    transform: skewY(-10deg);  /* Effet oblique */
+    z-index: -1;  /* Mettre l'élément derrière le texte */
+}
+
+/* Style du bouton "Commander" */
+.btn-commander {
+    background-color: white;  /* Fond blanc pour le bouton */
+    color: red;  /* Texte rouge */
+    padding: 8px 15px;  /* Espacement du bouton */
+    border: none;  /* Enlever la bordure */
+    text-decoration: none;  /* Enlever le souligné */
+    font-weight: bold;  /* Mettre en gras */
+    border-radius: 5px;  /* Coins arrondis */
+    display: inline-block;  /* Alignement du bouton */
+    margin-top: 10px;  /* Espacement au-dessus du bouton */
+}
+
+.btn-commander:hover {
+    background-color: #ff0000;  /* Couleur de fond au survol */
+    color: white;  /* Texte en blanc au survol */
+}
+
+
+
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const addToCartLink = document.getElementById('addToCartLink');
+        const selectedProductRadioButtons = document.querySelectorAll('input[name="selected_product"]');
+        const cartCountElement = document.getElementById('cart-count');
+
+        function updateAddToCartUrl() {
+            const selectedProduct = document.querySelector('input[name="selected_product"]:checked');
+            if (selectedProduct) {
+                const selectedProductId = selectedProduct.value;
+                const baseUrl = "{% url 'cart:cart_add_service' service_data.service.id %}";
+                addToCartLink.href = `${baseUrl}?image_id=${selectedProductId}`;
+            }
+        }
+
+        updateAddToCartUrl();
+        selectedProductRadioButtons.forEach(radio => {
+            radio.addEventListener('change', updateAddToCartUrl);
+        });
+
+        addToCartLink.addEventListener('click', function(event) {
+            event.preventDefault();
+            const selectedProduct = document.querySelector('input[name="selected_product"]:checked');
+            if (!selectedProduct) {
+                alert("Veuillez sélectionner un produit.");
+                return;
+            }
+
+            fetch(addToCartLink.href, {
+                method: 'GET',
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    alert(data.message);
+                    if (cartCountElement) {
+                        cartCountElement.textContent = data.cart_count;
+                    }
+                } else {
+                    alert("Erreur lors de l'ajout au panier.");
+                }
+            })
+            .catch(error => {
+                console.error("Erreur de requête :", error);
+                alert("Une erreur s'est produite, veuillez réessayer.");
+            });
+        });
+    });
+
+    document.querySelectorAll('input[name="selected_product"]').forEach(radio => {
+    radio.addEventListener('change', () => {
+        const selectedProductId = radio.value;
+        const url = `/get-product-price/${serviceId}/?image_id=${selectedProductId}`;
+        
+        fetch(url)
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    document.querySelector('.product-price').textContent = `Prix : ${data.price}€`;
+                } else {
+                    alert(data.message);
+                }
+            })
+            .catch(error => console.error('Erreur:', error));
+    });
+});
+
+
+</script>
+{% endblock %}

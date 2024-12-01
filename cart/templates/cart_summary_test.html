@@ -21,10 +21,9 @@
                 <tr>
                     <th></th> <!-- Colonne pour la case à cocher -->
                     <th>Nom du plan ou service</th>
-                    <th>Image</th>
+                    <th></th>
+                    <th></th>
                     <th>Prix</th>
-                    <th>Quantité</th>
-                    <th>Total</th>
                     <th>Durée</th>
                     <th>Date de début</th>
                     <th>Date d'échéance</th>
@@ -37,6 +36,7 @@
                     <tr>
                         <td><input type="checkbox" name="selected_items" value="plan-{{ plan.id }}"></td>
                         <td>{{ plan.name }}</td>
+                        <td>Vous disposez d’un droit de rétractation de 14 jours  </td>
                         <td>
                             {% if plan.image %}
                                 <img src="{{ plan.image.url }}" alt="Image de {{ plan.name }}" style="width: 50px; height: 50px;">
@@ -45,10 +45,6 @@
                             {% endif %}
                         </td>
                         <td>{{ plan.price }} €</td>
-                        <td>
-                            <input type="number" name="quantity-{{ plan.id }}" value="1" min="1" class="form-control text-center" onchange="updateTotal(this)">
-                        </td>
-                        <td id="total-plan-{{ plan.id }}">{{ plan.price }} €</td>
                         <td>{{ plan.duration|default:"N/A" }} jours</td>
                         <td>{{ plan.start_date|date:"d M Y"|default:"N/A" }}</td>
                         <td>{{ plan.end_date|date:"d M Y"|default:"N/A" }}</td>
@@ -57,6 +53,7 @@
                                 <i class="bi bi-trash-fill"></i>
                             </a>
                         </td>
+                        
                     </tr>
                     {% endfor %}
                 {% endif %}
@@ -66,6 +63,7 @@
                     <tr>
                         <td><input type="checkbox" name="selected_items" value="service-{{ service.id }}"></td>
                         <td>{{ service.name }}</td>
+                        <td>Vous disposez d’un droit de rétractation de 14 jours  </td>
                         <td>
                             {% if service.image_id %}
                                 <img src="{{ service.image_url }}" alt="Image de {{ service.name }}" style="width: 50px; height: 50px;">
@@ -74,13 +72,9 @@
                             {% endif %}
                         </td>
                         <td>{{ service.prix }} €</td>
-                        <td>
-                            <input type="number" name="quantity-{{ service.id }}" value="{{ service.quantity }}" min="1" class="form-control text-center" onchange="updateTotal(this)">
-                        </td>
-                        <td id="total-service-{{ service.id }}">{{ service.prix|floatformat:2 }} €</td>
-                        <td>{{ plan.duration|default:"N/A" }} jours</td>
-                        <td>{{ plan.start_date|date:"d M Y"|default:"N/A" }}</td>
-                        <td>{{ plan.end_date|date:"d M Y"|default:"N/A" }}</td>
+                        <td>N/A</td>
+                        <td>N/A</td>
+                        <td>N/A</td>
                         <td class="trash">
                             {% if service.image_id %}
                                 <a href="{% url 'cart:cart_delete' 'service' service.image_id %}" class="btn btn-trash">
@@ -92,28 +86,23 @@
                                 </a>
                             {% endif %}
                         </td>
+                        
                     </tr>
                     {% endfor %}
                 {% endif %}
                 
                 {% if not cart_plans and not cart_services %}
                     <tr>
-                        <td colspan="10" class="text-center">Votre panier est vide.</td>
+                        <td colspan="8" class="text-center">Votre panier est vide.</td>
                     </tr>
                 {% endif %}
             </tbody>
-            <tfoot>
-                <tr>
-                    <td colspan="5" class="text-end">Total général :</td>
-                    <td colspan="2" id="grand-total">TTVAC {{ totaltvac }}  €</td>
-                </tr>
-            </tfoot>
         </table>
 
         <div class="d-flex justify-content-between align-items-center mt-4">
             <!-- Boutons pour supprimer la sélection et vider le panier -->
             <div class="d-flex">
-                <button type="submit" class="btn btn-action me-2" style="font-size: 14px; background-color: orange;">
+                <button type="submit" class="btn btn-action me-2" style= "font-size: 14px; background-color: orange;">
                     <i class="bi bi-x-lg me-2"></i> Supprimer la sélection
                 </button>
                 <a href="{% url 'cart:cart_clear' %}" class="btn btn-action" style="background-color: rgba(255, 39, 50, 0.85);">
@@ -138,94 +127,110 @@
     <br>
 </div>
 
+<div class="modal fade" id="paiementModal" tabindex="-1" aria-labelledby="paiementModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="paiementModalLabel">Détails du paiement</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <dl class="row">
+                    <dt class="col-sm-3">Montant total :</dt>
+                    <dd class="col-sm-9">{{ totaltvac }} €</dd>
+                </dl>
+                <hr>
+                <dl class="row">
+                    <div class="col-sm-12">
+                        <dd style="background-color: rgba(101, 255, 152, 0.735); padding: 10px; border-radius: 5px;">
+                            <small style="font-style: italic; font-size: smaller;">
+                                Dès réception de votre paiement, vous pourrez profiter pleinement de nos services.
+                            </small>
+                        </dd>
+                    </div>
+                </dl>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="confirmPayerBtn">PAYER</button>
+            </div>
+        </div>
+    </div>
+</div>
 <br><br><br><br><br>
 <script>
     document.getElementById('confirmPayerBtn').addEventListener('click', function() {
         window.location.href = "{% url 'cart:checkout_session' %}"; 
     });
-
-  
-function updateTotal(input) {
-    const row = input.closest('tr');
-    const priceCell = row.querySelector('td:nth-child(4)'); // Cellule contenant le prix unitaire
-    const totalCell = row.querySelector('td:nth-child(6)'); // Cellule contenant le total
-    const quantity = parseInt(input.value, 10) || 1;
-    const price = parseFloat(priceCell.textContent.replace('€', '').trim());
-
-    // Mise à jour du total pour la ligne
-    const newTotal = (price * quantity).toFixed(2);
-    totalCell.textContent = `${newTotal} €`;
-
-    // Optionnel : recalculer le total global si nécessaire
-    updateGrandTotal();
-}
-
-function updateGrandTotal() {
-    let grandTotal = 0;
-    document.querySelectorAll('td[id^="total-"]').forEach(cell => {
-        const total = parseFloat(cell.textContent.replace('€', '').trim());
-        grandTotal += isNaN(total) ? 0 : total;
-    });
-    document.getElementById('grand-total').textContent = `${grandTotal.toFixed(2)} €`;
-}
-
-
-
 </script>
 
-
 <style>
-    
-    
-    /* Alignement centré pour la colonne "Supprimer" */
-.table th:last-child, .table td:last-child {
+   /* Alignement centré pour la colonne "Supprimer" */
+th:last-child, .trash {
+    width: 80px;
     text-align: center;
     vertical-align: middle;
 }
 
-/* Ajustement spécifique pour le conteneur corbeille */
-.trash {
-    display: flex;
-    align-items: center; /* Centrage vertical */
-    justify-content: center; /* Centrage horizontal */
-    height: 100%; /* Assure une hauteur maximale dans la cellule */
-    text-align: center;
-}
-
-/* Bouton corbeille */
+/* Style pour le bouton corbeille */
 .btn-trash {
-    display: flex; /* Utilisation de flexbox */
-    align-items: center; /* Centrage vertical de l'icône */
-    justify-content: center; /* Centrage horizontal de l'icône */
-    width: 40px; /* Taille ajustée */
-    height: 50px;
-    background-color: rgba(255, 39, 50, 0.85); /* Couleur de fond */
-    color: white; /* Couleur du texte ou de l'icône */
-    border: none; /* Pas de bordure */
-    border-radius: 5px; /* Bordures arrondies */
-    padding: 0; /* Pas d'espace interne */
-    margin: auto; /* Centrage automatique dans le conteneur */
-    transition: all 0.3s ease; /* Transition douce au survol */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background-color: rgba(255, 39, 50, 0.85);
+    color: white;
+    border: none;
+    border-radius: 5px;
+    padding: 0;
+    margin: 0 auto; /* Centrer horizontalement dans la colonne */
+    transition: all 0.3s ease;
 }
 
-/* Effet au survol */
+.btn-trash i {
+    font-size: 0.9rem;  /* Réduction de la taille de l'icône */
+    font-weight: bold;
+}
+
+    
+
+
+/* Effet au survol sans changement de couleur */
 .btn-trash:hover {
-    transform: scale(1.05); /* Agrandissement léger */
+    transform: scale(1.05);
     color: white;
 }
 
-/* Largeur spécifique pour les colonnes */
+/* Centrage global des éléments dans toutes les colonnes */
 .table th, .table td {
     vertical-align: middle;
     text-align: center;
 }
 
+/* Largeur spécifique pour certaines colonnes pour un alignement parfait */
 .table th:nth-child(5), .table td:nth-child(5), /* Prix */
 .table th:nth-child(6), .table td:nth-child(6), /* Image */
 .table th:nth-child(7), .table td:nth-child(7), /* Durée */
 .table th:nth-child(8), .table td:nth-child(8), /* Date de début */
 .table th:nth-child(9), .table td:nth-child(9)  /* Date d'échéance */ {
-    min-width: 100px; /* Assure un alignement uniforme */
+    min-width: 100px;
+}
+
+/* Ajustement spécifique pour la colonne Supprimer */
+.trash {
+    display: flex;
+    align-items: center;/* Centrage vertical */
+    justify-content: center;/* Centrage horizontal */
+    width: 60px;
+    height: 70px;  /* Ajustez la hauteur selon les besoins pour l'alignement */
+}
+
+.trash .btn-trash {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 /* Embellissement du titre du panier */
@@ -239,7 +244,7 @@ function updateGrandTotal() {
     margin-bottom: 1.5rem;
 }
 
-    </style>
-    
+
+</style>
 
 {% endblock %}
