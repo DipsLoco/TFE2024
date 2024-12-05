@@ -1,0 +1,45 @@
+{% extends 'admin_dashboard.html' %}
+{% block dashboard_content %}
+
+<!-- gym_app/templates/gym_app/coach_leave_requests.html -->
+<h1>Demandes de Congés</h1>
+<p>Liste des demandes de congés des coachs avec leur statut ici.</p>
+
+
+<h1>Demandes de Congés</h1>
+<table>
+    <thead>
+        <tr>
+            <th>Coach</th>
+            <th>Motif</th>
+            <th>Du</th>
+            <th>Au</th>
+            <th>Statut</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for request in leave_requests %}
+        <tr>
+            <td>{{ request.coach.username }}</td>
+            <td>{{ request.reason }}</td>
+            <td>{{ request.start_date }}</td>
+            <td>{{ request.end_date }}</td>
+            <td>{{ request.status }}</td>
+            <td>
+                <form action="{% url 'approve_leave_request' request.id %}" method="post">
+                    {% csrf_token %}
+                    <button type="submit">Approuver</button>
+                </form>
+                <form action="{% url 'reject_leave_request' request.id %}" method="post">
+                    {% csrf_token %}
+                    <button type="submit">Rejeter</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+
+{% endblock %}

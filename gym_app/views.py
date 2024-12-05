@@ -19,7 +19,7 @@ from django.urls import reverse, reverse_lazy
 from django.http import HttpResponseForbidden, JsonResponse
 from gym_app.models import CatalogService, Coach, DietPlan, GymAccessory, Message, PersonalizedCoaching, Plan, Review, Subscription, Workout, WorkoutImage, WorkoutSchedule, WorkoutParticipation
 from .forms import CustomPasswordChangeForm, SignUpForm, UserProfileForm, WorkoutParticipationForm, WorkoutScheduleForm
-from datetime import timedelta
+from datetime import date, timedelta
 from django.utils import timezone
 from datetime import timedelta
 from django.urls import path
@@ -943,7 +943,7 @@ def contact_member(request, member_id):
             is_read=False  # Message non lu à la création
         )
         django_messages.success(request, f"Message envoyé à {member.get_full_name()}")
-        return redirect('admin_dashboard')
+        return redirect('home_admin_dashboard')
     return HttpResponseForbidden("Méthode non autorisée")
 
 
@@ -1022,6 +1022,19 @@ def profile(request):
     plan_purchases = purchase_history.filter(item_type='plan')
     service_purchases = purchase_history.filter(item_type='service')
 
+    # ** Nouveau Code pour les Réservations **
+    # Récupérer les réservations actuelles
+    scheduleWorkout = WorkoutSchedule.objects.filter(
+        participants=user,  # Séances où l'utilisateur est inscrit
+        start_time__gte=timezone.now()  # À partir de maintenant
+    ).select_related('workout', 'coach').order_by('start_time')  # Trier par date croissante
+
+    # Récupérer l'historique des réservations passées
+    pastscheduleWorkout = WorkoutSchedule.objects.filter(
+        participants=user,
+        start_time__lt=timezone.now()  # Déjà passées
+    ).select_related('workout', 'coach').order_by('-start_time')  # Trier par date décroissante
+
     # Préparer les données pour le template
     context = {
         'user': user,  
@@ -1032,12 +1045,41 @@ def profile(request):
         'purchase_history': purchase_history,  # Historique global des achats si besoin
         'plan_purchases': plan_purchases,       # Achats de plans
         'service_purchases': service_purchases, # Achats de services
+        'scheduleWorkout': scheduleWorkout,     # Réservations actuelles
+        'pastscheduleWorkout': pastscheduleWorkout,  # Historique des réservations
     }
 
     return render(request, 'profile.html', context)
 
 
 
+# Gestion du succès du paiement
+@login_required
+def payment_success(request):
+    session_id = request.GET.get('session_id')
+    session = stripe.checkout.Session.retrieve(session_id)
+
+    if session.payment_status == 'paid':
+        plan_id = request.session.get('plan_id')
+        plan = get_object_or_404(Plan, id=plan_id)
+
+        # Créer une souscription pour l'utilisateur
+        subscription = Subscription.objects.create(
+            user=request.user,
+            plan=plan,
+            payment_status='paid',
+        )
+        
+        # Mettre à jour l'utilisateur en premium
+        request.user.is_premium = True
+        request.user.save()
+
+        # Supprimer le plan de la session
+        del request.session['plan_id']
+
+        return render(request, 'payment_success.html', {'plan': plan})
+
+    return render(request, 'payment_failed.html')
 
 
 # def migrate_old_purchases():
@@ -1247,6 +1289,94 @@ def create_coach_profile(sender, instance, created, **kwargs):
         if instance.role == 'coach':
             Coach.objects.get_or_create(user=instance)
 
+def submit_request(request):
+    """Permet au coach de soumettre une modification ou un congé."""
+    try:
+        coach = Coach.objects.get(user=request.user)  # Vérification de la liaison coach
+    except Coach.DoesNotExist:
+        messages.error(request, "Vous n'êtes pas autorisé à soumettre une demande.")
+        return redirect('coach_dashboard')  # Rediriger vers le tableau de bord
+
+    if request.method == "POST":
+        request_type = request.POST.get('type')
+        reason = request.POST.get('reason')
+
+        if coach.leave_requests:
+            coach.leave_requests += f"\n{request_type}: {reason}"
+        else:
+            coach.leave_requests = f"{request_type}: {reason}"
+
+        coach.leave_status = 'pending'
+        coach.save()
+        messages.success(request, "Votre demande a été soumise avec succès.")
+        return redirect('coach_dashboard')
+
+    return render(request, 'submit_request.html')
+
+
+
+def view_requests(request):
+    """Affiche les demandes de modifications et de congés pour l'admin."""
+    coaches = Coach.objects.exclude(leave_requests__isnull=True)  # Tous les coachs avec des demandes
+    return render(request, 'view_requests.html', {'coaches': coaches})
+
+
+
+def session_requests(request):
+    # Logique pour afficher les demandes de modification/annulation
+    return render(request, 'session_requests.html')
+
+# Vue pour gérer l'approbation ou le rejet (côté admin)
+def update_session_request_status(request, coach_id, status):
+    """Permet à l'admin d'approuver ou rejeter une demande."""
+    coach = get_object_or_404(Coach, id=coach_id)
+    coach.leave_status = status  # "approved" ou "rejected"
+    coach.save()
+    return redirect('view_requests')
+
+def admin_reports(request):
+    # Logique pour générer et afficher les rapports
+    return render(request, 'admin_reports.html')
+
+
+def coach_availabilities(request):
+    """Affiche les disponibilités des coachs avec options pour filtrer et modifier."""
+    # Filtrer les coachs selon la disponibilité (paramètre GET)
+    filter_by = request.GET.get('filter', 'all')
+    today = date.today()
+
+    if filter_by == 'available':
+        coaches = Coach.objects.filter(
+            available=True
+        ).exclude(
+            unavailable_from__lte=today, unavailable_until__gte=today
+        )
+    elif filter_by == 'unavailable':
+        coaches = Coach.objects.filter(
+            available=False
+        ) | Coach.objects.filter(
+            unavailable_from__lte=today, unavailable_until__gte=today
+        )
+    else:
+        coaches = Coach.objects.all()
+
+    context = {
+        'coaches': coaches,
+        'filter_by': filter_by,
+    }
+    return render(request, 'coach_availabilities.html', context)
+
+def toggle_coach_availability(request, coach_id):
+    """Permet à l'admin de changer le statut de disponibilité d'un coach."""
+    coach = Coach.objects.get(id=coach_id)
+    coach.available = not coach.available  # Inverser la disponibilité
+    coach.unavailable_reason = None  # Réinitialiser la raison
+    coach.unavailable_from = None  # Réinitialiser les dates
+    coach.unavailable_until = None
+    coach.save()
+    return redirect('coach_availabilities')
+
+
 @login_required
 def coach_dashboard(request):
     # Vérifier si l'utilisateur est un coach ou un administrateur (is_staff)
@@ -1318,45 +1448,56 @@ from django.utils import timezone
 
 @login_required
 @user_passes_test(lambda u: u.role in ['coach', 'admin'])
-def add_workout_schedule(request):
+def add_workout_schedule(request, schedule_id=None):
     user = request.user
 
-    # Récupération de tous les créneaux sans filtre par rôle
-    schedule_queryset = WorkoutSchedule.objects.all()
+    # Récupérer les séances planifiées pour modification
+    instance = None
+    if schedule_id:
+        instance = get_object_or_404(WorkoutSchedule, id=schedule_id, coach=user)
 
-    # Récupération des utilisateurs pouvant être ajoutés en tant que participants
+    # Gestion des spécialités du coach
+    try:
+        workout_queryset = user.coach.specialties.all() if user.role == 'coach' else Workout.objects.all()
+    except Coach.DoesNotExist:
+        workout_queryset = Workout.objects.none()
+
+    # Récupération des participants et des créneaux
+    schedule_queryset = WorkoutSchedule.objects.all()
     participants_queryset = User.objects.filter(role='member').only('first_name', 'last_name', 'email')
 
-    # Filtrer les workouts selon les spécialités du coach
-    if user.role == 'coach':
-        try:
-            # Accède aux spécialités du coach à travers la relation OneToOne avec User
-            workout_queryset = user.coach.specialties.all()
-        except Coach.DoesNotExist:
-            # Gestion de l'erreur si le coach n'existe pas pour cet utilisateur
-            workout_queryset = Workout.objects.none()
-    else:
-        workout_queryset = Workout.objects.all()
+    # Formulaire
+    form = WorkoutScheduleForm(
+        request.POST or None, 
+        instance=instance,
+        user=user,
+        schedule=schedule_queryset,
+        workout_queryset=workout_queryset
+    )
 
     if request.method == 'POST':
-        form = WorkoutScheduleForm(request.POST, user=user, schedule=schedule_queryset, workout_queryset=workout_queryset)
-        
         if form.is_valid():
             workout_schedule = form.save(commit=False)
             workout_schedule.coach = user
             workout_schedule.save()
             form.save_m2m()  # Sauvegarde des relations ManyToMany (participants)
-            messages.success(request, "Séance de workout créée avec succès.")
-            return redirect('coach_dashboard' if user.role == 'coach' else 'admin_dashboard')
+
+            # Message dynamique
+            if instance:
+                messages.success(request, "Séance modifiée avec succès.")
+            else:
+                messages.success(request, "Séance créée avec succès.")
+
+            # Redirection en fonction du rôle
+            return redirect('coach_dashboard' if user.role == 'coach' else 'home_admin_dashboard')
         else:
             messages.error(request, "Erreur dans le formulaire. Veuillez vérifier les champs.")
-    else:
-        form = WorkoutScheduleForm(user=user, schedule=schedule_queryset, workout_queryset=workout_queryset)
 
     return render(request, 'newWorkoutSchedule.html', {
         'form': form,
         'participants': participants_queryset,
     })
+
 
 def get_schedule_details(request, schedule_id):
     try:
@@ -1368,6 +1509,37 @@ def get_schedule_details(request, schedule_id):
         return JsonResponse(data)
     except WorkoutSchedule.DoesNotExist:
         return JsonResponse({'error': 'Créneau non trouvé'}, status=404)
+
+@login_required
+def coach_scheduled_sessions(request):
+    """Affiche les séances planifiées pour le coach connecté avec tri par date."""
+    user = request.user
+
+    # Vérifiez si l'utilisateur est un coach
+    if not user.role == 'coach' and not user.is_staff:
+        return HttpResponseForbidden("Vous n'avez pas l'autorisation d'accéder à cette page.")
+
+    # Récupérer les paramètres de tri
+    sort_order = request.GET.get('sort', 'recent')  # 'recent' par défaut
+    order_by = '-start_time' if sort_order == 'recent' else 'start_time'
+
+    # Filtrer les séances
+    sessions = WorkoutSchedule.objects.filter(coach=user).order_by(order_by)
+
+    # Ajout d'une vérification pour mettre à jour le statut 'expired'
+    for session in sessions:
+        if session.start_time < timezone.now():
+            session.expired = True
+        else:
+            session.expired = False
+
+    return render(request, 'coach_scheduled_sessions.html', {
+        'sessions': sessions,
+        'sort_order': sort_order,
+    })
+
+
+
 
 
 
@@ -1392,7 +1564,7 @@ def admin_dashboard(request):
     # Bloquer la navigation dans le futur
     now = timezone.now()
     if selected_year > now.year or (selected_year == now.year and selected_month > now.month):
-        return render(request, 'admin_dashboard.html', {
+        return render(request, 'home_admin_dashboard.html', {
             'message': "Aucune donnée disponible pour ce mois.",
             'current_year': now.year,
             'current_month': now.month,
@@ -1512,7 +1684,7 @@ def admin_dashboard(request):
         'no_next_data': no_next_data,
     }
 
-    return render(request, 'admin_dashboard.html', context)
+    return render(request, 'home_admin_dashboard.html', context)
 
 
 @login_required

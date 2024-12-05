@@ -1,0 +1,166 @@
+{% extends 'coach_dashboard.html' %}
+{% block dashboard_content %}
+
+<div class="scheduled-sessions-container">
+    <h1 class="page-title">Mes Séances Planifiées</h1>
+
+    <!-- Filtre de tri -->
+    <form method="get" class="mb-3">
+        <label for="sort">Trier par :</label>
+        <select name="sort" id="sort" onchange="this.form.submit()">
+            <option value="recent" {% if sort_order == 'recent' %}selected{% endif %}>Du plus récent au plus vieux</option>
+            <option value="oldest" {% if sort_order == 'oldest' %}selected{% endif %}>Du plus vieux au plus récent</option>
+        </select>
+    </form>
+
+    {% if sessions %}
+    <table class="sessions-table">
+        <thead>
+            <tr>
+                <th>Workout</th>
+                <th>Lieu</th>
+                <th>Date</th>
+                <th>Heure</th>
+                <th>Participants</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for session in sessions %}
+            <tr>
+                <td>{{ session.workout.title }}</td> <!-- Correction pour afficher le titre du workout -->
+                <td>{{ session.location }}</td>
+                <td>{{ session.start_time|date:"d M Y" }}</td>
+                <td>{{ session.start_time|time:"H:i" }} - {{ session.end_time|time:"H:i" }}</td>
+                <td>
+                    {% for participant in session.participants.all %}
+                        {{ participant.first_name }} {{ participant.last_name }}{% if not forloop.last %}, {% endif %}
+                    {% endfor %}
+                </td>
+                <td>
+                   
+                    <a href="" class="btn btn-texte-alert-success">Modifier</a>
+                 
+                    
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <p>Aucune séance planifiée pour le moment.</p>
+    {% endif %}
+</div>
+
+<style>
+    .scheduled-sessions-container {
+        padding: 20px;
+        background-color: #ffffff;
+        border-radius: 10px;
+        box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .page-title {
+        color: #2c3e50;
+        font-size: 1.8rem;
+        margin-bottom: 20px;
+        text-align: center;
+    }
+
+    .filter-form {
+        margin-bottom: 20px;
+        text-align: right;
+    }
+
+    .form-select {
+        display: inline-block;
+        width: auto;
+        padding: 5px 10px;
+        font-size: 1rem;
+        border: 1px solid #bdc3c7;
+        border-radius: 5px;
+        background-color: #f9f9f9;
+        transition: border-color 0.3s ease;
+    }
+
+    .sessions-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+    }
+
+    .sessions-table th,
+    .sessions-table td {
+        padding: 12px 15px;
+        border: 1px solid #ddd;
+        text-align: center;
+    }
+
+    .sessions-table th {
+        background-color: #2980b9;
+        color: #ffffff;
+        text-transform: uppercase;
+        font-size: 0.9rem;
+    }
+
+    .sessions-table td {
+        font-size: 0.9rem;
+    }
+
+    .btn {
+        padding: 8px 15px;
+        border-radius: 5px;
+        text-decoration: none;
+        font-weight: bold;
+        color: #ffffff;
+        background-color: #2980b9;
+        transition: background-color 0.3s ease;
+    }
+
+    .btn:hover {
+        background-color: #3498db;
+    }
+
+    .btn-secondary {
+        background-color: #6c757d;
+    }
+
+    .btn-secondary:hover {
+        cursor: not-allowed;
+    }
+
+    form {
+        margin-bottom: 20px;
+    }
+
+    form label {
+        margin-right: 10px;
+        font-weight: bold;
+    }
+
+    form select {
+        padding: 5px 10px;
+        border-radius: 4px;
+        border: 1px solid #ddd;
+    }
+</style>
+
+<script>
+    // Mettre à jour la date actuelle pour comparaison
+    const now = new Date();
+    const tableRows = document.querySelectorAll('.sessions-table tbody tr');
+
+    tableRows.forEach(row => {
+        const sessionDate = new Date(row.querySelector('td:nth-child(3)').textContent);
+        const actionButton = row.querySelector('.btn');
+
+        if (sessionDate < now) {
+            actionButton.classList.remove('btn-primary');
+            actionButton.classList.add('btn-secondary');
+            actionButton.disabled = true;
+            actionButton.textContent = 'Expiré';
+        }
+    });
+</script>
+
+{% endblock %}

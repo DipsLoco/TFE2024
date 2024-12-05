@@ -1,0 +1,156 @@
+{% extends 'admin_dashboard.html' %}
+{% block dashboard_content %}
+{% load static %}
+
+<div class="coach-availability-container">
+    <h1 class="page-title">Disponibilités des Coachs</h1>
+
+    <!-- Filtres -->
+    <div class="filters">
+        <a href="?filter=all" class="filter-link {% if filter_by == 'all' %}active{% endif %}">Tous</a>
+        <a href="?filter=available" class="filter-link {% if filter_by == 'available' %}active{% endif %}">Disponibles</a>
+        <a href="?filter=unavailable" class="filter-link {% if filter_by == 'unavailable' %}active{% endif %}">Indisponibles</a>
+    </div>
+
+    <!-- Liste des coachs -->
+    <table class="coach-table">
+        <thead>
+            <tr>
+                <th>Nom</th>
+                <th>Statut</th>
+                <th>Raison d'indisponibilité</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for coach in coaches %}
+            <tr>
+                <td>{{ coach.username }}</td>
+                <td>
+                    <span class="status {% if coach.available %}status-available{% else %}status-unavailable{% endif %}">
+                        {% if coach.available %}Disponible{% else %}Indisponible{% endif %}
+                    </span>
+                </td>
+                <td>{{ coach.unavailable_reason|default:"-" }}</td>
+                <td>
+                    <form action="{% url 'toggle_coach_availability' coach.id %}" method="post">
+                        {% csrf_token %}
+                        <button type="submit" class="btn-action">
+                            {% if coach.available %}Marquer Indisponible{% else %}Marquer Disponible{% endif %}
+                        </button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<style>
+/* Conteneur principal */
+.coach-availability-container {
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Titre de la page */
+.page-title {
+    text-align: center;
+    color: #2c3e50;
+    font-size: 2rem;
+    margin-bottom: 20px;
+}
+
+/* Filtres */
+.filters {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.filter-link {
+    text-decoration: none;
+    color: #34495e;
+    font-weight: bold;
+    padding: 8px 12px;
+    margin: 0 10px;
+    border-radius: 5px;
+    transition: background-color 0.3s, color 0.3s;
+}
+
+.filter-link.active,
+.filter-link:hover {
+    background-color: #34495e;
+    color: #ffffff;
+}
+
+/* Table des coachs */
+.coach-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    background-color: #ffffff;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+}
+
+.coach-table th,
+.coach-table td {
+    padding: 15px;
+    text-align: left;
+    border-bottom: 1px solid #ecf0f1;
+}
+
+.coach-table th {
+    background-color: #34495e;
+    color: #ffffff;
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+.coach-table tr:last-child td {
+    border-bottom: none;
+}
+
+.coach-table td {
+    color: #2c3e50;
+}
+
+/* Statuts */
+.status {
+    font-weight: bold;
+    padding: 5px 10px;
+    border-radius: 5px;
+    text-transform: uppercase;
+}
+
+.status-available {
+    background-color: #27ae60;
+    color: #ffffff;
+}
+
+.status-unavailable {
+    background-color: #e74c3c;
+    color: #ffffff;
+}
+
+/* Boutons d'action */
+.btn-action {
+    background-color: #2980b9;
+    color: #ffffff;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+    font-weight: bold;
+}
+
+.btn-action:hover {
+    background-color: #3498db;
+}
+</style>
+
+{% endblock %}

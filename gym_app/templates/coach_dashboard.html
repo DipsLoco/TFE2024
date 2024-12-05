@@ -3,15 +3,14 @@
 {% load i18n %}
 
 {% block content %}
-<br>
+
 <div class="container mt-0">
     <h2 class="text-primary">Tableau de Bord du Coach   *{{ user.first_name }} *</h2>
-    <br>
     
     
     {% include 'navbar_coach.html' %}
 
-
+<br>
     {% block dashboard_content %}
     <!-- Contenu spécifique au tableau de bord du coach -->
     {% endblock %}

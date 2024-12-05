@@ -234,22 +234,34 @@ class WorkoutParticipation(models.Model):
 
 
 
+from datetime import date  # Assure-toi que ce module est importé en haut du fichier
+
+from django.db import models
+from datetime import date
+
+from django.conf import settings  # Pour récupérer AUTH_USER_MODEL
+
 class Coach(models.Model):
     username = models.CharField(max_length=50, unique=True)
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-    specialties = models.ManyToManyField(Workout, related_name='specialties')
-    available = models.BooleanField(default=True)  # Disponibilités générales
-    unavailable_reason = models.CharField(max_length=255, blank=True, null=True)  # Raison d'indisponibilité
-    unavailable_from = models.DateField(blank=True, null=True)  # Début de l'absence
-    unavailable_until = models.DateField(blank=True, null=True)  # Fin de l'absence
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)  # Utilise AUTH_USER_MODEL
+    specialties = models.ManyToManyField('Workout', related_name='specialties')
+    available = models.BooleanField(default=True)
+    unavailable_reason = models.CharField(max_length=255, blank=True, null=True)
+    unavailable_from = models.DateField(blank=True, null=True)
+    unavailable_until = models.DateField(blank=True, null=True)
     image = models.ImageField(upload_to='coach_images/', blank=True, null=True)
     exp = models.PositiveIntegerField(default=0)
     about = models.TextField(null=True, blank=True)
+    leave_requests = models.TextField(blank=True, null=True)
+    leave_status = models.CharField(
+        max_length=10,
+        choices=[('pending', 'En attente'), ('approved', 'Approuvé'), ('rejected', 'Rejeté')],
+        default='pending'
+    )
 
     def is_currently_available(self):
-        """Vérifie si le coach est disponible à l'instant présent."""
         if not self.available:
-            return False  # Coach non disponible (statut général)
+            return False
         if self.unavailable_from and self.unavailable_until:
             today = date.today()
             return not (self.unavailable_from <= today <= self.unavailable_until)
@@ -257,6 +269,8 @@ class Coach(models.Model):
 
     def __str__(self):
         return self.username
+
+
 
 
 class Plan(models.Model):

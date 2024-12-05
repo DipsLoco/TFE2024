@@ -19,7 +19,7 @@
         <table class="table table-striped">
             <thead>
                 <tr>
-                    <th></th> <!-- Colonne pour la case à cocher -->
+                    <th></th>
                     <th>Nom du plan ou service</th>
                     <th>Image</th>
                     <th>Prix</th>
@@ -111,7 +111,6 @@
         </table>
 
         <div class="d-flex justify-content-between align-items-center mt-4">
-            <!-- Boutons pour supprimer la sélection et vider le panier -->
             <div class="d-flex">
                 <button type="submit" class="btn btn-action me-2" style="font-size: 14px; background-color: orange;">
                     <i class="bi bi-x-lg me-2"></i> Supprimer la sélection
@@ -121,7 +120,6 @@
                 </a>
             </div>
 
-            <!-- Boutons pour ajouter un service et ajouter un plan -->
             <a href="{% url 'home' %}#catalog-services" class="btn btn-action me-2" style="background-color: #d3d3d3; color: black;">
                 <i class="bi bi-plus-circle me-2"></i> Ajouter un service
             </a>
@@ -129,7 +127,7 @@
                 <i class="bi bi-plus-circle me-2"></i> Ajouter un plan
             </a>
 
-            <!-- Bouton pour confirmer et payer -->
+            <!-- Corrected "Confirmer et Payer" button -->
             <button type="button" class="btn btn-action" data-bs-toggle="modal" data-bs-target="#paiementModal" style="background-color: rgb(13, 161, 0);">
                 <i class="bi bi-credit-card me-2"></i> Confirmer et Payer
             </button>
@@ -137,41 +135,65 @@
     </form>
     <br>
 </div>
-
+<div class="modal fade" id="paiementModal" tabindex="-1" aria-labelledby="paiementModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="paiementModalLabel">Détails du paiement</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <dl class="row">
+                    <dt class="col-sm-3">Montant total :</dt>
+                    <dd class="col-sm-9">{{ totaltvac }} €</dd>
+                </dl>
+                <hr>
+                <dl class="row">
+                    <div class="col-sm-12">
+                        <dd style="background-color: rgba(101, 255, 152, 0.735); padding: 10px; border-radius: 5px;">
+                            <small style="font-style: italic; font-size: smaller;">
+                                Dès réception de votre paiement, vous pourrez profiter pleinement de nos services.
+                            </small>
+                        </dd>
+                    </div>
+                </dl>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-primary" id="confirmPayerBtn">PAYER</button>
+            </div>
+        </div>
+        </div>
+    </div>
+</div>
 <br><br><br><br><br>
 <script>
     document.getElementById('confirmPayerBtn').addEventListener('click', function() {
-        window.location.href = "{% url 'cart:checkout_session' %}"; 
+        window.location.href = "{% url 'cart:checkout_session' %}";
     });
 
-  
-function updateTotal(input) {
-    const row = input.closest('tr');
-    const priceCell = row.querySelector('td:nth-child(4)'); // Cellule contenant le prix unitaire
-    const totalCell = row.querySelector('td:nth-child(6)'); // Cellule contenant le total
-    const quantity = parseInt(input.value, 10) || 1;
-    const price = parseFloat(priceCell.textContent.replace('€', '').trim());
+    function updateTotal(input) {
+        const row = input.closest('tr');
+        const priceCell = row.querySelector('td:nth-child(4)');
+        const totalCell = row.querySelector('td:nth-child(6)');
+        const quantity = parseInt(input.value, 10) || 1;
+        const price = parseFloat(priceCell.textContent.replace('€', '').trim());
 
-    // Mise à jour du total pour la ligne
-    const newTotal = (price * quantity).toFixed(2);
-    totalCell.textContent = `${newTotal} €`;
+        const newTotal = (price * quantity).toFixed(2);
+        totalCell.textContent = `${newTotal} €`;
 
-    // Optionnel : recalculer le total global si nécessaire
-    updateGrandTotal();
-}
+        updateGrandTotal();
+    }
 
-function updateGrandTotal() {
-    let grandTotal = 0;
-    document.querySelectorAll('td[id^="total-"]').forEach(cell => {
-        const total = parseFloat(cell.textContent.replace('€', '').trim());
-        grandTotal += isNaN(total) ? 0 : total;
-    });
-    document.getElementById('grand-total').textContent = `${grandTotal.toFixed(2)} €`;
-}
-
-
-
+    function updateGrandTotal() {
+        let grandTotal = 0;
+        document.querySelectorAll('td[id^="total-"]').forEach(cell => {
+            const total = parseFloat(cell.textContent.replace('€', '').trim());
+            grandTotal += isNaN(total) ? 0 : total;
+        });
+        document.getElementById('grand-total').textContent = `${grandTotal.toFixed(2)} €`;
+    }
 </script>
+
 
 
 <style>

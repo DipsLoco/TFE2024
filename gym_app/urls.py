@@ -13,7 +13,7 @@ from .views import (
     add_workout_schedule, remind_subscription, workout_detail, download_invoice,
     service_detail, register_user, change_password, reset_user_password, add_review,
     conditions_vente, cookies, confidentialite, mentions_legales, 
-    cookie_consent_view, banner_view, cookie_preferences_view
+    cookie_consent_view, banner_view, cookie_preferences_view, coach_availabilities,
 )
 
 urlpatterns = [
@@ -33,9 +33,28 @@ urlpatterns = [
     path('profile/', profile, name='profile'),
     path('edit_profile/', edit_profile, name='edit_profile'),
 
-    # Dashboards
+   # Dashboard du coach
     path('coach_dashboard/', views.coach_dashboard, name='coach_dashboard'),
+    path('new_workoutSchedule/', views.add_workout_schedule, name='newWorkoutSchedule'),
+    path('get_schedule_details/<int:schedule_id>/', views.get_schedule_details, name='get_schedule_details'),
+    path('new_workout_schedule/<int:schedule_id>/', views.add_workout_schedule, name='editWorkoutSchedule'),
+    path('coach_scheduled_sessions/', views.coach_scheduled_sessions, name='coach_scheduled_sessions'),
+
+
+    # Disponibilités des coachs
+    path('coach_availabilities/', views.coach_availabilities, name='coach_availabilities'),
+    path('toggle_coach_availability/<int:coach_id>/', views.toggle_coach_availability, name='toggle_coach_availability'),
+
+    # Gestion des demandes
+    path('submit_request/', views.submit_request, name='submit_request'),
+    path('view_requests/', views.view_requests, name='view_requests'),
+    # Gestion des demandes
+    path('update_request_status/<int:coach_id>/<str:status>/', views.update_session_request_status, name='update_request_status'),
+
+    # Tableau de bord admin
+    path('admin_reports/', views.admin_reports, name='admin_reports'),
     path('admin_dashboard/', views.admin_dashboard, name='admin_dashboard'),
+    
 
     # Contact
     path('contact_coach/<int:coach_id>/', contact_coach, name='contact_coach'),  
@@ -89,8 +108,8 @@ urlpatterns = [
     path('preferences/', views.cookie_preferences_view, name='cookie_preferences'),
 
     # URL supplémentaires
-    path('new_workoutSchedule/', views.add_workout_schedule, name='newWorkoutSchedule'),
-    path('get_schedule_details/<int:schedule_id>/', views.get_schedule_details, name='get_schedule_details'),
+    
+
 ]
 
 # Serve static and media files in development

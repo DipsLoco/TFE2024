@@ -266,6 +266,13 @@ def create_checkout_session(request):
 
 # Gérer le succès du paiement pour les plans et services
 
+from django.utils.timezone import now
+from django.shortcuts import get_object_or_404
+from datetime import datetime
+
+from django.utils.timezone import now
+from datetime import datetime
+
 @login_required
 def payment_success(request):
     cart = Cart(request)
@@ -274,43 +281,52 @@ def payment_success(request):
     cart.clear()
 
     plan = purchased_plans[0] if purchased_plans else None
-    service = purchased_services[0] if purchased_services else None
 
+    # Enregistrement d'une souscription si un plan a été acheté
+    if plan:
+        subscription = Subscription.objects.create(
+            user=request.user,
+            plan=plan,
+            payment_status='paid',
+        )
+
+        # Mettre à jour l'utilisateur en premium
+        request.user.is_premium = True
+        request.user.save()
+
+        # Enregistrer l'achat du plan dans l'historique
+        PurchaseHistory.objects.create(
+            user=request.user,
+            item_type='plan',
+            plan=plan,
+            price=plan.price,
+            purchase_date=now()
+        )
+        print(f"PurchaseHistory créé pour le plan : {plan.name}")
+
+    # Enregistrement des achats de services
     for service_item in purchased_services:
         try:
-            # Log pour vérifier le contenu de service_item
-            print("Données brutes de service_item:", service_item)
-
-            # Extraction et vérification des IDs
             service_id = service_item.get("service_id")
             image_id = service_item.get("image_id")
             
-            if service_id is not None and isinstance(service_id, int):
-                catalog_service = CatalogService.objects.filter(id=service_id).first()
-            else:
-                print("[ERROR] ID de service non valide ou absent:", service_id)
-                continue
-            
-            if image_id is not None and isinstance(image_id, int):
-                service_image = ServiceImage.objects.filter(id=image_id).first()
-            else:
-                service_image = None  # Peut être optionnel
+            catalog_service = CatalogService.objects.get(id=service_id)
+            service_image = ServiceImage.objects.filter(id=image_id).first()
+            price = service_image.price if service_image else catalog_service.price
 
-            if catalog_service:
-                price = service_image.price if service_image else catalog_service.price
-                PurchaseHistory.objects.create(
-                    user=request.user,
-                    item_type='service',
-                    price=price,
-                    purchase_date=datetime.now(),
-                    catalog_service=catalog_service
-                )
-                print("PurchaseHistory enregistré pour le service:", catalog_service.name)
-            else:
-                print(f"[ERROR] Service introuvable pour ID {service_id}")
-
+            # Ajouter au PurchaseHistory
+            PurchaseHistory.objects.create(
+                user=request.user,
+                item_type='service',
+                price=price,
+                purchase_date=datetime.now(),
+                catalog_service=catalog_service
+            )
+            print(f"Service ajouté à PurchaseHistory : {catalog_service.name}")
+        except CatalogService.DoesNotExist:
+            print(f"[ERROR] Service introuvable avec ID {service_id}")
         except Exception as e:
-            print(f"Erreur lors de l'enregistrement de l'achat de service : {e}")
+            print(f"Erreur lors de l'enregistrement du service : {e}")
 
     # Envoi de confirmation
     try:
@@ -323,7 +339,7 @@ def payment_success(request):
                     subject="Confirmation de souscription",
                     body="Merci pour votre souscription. Profitez de vos avantages premium avec BE-FIT."
                 )
-            elif purchased_services:
+            if purchased_services:
                 Message.objects.create(
                     sender=admin_user,
                     recipient=request.user,
@@ -333,7 +349,9 @@ def payment_success(request):
     except Exception as e:
         print(f"Erreur lors de l'envoi du message de confirmation : {e}")
 
-    return render(request, 'payment_success.html', {'plan': plan, 'service': service})
+    return render(request, 'payment_success.html', {'plan': plan, 'services': purchased_services})
+
+
 
 
 

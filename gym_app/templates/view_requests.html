@@ -1,0 +1,102 @@
+{% extends 'admin_dashboard.html' %}
+{% block dashboard_content %}
+
+<div class="view-requests-container">
+    <h1 class="page-title">Gestion des Demandes</h1>
+    <table class="requests-table">
+        <thead>
+            <tr>
+                <th>Nom du Coach</th>
+                <th>Type de Demande</th>
+                <th>Raison</th>
+                <th>Statut</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for coach in coaches %}
+            <tr>
+                <td>{{ coach.username }}</td>
+                <td>
+                    {% for request in coach.leave_requests|linebreaks %}
+                    {{ request }}
+                    {% endfor %}
+                </td>
+                <td>{{ coach.leave_status }}</td>
+                <td>
+                    <a href="{% url 'update_request_status' coach.id 'approved' %}" class="btn btn-success">Approuver</a>
+                    <a href="{% url 'update_request_status' coach.id 'rejected' %}" class="btn btn-danger">Rejeter</a>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<style>
+    .view-requests-container {
+        padding: 20px;
+        background-color: #ffffff;
+        border-radius: 10px;
+        box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .page-title {
+        color: #2c3e50;
+        font-size: 1.8rem;
+        margin-bottom: 20px;
+        text-align: center;
+    }
+
+    .requests-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+    }
+
+    .requests-table th,
+    .requests-table td {
+        padding: 12px 15px;
+        border: 1px solid #ddd;
+        text-align: center;
+    }
+
+    .requests-table th {
+        background-color: #2980b9;
+        color: #ffffff;
+        text-transform: uppercase;
+        font-size: 0.9rem;
+    }
+
+    .requests-table td {
+        font-size: 0.9rem;
+    }
+
+    .btn {
+        padding: 8px 15px;
+        border-radius: 5px;
+        text-decoration: none;
+        font-weight: bold;
+        transition: background-color 0.3s ease;
+    }
+
+    .btn-success {
+        background-color: #2ecc71;
+        color: #ffffff;
+    }
+
+    .btn-success:hover {
+        background-color: #27ae60;
+    }
+
+    .btn-danger {
+        background-color: #e74c3c;
+        color: #ffffff;
+    }
+
+    .btn-danger:hover {
+        background-color: #c0392b;
+    }
+</style>
+
+{% endblock %}

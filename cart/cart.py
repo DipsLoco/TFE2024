@@ -56,18 +56,32 @@ class Cart:
         services = []
         for key, item in self.cart.items():
             if item['type'] == 'service':
-                service_id = int(key.split('-')[1])
-                service = get_object_or_404(CatalogService, id=service_id)
-                item['name'] = service.name
-                item['prix'] = item['prix']
-                item['quantity'] = item.get('quantity', 1)  # Par défaut à 1
-                if 'image_id' in item and item['image_id']:
-                    try:
-                        image = ServiceImage.objects.get(id=item['image_id'])
-                        item['image_url'] = image.image.url
-                    except ServiceImage.DoesNotExist:
+                try:
+                    # Récupérer l'ID du service depuis la clé
+                    service_id = int(key.split('-')[1])
+                    service = CatalogService.objects.get(id=service_id)
+                    
+                    # Ajouter les détails du service
+                    item['name'] = service.name
+                    item['prix'] = float(item['prix'])  # Convertir en float si nécessaire
+                    item['quantity'] = item.get('quantity', 1)
+                    
+                    # Gestion des images liées
+                    if 'image_id' in item and item['image_id']:
+                        try:
+                            image = ServiceImage.objects.get(id=item['image_id'])
+                            item['image_url'] = image.image.url
+                            item['image_price'] = image.price
+                        except ServiceImage.DoesNotExist:
+                            item['image_url'] = None
+                            item['image_price'] = None
+                    else:
                         item['image_url'] = None
-                services.append(item)
+                        item['image_price'] = None
+                    
+                    services.append(item)
+                except CatalogService.DoesNotExist:
+                    print(f"[ERROR] Service introuvable pour ID {key.split('-')[1]}")
         return services
 
 

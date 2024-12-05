@@ -52,7 +52,7 @@
             
             <!-- Barre de recherche -->
             <form class="d-flex ms-auto search-form" action="{% url 'search' %}" method="get" onsubmit="clearSearchField()">
-                <input id="navbarSearchInput" class="form-control me-2" type="search" name="q" placeholder="Recherche" aria-label="Search" value="{{ request.GET.q|default:'' }}">
+                <input id="navbarSearchInput" class="form-control me-2" type="search" name="q" placeholder="" aria-label="Search" value="{{ request.GET.q|default:'' }}">
                 <button class="btn btn-outline-light" type="submit">{% trans "Recherche" %}</button>
                 
                 <!-- Bouton de rafraîchissement -->

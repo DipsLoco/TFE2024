@@ -151,20 +151,23 @@
         </div>
         <div class="card-body">
             {% if user.is_staff or user.role == 'coach' %}
-                <!-- Affichage "Illimité" pour les admins et les coachs -->
-                <div class="vip-plan">
-                    <p><strong>Plan :</strong> <span class="vip-plan-text">Illimité <i class="fas fa-infinity vip-infinity-icon"></i></span></p>
-                    <p><strong>Date de Début :</strong> {{ current_subscription.start_date|date:"d M Y" }}</p>
-                    <p><strong>Durée :</strong> <span class="text-muted">Indéterminée</span></p>
-                </div>
-            {% elif current_subscription %}
-                <!-- Affichage normal pour les autres utilisateurs -->
-                <p><strong>Plan :</strong> {{ current_subscription.plan.name }}</p>
-                <p><strong>Date de Début :</strong> {{ current_subscription.start_date|date:"d M Y" }}</p>
-                <p><strong>Date de Fin :</strong> {{ current_subscription.get_end_date|date:"d M Y" }}</p>
-            {% else %}
-                <p class="text-muted">Aucun abonnement actif</p>
-            {% endif %}
+<div class="vip-plan">
+    <p><strong>Plan :</strong> <span class="vip-plan-text">Illimité <i class="fas fa-infinity vip-infinity-icon"></i></span></p>
+    {% if current_subscription %}
+    <p><strong>Date de Début :</strong> {{ current_subscription.start_date|date:"d M Y" }}</p>
+    {% else %}
+    <p><strong>Date de Début :</strong> Non disponible</p>
+    {% endif %}
+    <p><strong>Durée :</strong> <span class="text-muted">Indéterminée</span></p>
+</div>
+{% elif current_subscription %}
+<p><strong>Plan :</strong> {{ current_subscription.plan.name }}</p>
+<p><strong>Date de Début :</strong> {{ current_subscription.start_date|date:"d M Y" }}</p>
+<p><strong>Date de Fin :</strong> {{ current_subscription.get_end_date|date:"d M Y" }}</p>
+{% else %}
+<p class="text-muted">Aucun abonnement actif</p>
+{% endif %}
+
         </div>
     </div>
 </div>
